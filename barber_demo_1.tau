@@ -1,0 +1,80 @@
+# Hello! Let's see how Tau language, a powerful logical reasoning system,  
+# proves why the Barber's Paradox can be tricky.
+# What's the Barber's Paradox?
+# It's a puzzle about a barber who shaves everyone who doesn't shave themselves. 
+# The question is: Who shaves the barber?
+# First we define what the barber does:
+
+barberShaves(X) := p(X) = 0
+
+# This means the barber shaves X if X doesn't shave themselves.
+# Now we describe the whole paradox:
+
+paradox(b) := all X (barberShaves(X) <-> X != b)
+
+# This says: for all X, the barber shaves X if and only if X is not the barber.
+# Great, we are ready to start the questions now:
+# 1. Can such a barber exist?
+
+n ex b paradox(b)
+
+# this an complex answer right? Tau shows us what would have to be true
+# and it's very complicated.
+# 2. Is it impossible for this barber to exist?
+
+n !ex b paradox(b)
+
+# Tau's answer is the opposite of the first one, which makes sense.
+# 3. What if we say there is such a barber?
+
+n paradox(B)
+
+# Tau shows us what would have to be true, and it's very complicated again.
+# 4. Finally, we ask if this leads to a contradiction
+
+n all b (paradox(b) -> (barberShaves(b) <-> !barberShaves(b)))
+
+# Tau's answer here is the same as saying the barber can't exist!
+# What did we see?
+# Tau doesn't just say "yes" or "no". It shows us the complex logic behind the paradox.
+# The answers for "can the barber exist" and "is it impossible" are opposites
+# Most importantly, Tau shows that if this barber existed,
+# it would lead to a contradiction.
+
+
+# but in our example we didnt define the basic concept itself.
+# 5. that X shaves themselves:
+
+p(X) := X' #(note: in Tau, X' means "not X")
+
+# p(X) := X would otherwise mean X is shaved by the barber
+# Now we can ask the same questions again:
+
+n ex b paradox(b)
+
+# Tau says clearly no, such a barber cannot exist.
+
+n !ex b paradox(b)
+
+# Tau confirms it's impossible for this barber to exist.
+
+n paradox(B)
+
+# Tau shows that assuming such a barber exists leads to a false statement
+
+n all b (paradox(b) -> (barberShaves(b) <-> !barberShaves(b)))
+
+# Tau proves that the paradox indeed leads to a contradiction for any barber.
+# Is the paradox condition itself contradictory?
+
+n paradox(b)
+
+# Tau shows that the paradox condition itself is false (contradictory) for any b.
+
+# The paradox inevitably leads to a situation where the barber must both shave and not 
+# shave himself, which is a clear contradiction.
+# Tau doesn't just say "this is a paradox" in plain language. Instead, it rigorously 
+# proves the paradoxical nature through formal logic, demonstrating why the Barber's 
+# Paradox is indeed a true logical paradox.
+
+quit # quit the demo

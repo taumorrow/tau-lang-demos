@@ -1,0 +1,71 @@
+# Hello! Let's have some more fun with the Tau language!
+# What's the Barber's Paradox?
+# It's a puzzle about a barber who shaves everyone who doesn't shave themselves. 
+# The question is: Who shaves the barber?
+# First we define a more explicit form of the barbers function:
+
+barber(X, Y) := X = Y'
+
+# This means Y is shaved by the barber X if and only if Y doesn't shave themselves.
+# Now we describe the whole paradox:
+
+paradox(b) := ex b all X barber(b, X)
+
+# This statement says: there exists a barber b such that for all X, 
+# b shaves X if and only if X doesn't shave themselves.
+# Great, we are ready to start the questions now:
+# 1. Can such a barber exist?
+
+n paradox(b)
+
+# Tau evaluated the paradox to False (F), which means it determined 
+# that no such barber can exist.
+# 2. Is it impossible for this barber to exist?
+
+n !paradox(b)
+
+# Tau evaluated the negation to True (T), confirming that it's 
+# impossible for such a barber to exist.
+
+# What we learned:
+
+# Defining the barber's action as a two-variable function (barber(X, Y))
+# and using existential quantification (ex b) followed by universal
+# quantification (all X) correctly captured the essence of the paradox.
+
+# Tau was able to prove that the paradox leads to a contradiction by 
+# evaluating it to False.
+# Tau confirmed the impossibility of the paradox by evaluating its 
+# negation to True.
+
+# Interpretation of paradox(b) evaluating to False (F):
+# This means that Tau has determined that no barber b can satisfy the 
+# condition "b shaves X if and only if X doesn't shave themselves" for all X.
+# In logical terms, Tau has proven that the statement "there exists a barber 
+# who shaves all and only those who do not shave themselves" is false.
+# This aligns with our understanding of the paradox: such a barber cannot 
+# logically exist.
+
+# Interpretation of !paradox(b) evaluating to True (T):
+# This confirms that the negation of the paradox is true.
+# In other words, it's true that there does not exist a barber who shaves 
+# all and only those who do not shave themselves.
+# This double-checks our first result, providing additional confidence 
+# in Tau's handling of the paradox.
+
+# Tau's handling of quantifiers:
+# Tau correctly interpreted and processed both existential (ex b) and 
+# universal (all X) quantifiers, demonstrating its ability to handle complex
+# logical structures.
+
+# Tau's processing of Boolean functions:
+# Tau correctly interpreted our barber(X, Y) function, translating it into 
+# Boolean algebra. This shows Tau's capability to work with user-defined 
+# functions and translate them into its internal logical representation.
+
+# Consistency of results:
+# The fact that paradox(b) evaluated to False and its negation to True shows
+# the internal consistency of Tau's logical processing. This consistency is
+# crucial for a logical system dealing with complex paradoxes.
+
+quit # quit the demo

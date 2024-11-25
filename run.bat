@@ -19,22 +19,26 @@ if not exist "tau.exe" (
     exit /b 1
 )
 
-:: Create temporary file for communication
+:: Create temporary file
 set "tempfile=%TEMP%\tau_pipe_%RANDOM%.txt"
+type nul > "%tempfile%"
 
-:: Read input file and wait for keypress before sending each line
+:: Wait 5 seconds for tau to start
+timeout /t 5 /nobreak > nul
+
+:: Start tau in background
+start /b "" tau.exe < "%tempfile%"
+
+:: Process input file line by line
 for /f "usebackq delims=" %%a in ("%1") do (
     set "line=%%a"
     :: Skip lines starting with ##
     echo !line! | findstr /b "##" >nul
     if errorlevel 1 (
-        pause >nul
+        pause > nul
         echo !line!>> "%tempfile%"
     )
 )
-
-:: Run tau with the temp file
-type "%tempfile%" | tau.exe
 
 :: Clean up
 del "%tempfile%"

@@ -1,6 +1,3 @@
-# tau-lang-demos
-Demos for the famous Tau language
-
 # Tau Demo Runner
 
 Tau Demo Runner is a windows application designed to execute and manage demo scripts using the Tau language. It provides a user-friendly interface with various controls to run, pause, stop, and navigate through demo steps.

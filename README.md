@@ -19,6 +19,19 @@ Tau Demo Runner is a Windows application designed to execute and manage demo scr
 - Quick access buttons for common commands (help, history, definitions, version)
 - Microsecond precision execution time tracking
 
+### Key Bindings 
+Enter     - Execute command
+Up/Down   - Navigate history
+F5        - Run demo
+F6        - Pause execution
+F7        - Stop execution
+F8        - Auto-execute
+F9        - Skip command
+F10       - Next step
+Ctrl+L    - Clear output
+Ctrl+R    - Restart process
+Alt+C     - Toggle comments
+
 ### Advanced Syntax Highlighting
 - Real-time syntax highlighting for Tau commands and output
 - Full ANSI color code support
@@ -78,6 +91,9 @@ Tau Demo Runner is a Windows application designed to execute and manage demo scr
 ### Settings Storage
 - `settings.xml`: User preferences (window size, location, theme, etc.)
 - `themes.xml`: Custom theme definitions
+
+### Tau Language Help Storage
+- 'help.xml'
 
 ### Theme Customization
 Themes can be customized by editing `themes.xml`, supporting:

@@ -47,16 +47,27 @@ Alt+C     - Toggle comments
   - Time expressions
   - Definitions
 
-### Theme System
-- **Built-in Themes**:
-  - Default (Light/Dark variants)
-  - Tokyo Night (Light/Dark variants)
-- Theme features:
-  - Proper light/dark variant support
-  - System theme detection on first launch
-  - XML-based theme configuration
-  - Theme groups with variant management
-  - Custom toolbar and status bar styling
+### Smart Help System
+- Context-sensitive help popups
+- Pattern-based code analysis
+- Searchable documentation
+- Category-based organization
+- Extensive code examples
+
+### Advanced Theme System
+- **Built-in Theme Collections**:
+  - Tokyo Night, Monokai, Solarized
+  - Dracula, One Dark/Light
+  - Nord, Gruvbox, GitHub
+  - Matrix, Ocean, Forest
+  - Synthwave84, Cotton Candy
+  - And more...
+- **Theme Features**:
+  - Light/Dark variants for each theme
+  - System theme detection
+  - XML-based configuration
+  - Runtime theme switching
+  - Custom UI element styling
 
 ### Interface Customization
 - Adjustable font size (8-24pt)

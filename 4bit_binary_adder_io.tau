@@ -1,0 +1,73 @@
+# Title: Simple 4-bit Binary Adder
+# Description: Adds two 4-bit binary numbers and produces a 5-bit result (to handle overflow)
+
+# === INPUT FILES ===
+# First number (A) - 4 bits
+sbf i1 = ifile("i1.in")  # LSB (least significant bit)
+sbf i2 = ifile("i2.in")
+sbf i3 = ifile("i3.in")
+sbf i4 = ifile("i4.in")  # MSB (most significant bit)
+
+# Second number (B) - 4 bits
+sbf i5 = ifile("i5.in")  # LSB
+sbf i6 = ifile("i6.in")
+sbf i7 = ifile("i7.in")
+sbf i8 = ifile("i8.in")  # MSB
+
+# === OUTPUT FILES ===
+# Sum (S) - 5 bits to handle overflow
+sbf o1 = ofile("o1.out")  # LSB
+sbf o2 = ofile("o2.out")
+sbf o3 = ofile("o3.out")
+sbf o4 = ofile("o4.out")
+sbf o5 = ofile("o5.out")  # MSB (overflow bit)
+
+# carry files
+sbf o6 = ofile("o6.out")
+sbf o7 = ofile("o7.out")
+sbf o8 = ofile("o8.out")
+sbf o9 = ofile("o9.out")
+
+
+
+# === ADDER FUNCTION DEFINITIONS ===
+
+# Half adder - used for the first bit position with no carry-in
+halfAdderSum(a,b) := a + b        # XOR operation for sum bit
+halfAdderCarry(a,b) := a & b      # AND operation for carry bit
+
+# Full adder - used for all other bit positions with carry-in
+fullAdderSum(a,b,c) := a + b + c  # Triple XOR for sum bit
+fullAdderCarry(a,b,c) := (a & b) | (a & c) | (b & c)  # Carry logic
+
+# === BINARY ADDITION RULES ===
+
+# Bit 0 (LSB) - use half adder (no carry-in)
+r o1[t] = halfAdderSum(i1[t],i5[t])
+r o6[t] = halfAdderCarry(i1[t],i5[t])
+
+sbf i9 = ifile("o6.out")
+
+# Bit 1 - use full adder with carry from bit 0
+r o2[t] = fullAdderSum(i2[t], i6[t], i9[t])
+r o7[t] = fullAdderCarry(i2[t], i6[t], i9[t])
+
+sbf i10 = ifile("o7.out")
+
+# Bit 2 - use full adder with carry from bit 1
+r o3[t] = fullAdderSum(i3[t], i7[t], i10[t])
+r o8[t] = fullAdderCarry(i3[t], i7[t], i10[t])
+
+sbf i11 = ifile("o8.out")
+
+# Bit 3 - use full adder with carry from bit 2
+r o4[t] = fullAdderSum(i4[t], i8[t], i11[t])
+r o9[t] = fullAdderCarry(i4[t], i8[t], i11[t])
+
+sbf i12 = ifile("o9.out")
+
+# Bit 4 (MSB/overflow) - just the final carry
+r o5[t] = i12[t]
+
+
+

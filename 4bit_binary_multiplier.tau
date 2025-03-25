@@ -1,0 +1,118 @@
+# 4-bit Binary Multiplier in Tau Language
+# This program multiplies two 4-bit numbers and produces an 8-bit result
+
+# === FIRST NUMBER (A) - 4 BITS ===
+# Let's set A = 3 (binary 0011)
+a4(x) := 1  # LSB
+a3(x) := 1
+a2(x) := 0
+a1(x) := 0  # MSB
+
+# === SECOND NUMBER (B) - 4 BITS ===
+# Let's set B = 5 (binary 0101)
+b4(x) := 1  # LSB
+b3(x) := 0
+b2(x) := 1
+b1(x) := 0  # MSB
+
+# === HELPER FUNCTIONS ===
+# Half adder - used for adding two bits without carry-in
+halfAdderSum(a, b) := a + b        # XOR operation for sum bit
+halfAdderCarry(a, b) := a & b      # AND operation for carry bit
+
+# Full adder - used for adding two bits with carry-in
+fullAdderSum(a, b, c) := a + b + c  # Triple XOR for sum bit
+fullAdderCarry(a, b, c) := (a & b) | (a & c) | (b & c)  # Carry logic
+
+# === STEP 1: GENERATE PARTIAL PRODUCTS ===
+# Each bit of B is multiplied with all bits of A
+# Using naming convention: pp[B bit][A bit]
+
+# Partial product for B4 (LSB of B)
+ppB4A4(x) := a4(x) & b4(x)  # A4 * B4 -> bit 0
+ppB4A3(x) := a3(x) & b4(x)  # A3 * B4 -> bit 1
+ppB4A2(x) := a2(x) & b4(x)  # A2 * B4 -> bit 2
+ppB4A1(x) := a1(x) & b4(x)  # A1 * B4 -> bit 3
+
+# Partial product for B3
+ppB3A4(x) := a4(x) & b3(x)  # A4 * B3 -> bit 1
+ppB3A3(x) := a3(x) & b3(x)  # A3 * B3 -> bit 2
+ppB3A2(x) := a2(x) & b3(x)  # A2 * B3 -> bit 3
+ppB3A1(x) := a1(x) & b3(x)  # A1 * B3 -> bit 4
+
+# Partial product for B2
+ppB2A4(x) := a4(x) & b2(x)  # A4 * B2 -> bit 2
+ppB2A3(x) := a3(x) & b2(x)  # A3 * B2 -> bit 3
+ppB2A2(x) := a2(x) & b2(x)  # A2 * B2 -> bit 4
+ppB2A1(x) := a1(x) & b2(x)  # A1 * B2 -> bit 5
+
+# Partial product for B1 (MSB of B)
+ppB1A4(x) := a4(x) & b1(x)  # A4 * B1 -> bit 3
+ppB1A3(x) := a3(x) & b1(x)  # A3 * B1 -> bit 4
+ppB1A2(x) := a2(x) & b1(x)  # A2 * B1 -> bit 5
+ppB1A1(x) := a1(x) & b1(x)  # A1 * B1 -> bit 6
+
+# === STEP 2: ADDITION OF PARTIAL PRODUCTS ===
+
+# Bit 0 is just B4*A4
+bit0(x) := ppB4A4(x)
+
+# Bit 1 uses a half adder (B4*A3 + B3*A4)
+bit1(x) := halfAdderSum(ppB4A3(x), ppB3A4(x))
+carry1(x) := halfAdderCarry(ppB4A3(x), ppB3A4(x))
+
+# Bit 2 uses full adders with carry from bit 1
+# We have B4*A2, B3*A3, B2*A4 and carry1 - need multiple steps
+sum2a(x) := halfAdderSum(ppB4A2(x), ppB3A3(x))
+carry2a(x) := halfAdderCarry(ppB4A2(x), ppB3A3(x))
+
+sum2b(x) := fullAdderSum(sum2a(x), ppB2A4(x), carry1(x))
+carry2b(x) := fullAdderCarry(sum2a(x), ppB2A4(x), carry1(x))
+
+bit2(x) := sum2b(x)
+carry2(x) := carry2a(x) | carry2b(x)
+
+# Bit 3 has B4*A1, B3*A2, B2*A3, B1*A4 and carry2
+sum3a(x) := halfAdderSum(ppB4A1(x), ppB3A2(x))
+carry3a(x) := halfAdderCarry(ppB4A1(x), ppB3A2(x))
+
+sum3b(x) := fullAdderSum(sum3a(x), ppB2A3(x), carry2(x))
+carry3b(x) := fullAdderCarry(sum3a(x), ppB2A3(x), carry2(x))
+
+sum3c(x) := halfAdderSum(sum3b(x), ppB1A4(x))
+carry3c(x) := halfAdderCarry(sum3b(x), ppB1A4(x))
+
+bit3(x) := sum3c(x)
+carry3(x) := carry3a(x) | carry3b(x) | carry3c(x)
+
+# Bit 4 has B3*A1, B2*A2, B1*A3 and carry3
+sum4a(x) := halfAdderSum(ppB3A1(x), ppB2A2(x))
+carry4a(x) := halfAdderCarry(ppB3A1(x), ppB2A2(x))
+
+sum4b(x) := fullAdderSum(sum4a(x), ppB1A3(x), carry3(x))
+carry4b(x) := fullAdderCarry(sum4a(x), ppB1A3(x), carry3(x))
+
+bit4(x) := sum4b(x)
+carry4(x) := carry4a(x) | carry4b(x)
+
+# Bit 5 has B2*A1, B1*A2 and carry4
+bit5(x) := fullAdderSum(ppB2A1(x), ppB1A2(x), carry4(x))
+carry5(x) := fullAdderCarry(ppB2A1(x), ppB1A2(x), carry4(x))
+
+# Bit 6 has B1*A1 and carry5
+bit6(x) := halfAdderSum(ppB1A1(x), carry5(x))
+carry6(x) := halfAdderCarry(ppB1A1(x), carry5(x))
+
+# Bit 7 is just the final carry
+bit7(x) := carry6(x)
+
+# === DISPLAY RESULTS ===
+# Output the 8-bit result (3 * 5 = 15, binary 00001111)
+n bit0(x)  # LSB
+n bit1(x)
+n bit2(x)
+n bit3(x)
+n bit4(x)
+n bit5(x)
+n bit6(x)
+n bit7(x)  # MSB

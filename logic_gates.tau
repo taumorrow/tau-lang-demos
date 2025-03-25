@@ -1,0 +1,24 @@
+# Title: Logic Gates
+# Description: Implementation of basic logic gates (AND, OR, NOT, XOR) with two inputs.
+
+# Define input files
+sbf i1 = ifile("input1.in")
+sbf i2 = ifile("input2.in")
+
+# Define output files
+sbf o1 = ofile("and.out")
+sbf o2 = ofile("or.out")
+sbf o3 = ofile("not.out")
+sbf o4 = ofile("xor.out")
+
+# AND gate
+r o1[t] = i1[t] & i2[t]
+
+# OR gate
+r o2[t] = i1[t] | i2[t]
+
+# NOT gate (of first input)
+r o3[t] = i1[t]'
+
+# XOR gate
+r o4[t] = (i1[t] & i2[t]') | (i1[t]' & i2[t])

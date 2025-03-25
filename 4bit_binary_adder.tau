@@ -1,0 +1,46 @@
+# Title: Simple 4-bit Binary Adder
+# Description: Adds two 4-bit binary numbers and produces a 5-bit result (to handle overflow)
+
+# First number (A) - 4 bits
+a4(x) := 1  # LSB (least significant bit)
+a3(x) := 1 
+a2(x) := 0 
+a1(x) := 0 # MSB (most significant bit)
+
+# Second number (B) - 4 bits
+b4(x) := 0  # LSB (least significant bit)
+b3(x) := 1 
+b2(x) := 0 
+b1(x) := 0 # MSB (most significant bit)
+
+# Half adder - used for the first bit position with no carry-in
+halfAdderSum(a,b) := a + b        # XOR operation for sum bit
+halfAdderCarry(a,b) := a & b      # AND operation for carry bit
+
+# Full adder - used for all other bit positions with carry-in
+fullAdderSum(a,b,c) := a + b + c  # Triple XOR for sum bit
+fullAdderCarry(a,b,c) := (a & b) | (a & c) | (b & c)  # Carry logic
+
+# === BINARY ADDITION RULES ===
+
+# Bit 0 (LSB) - use half adder (no carry-in)
+bit0(x) := halfAdderSum(a4(x),b4(x))
+carry0(x) := halfAdderCarry(a4(x),b4(x))
+
+# Bit 1 - use full adder with carry from bit 0
+bit1(x) := fullAdderSum(a3(x), b3(x), carry0(x))
+carry1(x) := fullAdderCarry(a3(x), b3(x), carry0(x))
+
+# Bit 2 - use full adder with carry from bit 0
+bit2(x) := fullAdderSum(a2(x), b2(x), carry1(x))
+carry2(x) := fullAdderCarry(a2(x), b2(x), carry1(x))
+
+# Bit 3 - use full adder with carry from bit 0
+bit3(x) := fullAdderSum(a1(x), b1(x), carry2(x))
+bit4(x) := fullAdderCarry(a1(x), b1(x), carry2(x)) # last/overflow bit
+
+n bit0(x)
+n bit1(x)
+n bit2(x)
+n bit3(x)
+n bit4(x)

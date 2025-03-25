@@ -1,0 +1,9 @@
+# Title: Delayed Signal
+# Description: A rule that outputs the input from the previous time step, demonstrating temporal operations.
+
+# Define input and output files
+sbf i1 = ifile("signal.in")
+sbf o1 = ofile("delayed.out")
+
+# Rule: output equals input from previous time step
+r o1[t] = i1[t-1]

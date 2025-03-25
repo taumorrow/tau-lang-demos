@@ -1,0 +1,75 @@
+# Title: 4-bit Binary Subtractor
+# Description: Subtracts a 4-bit binary number (B) from another 4-bit number (A) and produces a 5-bit result (to handle borrow and sign bit)
+
+# First number (A) - 4 bits (minuend)
+a4(x) := 1  # LSB (least significant bit)
+a3(x) := 0 
+a2(x) := 1 
+a1(x) := 0  # MSB (most significant bit)
+
+# Second number (B) - 4 bits (subtrahend)
+b4(x) := 1  # LSB (least significant bit)
+b3(x) := 0 
+b2(x) := 0 
+b1(x) := 0  # MSB (most significant bit)
+
+# Two's complement operations - Invert each bit and add 1
+# Invert the bits of B
+notB4(x) := b4(x)'
+notB3(x) := b3(x)'
+notB2(x) := b2(x)'
+notB1(x) := b1(x)'
+
+# Half adder - used for the first bit position with no carry-in
+halfAdderSum(a,b) := a + b        # XOR operation for sum bit
+halfAdderCarry(a,b) := a & b      # AND operation for carry bit
+
+# Full adder - used for all other bit positions with carry-in
+fullAdderSum(a,b,c) := a + b + c  # Triple XOR for sum bit
+fullAdderCarry(a,b,c) := (a & b) | (a & c) | (b & c)  # Carry logic
+
+# === BINARY SUBTRACTION VIA TWO'S COMPLEMENT ===
+
+# Step 1: Add 1 to the inverted B (completing two's complement)
+# Bit 0 (LSB) - Add 1 to notB4
+twoComp4(x) := halfAdderSum(notB4(x), 1)
+twoCompCarry0(x) := halfAdderCarry(notB4(x), 1)
+
+# Bit 1 - Handle carry from bit 0
+twoComp3(x) := fullAdderSum(notB3(x), 0, twoCompCarry0(x))
+twoCompCarry1(x) := fullAdderCarry(notB3(x), 0, twoCompCarry0(x))
+
+# Bit 2 - Handle carry from bit 1
+twoComp2(x) := fullAdderSum(notB2(x), 0, twoCompCarry1(x))
+twoCompCarry2(x) := fullAdderCarry(notB2(x), 0, twoCompCarry1(x))
+
+# Bit 3 - Handle carry from bit 2
+twoComp1(x) := fullAdderSum(notB1(x), 0, twoCompCarry2(x))
+twoCompCarry3(x) := fullAdderCarry(notB1(x), 0, twoCompCarry2(x))
+
+# Step 2: Add A to the two's complement of B
+# Bit 0 (LSB) - Add a4 and twoComp4
+bit0(x) := halfAdderSum(a4(x), twoComp4(x))
+carry0(x) := halfAdderCarry(a4(x), twoComp4(x))
+
+# Bit 1 - Add a3, twoComp3, and carry from bit 0
+bit1(x) := fullAdderSum(a3(x), twoComp3(x), carry0(x))
+carry1(x) := fullAdderCarry(a3(x), twoComp3(x), carry0(x))
+
+# Bit 2 - Add a2, twoComp2, and carry from bit 1
+bit2(x) := fullAdderSum(a2(x), twoComp2(x), carry1(x))
+carry2(x) := fullAdderCarry(a2(x), twoComp2(x), carry1(x))
+
+# Bit 3 - Add a1, twoComp1, and carry from bit 2
+bit3(x) := fullAdderSum(a1(x), twoComp1(x), carry2(x))
+carry3(x) := fullAdderCarry(a1(x), twoComp1(x), carry2(x))
+
+# Bit 4 (sign bit) - In two's complement, this tells us if the result is negative
+bit4(x) := carry3(x)'  # Invert the carry - in subtraction, no carry means negative result
+
+# Output the results
+n bit0(x)  # LSB
+n bit1(x)
+n bit2(x)
+n bit3(x)
+n bit4(x)  # MSB/sign bit

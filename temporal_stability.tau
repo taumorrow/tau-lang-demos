@@ -1,0 +1,9 @@
+# Title: Temporal Stability
+# Description: A rule that only changes its output when the input has been stable for two consecutive time steps.
+
+# Define input and output files
+sbf i1 = ifile("input.in")
+sbf o1 = ofile("stable.out")
+
+# Rule: output changes only when input is stable for 2 time steps
+r o1[t] = (i1[t] & i1[t-1] & o1[t-1]') | (i1[t]' & i1[t-1]' & o1[t-1]) | ((i1[t] + i1[t-1]) & o1[t-1])

@@ -1,0 +1,37 @@
+# Title: Feedback Loop
+# Description: A simplified feedback loop implementation with proper input/output handling.
+
+# Define initial input file
+sbf i1 = ifile("loop.in")
+
+# Define output files for each stage
+sbf o1 = ofile("primary.out")
+sbf o2 = ofile("secondary.out")
+sbf o3 = ofile("ifeedback.out")
+sbf o4 = ofile("feedback.out")
+sbf o5 = ofile("final.out")
+
+# Rule 1: Basic signal processing - determines the primary output
+r o1[t] = i1[t]
+
+# After o1 is created, redefine it as an input for subsequent rules
+sbf i2 = ifile("primary.out")
+
+# Rule 2: Depends on primary output - produces secondary output
+r o2[t] = i2[t-1]'
+
+# After o2 is created, redefine it as an input
+sbf i3 = ifile("secondary.out")
+
+# For the feedback mechanism, we need to define an initial input for o3's past state
+# First execution of o3 (initial state)
+r o3[t] = i1[t] & i3[t]
+
+# Define the feedback input
+sbf i4 = ifile("ifeedback.out")
+
+# Rule 3: Feedback mechanism with proper input definitions
+r o4[t] = (i4[t-1] + i2[t]) & i3[t]
+
+# Rule 4: Final integration - combines all intermediate outputs
+r o5[t] = (i2[t] & i3[t]) | (i3[t] & i4[t]) | (i4[t] & i2[t]')

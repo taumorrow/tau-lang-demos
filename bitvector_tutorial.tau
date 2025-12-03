@@ -1,0 +1,151 @@
+# ============================================================================
+# BITVECTOR TUTORIAL - Tau Language 0.7-alpha
+# Complete guide with working examples
+# Run with: tau < bitvector_tutorial.tau
+# ============================================================================
+
+set charvar off
+
+# ============================================================================
+# PART 1: BASICS - Constants and Representation
+# ============================================================================
+
+# Hexadecimal notation
+solve x = { #xFF }:bv[8]
+# Output: x = 255
+
+# Binary notation  
+solve x = { #b11111111 }:bv[8]
+# Output: x = 255
+
+# Decimal (displayed in output)
+solve x = { #x0F }:bv[8]
+# Output: x = 15
+
+# Different widths
+solve x = { #xFFFF }:bv[16]
+# Output: x = 65535
+
+solve x = { #xFFFFFFFF }:bv[32]
+# Output: x = 4294967295
+
+# ============================================================================
+# PART 2: BITWISE OPERATIONS
+# ============================================================================
+
+# XOR
+solve (result = a ^ b) && (a = { #x0F }:bv[8]) && (b = { #xF0 }:bv[8])
+# Output: result = 255 (0x0F ^ 0xF0 = 0xFF)
+
+# AND
+solve (result = a & b) && (a = { #xFF }:bv[8]) && (b = { #x0F }:bv[8])
+# Output: result = 15
+
+# OR
+solve (result = a | b) && (a = { #x0F }:bv[8]) && (b = { #xF0 }:bv[8])
+# Output: result = 255
+
+# ============================================================================
+# PART 3: ARITHMETIC OPERATIONS
+# ============================================================================
+
+# Addition
+solve (result = a + b) && (a = { #x0A }:bv[8]) && (b = { #x05 }:bv[8])
+# Output: result = 15
+
+# Multiplication
+solve (result = a * b) && (a = { #x08 }:bv[8]) && (b = { #x08 }:bv[8])
+# Output: result = 64
+
+# Modulo
+solve (result = a % b) && (a = { #x71 }:bv[8]) && (b = { #x0F }:bv[8])
+# Output: result = 8 (113 % 15 = 8)
+
+# Division
+solve (result = a / b) && (a = { #x64 }:bv[8]) && (b = { #x0A }:bv[8])
+# Output: result = 10 (100 / 10 = 10)
+
+# ============================================================================
+# PART 4: MULTI-PARTY OPERATIONS
+# ============================================================================
+
+# 2-party XOR
+solve (seed = p1 ^ p2) && (p1 = { #x15 }:bv[8]) && (p2 = { #x2A }:bv[8])
+# Output: seed = 63
+
+# 3-party XOR (Casino PRNG seed generation)
+solve (seed = p1 ^ p2 ^ p3) && (p1 = { #x15 }:bv[8]) && (p2 = { #x2A }:bv[8]) && (p3 = { #x4E }:bv[8])
+# Output: seed = 113
+
+# 4-party XOR
+solve (seed = p1 ^ p2 ^ p3 ^ p4) && (p1 = { #x01 }:bv[8]) && (p2 = { #x02 }:bv[8]) && (p3 = { #x04 }:bv[8]) && (p4 = { #x08 }:bv[8])
+# Output: seed = 15
+
+# ============================================================================
+# PART 5: COMPARISON OPERATIONS
+# ============================================================================
+
+# Equality
+solve (a = b) && (a = { #xFF }:bv[8]) && (b = { #xFF }:bv[8])
+# Output: SAT (a = 255, b = 255)
+
+# Less than
+solve (a < b) && (a = { #x0A }:bv[8]) && (b = { #xFF }:bv[8])
+# Output: SAT (10 < 255)
+
+# Greater than
+solve (a > b) && (a = { #xFF }:bv[8]) && (b = { #x0A }:bv[8])
+# Output: SAT (255 > 10)
+
+# ============================================================================
+# PART 6: PRACTICAL PATTERNS
+# ============================================================================
+
+# Pattern 1: Range checking (dice 1-6)
+solve (dice >= { #x01 }:bv[8]) && (dice <= { #x06 }:bv[8]) && (dice = { #x04 }:bv[8])
+# Output: SAT (4 is in range 1-6)
+
+# Pattern 2: Wrapping arithmetic (modulo for cyclic values)
+solve (next = (current + { #x01 }:bv[8]) % { #x0A }:bv[8]) && (current = { #x09 }:bv[8])
+# Output: next = 0 (wraps around)
+
+# Pattern 3: Bit masking
+solve (masked = value & { #x0F }:bv[8]) && (value = { #xFF }:bv[8])
+# Output: masked = 15 (keeps only lower 4 bits)
+
+# ============================================================================
+# PART 7: COMPLETE EXAMPLE - CASINO DICE
+# ============================================================================
+
+# Full provably fair dice roll
+solve (
+  # Step 1: Players contribute
+  (seed = p1 ^ p2 ^ p3) &&
+  (p1 = { #x15 }:bv[8]) && (p2 = { #x2A }:bv[8]) && (p3 = { #x4E }:bv[8]) &&
+  
+  # Step 2: Map to LFSR state (0-14)
+  (lfsr = seed % { #x0F }:bv[8]) &&
+  
+  # Step 3: Simple next state (for demo: +1 mod 15)
+  (next = (lfsr + { #x01 }:bv[8]) % { #x0F }:bv[8]) &&
+  
+  # Step 4: Map to dice (1-6)
+  (dice = (next % { #x06 }:bv[8]) + { #x01 }:bv[8])
+)
+# Output: Complete solution with dice result
+
+# ============================================================================
+# KNOWN ISSUES & WORKAROUNDS
+# ============================================================================
+
+# Issue: Predicate definitions with bitvectors cause segfault
+# BAD (crashes):
+# seed_gen(p1, p2, p3, seed) := seed = p1 ^ p2 ^ p3
+
+# GOOD (works):
+# Use inline solve as shown in all examples above
+
+# ============================================================================
+# END OF TUTORIAL
+# All examples are copy-paste ready and tested on Tau 0.7-alpha
+# ============================================================================

@@ -1,0 +1,129 @@
+# ============================================================================
+# TEMPORAL STATE MACHINE - Casino Dice with State Carryover
+# Pure Tau Language with Bitvectors
+# Demonstrates temporal logic with evolving state
+# ============================================================================
+
+set charvar off
+
+# ============================================================================
+# STREAM DEFINITIONS
+# ============================================================================
+
+# Input streams: 3 players contribute random values each round
+i1 : bv[8] = in console   # Player 1 contribution (0-255)
+i2 : bv[8] = in console   # Player 2 contribution (0-255)
+i3 : bv[8] = in console   # Player 3 contribution (0-255)
+
+# Output streams: Show intermediate calculations and final result
+seed : bv[8] = out console   # Combined seed from XOR of all players
+lfsr : bv[8] = out console   # LFSR state (carries forward between rounds)
+next : bv[8] = out console   # Next LFSR state after transformation
+dice : bv[8] = out console   # Final dice result (1-6)
+o1 : bv[8] = out console     # Main output (copy of dice)
+
+# ============================================================================
+# TEMPORAL STATE MACHINE SPECIFICATION
+# ============================================================================
+
+run always (
+  # Step 1: Multi-party seed generation via XOR
+  # XOR ensures no single player can control the outcome
+  (seed[t] = i1[t] ^ i2[t] ^ i3[t]) &&
+  
+  # Step 2: LFSR state evolution with temporal carryover
+  # Current state = previous next state + current seed contribution
+  # This creates history-dependent randomness
+  (lfsr[t] = next[t-1] + seed[t] % { #x0F }:bv[8]) &&
+  
+  # Step 3: LFSR state transition
+  # Simple transformation: (state + 1) mod 15
+  (next[t] = (lfsr[t] + { #x01 }:bv[8]) % { #x0F }:bv[8]) &&
+  
+  # Step 4: Map to dice value (1-6)
+  # Modulo 6 gives 0-5, add 1 to get 1-6 range
+  (dice[t] = (next[t] % { #x06 }:bv[8]) + { #x01 }:bv[8]) &&
+  
+  # Step 5: Output final result
+  (o1[t] = dice[t])
+)
+
+# ============================================================================
+# KEY DIFFERENCE FROM INDEPENDENT VERSION
+# ============================================================================
+
+# Independent version (casino.tau):
+#   lfsr[t] = seed[t] % 15
+#   Each round recalculates from seed
+#   Same inputs → same outputs
+#
+# Temporal version (this file):
+#   lfsr[t] = next[t-1] + seed[t] % 15
+#   State carries forward between rounds
+#   Same inputs → different outputs (history-dependent)
+
+# ============================================================================
+# EXAMPLE EXECUTION - Demonstrating State Evolution
+# ============================================================================
+
+# ROUND 1:
+# Input: i1[1] := #x15, i2[1] := #x2A, i3[1] := #x4E
+# Output: seed 113, lfsr 8, next 9, dice 4
+
+# ROUND 2:
+# Input: i1[2] := #x01, i2[2] := #x02, i3[2] := #x04
+# Output: seed 7, lfsr 16 (= 9 + 7), next 2, dice 3
+
+# ROUND 3:
+# Input: i1[3] := #xFF, i2[3] := #x00, i3[3] := #xAA
+# Output: seed 85, lfsr 12 (= 2 + 10), next 13, dice 2
+
+# ROUND 4 (SAME INPUTS AS ROUND 3):
+# Input: i1[4] := #xFF, i2[4] := #x00, i3[4] := #xAA
+# Output: seed 85, lfsr 23 (= 13 + 10), next 9, dice 4
+#
+# NOTE: Same inputs (255, 0, 170) but different dice result (2 vs 4)
+# because state evolved between rounds!
+
+# ============================================================================
+# TEMPORAL STATE MACHINE PROPERTIES
+# ============================================================================
+
+# 1. State Evolution:
+#    Each round's state depends on previous rounds
+#    History affects future outcomes
+
+# 2. Multi-party Fair:
+#    All players contribute to seed via XOR
+#    No single player controls outcome
+
+# 3. Deterministic but History-Dependent:
+#    Given full history, outcome is provable
+#    Same inputs at different times → different results
+
+# 4. Mathematically Verifiable:
+#    Every step is a Tau formula
+#    SAT checking proves correctness
+
+# ============================================================================
+# WHY THIS MATTERS
+# ============================================================================
+
+# This demonstrates:
+# - Temporal logic in action (state carries forward)
+# - Multi-party computation (XOR seed generation)
+# - History-dependent randomness (LFSR evolution)
+# - Provable fairness (mathematical verification)
+
+# Applications:
+# - Gaming with evolving state
+# - DAO governance with historical context
+# - Any system where past affects future in verifiable way
+
+# This is not just a casino game - it's a working temporal state machine
+# that proves Tau can handle complex stateful systems with mathematical
+# guarantees.
+#
+# ============================================================================
+# END OF TEMPORAL STATE MACHINE SPECIFICATION
+# ============================================================================

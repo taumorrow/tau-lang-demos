@@ -1,0 +1,52 @@
+set charvar off
+
+# ============================================================================
+# 4-BIT BINARY ADDER USING SBF (Simple Boolean Functions)
+# ============================================================================
+# 
+# This is a complete 4-bit ripple-carry adder that adds two 4-bit numbers
+# and produces a 5-bit result (including overflow bit).
+#
+# Algorithm: Full Adder Logic
+#   - sum_i = (a_i XOR b_i) XOR carry_i-1
+#   - carry_i = (a_i AND b_i) OR ((a_i XOR b_i) AND carry_i-1)
+#
+# Example: 3 + 2 = 5
+#   A = 0011 (3 in decimal)
+#   B = 0010 (2 in decimal)
+#   Result = 00101 (5 in decimal)
+# ============================================================================
+
+solve (
+    # === INPUT DEFINITIONS ===
+    # A = 0011 (bits: a3 a2 a1 a0 from MSB to LSB)
+    (a3 = {0}:sbf) && (a2 = {0}:sbf) && (a1 = {1}:sbf) && (a0 = {1}:sbf) &&
+    
+    # B = 0010 (bits: b3 b2 b1 b0 from MSB to LSB)
+    (b3 = {0}:sbf) && (b2 = {0}:sbf) && (b1 = {1}:sbf) && (b0 = {0}:sbf) &&
+    
+    # === BIT 0 (LSB) ===
+    # Half adder (no carry in)
+    (bit0 = a0 ^ b0) && 
+    (carry0 = a0 & b0) &&
+    
+    # === BIT 1 ===
+    # Full adder with carry0
+    (bit1 = (a1 ^ b1) ^ carry0) && 
+    (carry1 = (a1 & b1) | ((a1 ^ b1) & carry0)) &&
+    
+    # === BIT 2 ===
+    # Full adder with carry1
+    (bit2 = (a2 ^ b2) ^ carry1) && 
+    (carry2 = (a2 & b2) | ((a2 ^ b2) & carry1)) &&
+    
+    # === BIT 3 (MSB) ===
+    # Full adder with carry2
+    (bit3 = (a3 ^ b3) ^ carry2) && 
+    
+    # === BIT 4 (OVERFLOW) ===
+    # Final carry out
+    (bit4 = (a3 & b3) | ((a3 ^ b3) & carry2))
+)
+
+defs

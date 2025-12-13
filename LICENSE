@@ -10,6 +10,28 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, subject to the following conditions:
 
 ================================================================================
+THIRD-PARTY IP: TAU LANGUAGE
+================================================================================
+
+IMPORTANT: Tau Language and all related intellectual property rights belong
+exclusively to IDNI AG (https://idni.org).
+
+This license covers ONLY the licensor's original innovations in provably fair
+multiplayer gaming mechanics. It does NOT grant any rights to Tau Language itself.
+
+Use of Tau Language is subject to IDNI's own license terms:
+https://github.com/IDNI/tau-lang/blob/main/LICENSE
+
+The licensor claims NO ownership over:
+- Tau Language compiler, interpreter, or runtime
+- Tau Language syntax, semantics, or specifications
+- IDNI's formal logic systems (NSO, GSSOTC, etc.)
+- Any IDNI intellectual property
+
+This software uses Tau Language under IDNI's license. All rights to Tau Language
+remain with IDNI AG.
+
+================================================================================
 RESTRICTION: PROVABLY FAIR MULTIPLAYER GAMING
 ================================================================================
 
@@ -45,7 +67,7 @@ YOU MAY use this technology commercially on Tau Net IF:
 
 1. Application executes on Tau Net blockchain infrastructure
 2. Core game logic uses Tau Language for verification
-3. Attribution is maintained: "Powered by l0g1x's provably fair tech"
+3. Attribution is maintained: "Powered by [Your Name]'s provably fair tech"
 4. Source code modifications remain open source
 
 ================================================================================
@@ -72,6 +94,26 @@ For commercial use of provably fair multiplayer gaming outside Tau Net:
 
 Contact: taumorrow@gmail.com
 Subject: "Provably Fair Gaming License"
+
+================================================================================
+PATENT NOTICE
+================================================================================
+
+The licensor reserves patent rights to the provably fair multiplayer gaming
+innovations described above (NOT to Tau Language itself, which belongs to IDNI).
+
+These gaming innovations include:
+- Multi-party XOR seed generation for gaming
+- Simultaneous commitment-based game mechanics
+- Novel collision resolution methods
+- Integration patterns for real-time constraint verification in games
+
+Commercial use of these gaming innovations outside authorized channels may
+constitute patent infringement regardless of source code license compliance.
+
+CLARIFICATION: This patent notice does NOT claim any rights over Tau Language,
+IDNI technologies, or general constraint solving methods. It applies ONLY to
+the specific gaming applications and mechanics developed by the licensor.
 
 ================================================================================
 ENFORCEMENT
@@ -157,4 +199,4 @@ Questions? taumorrow@gmail.com
 
 ================================================================================
 
-Version 1.0 - December 2025
+Version 1.0 - December 2024

@@ -17,7 +17,7 @@ COMMERCIAL USE OF THE FOLLOWING IS PROHIBITED without explicit written license:
 
 "Provably Fair Multiplayer Gaming Technology" means:
 
-1. Multi-party XOR-based cryptographic seed generation for randomness
+1. Multi-party XOR-based cryptographic seed generation for randomness in gaming applications
 2. Simultaneous commitment-based multiplayer game mechanics
 3. Temporal constraint satisfaction for game state validation
 4. Real-time formal verification of game moves using constraint solvers

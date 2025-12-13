@@ -99,19 +99,20 @@ Subject: "Provably Fair Gaming License"
 PATENT NOTICE
 ================================================================================
 
-The licensor reserves patent rights to the provably fair multiplayer gaming
+The licensor reserves all patent rights to the provably fair multiplayer gaming
 innovations described above (NOT to Tau Language itself, which belongs to IDNI).
 
-These gaming innovations include:
+These gaming innovations may be subject to patent protection and include:
 - Multi-party XOR seed generation for gaming
 - Simultaneous commitment-based game mechanics
 - Novel collision resolution methods
 - Integration patterns for real-time constraint verification in games
 
+The licensor reserves the right to file patent applications for these innovations.
 Commercial use of these gaming innovations outside authorized channels may
-constitute patent infringement regardless of source code license compliance.
+constitute patent infringement if patents are granted.
 
-CLARIFICATION: This patent notice does NOT claim any rights over Tau Language,
+CLARIFICATION: This notice does NOT claim any rights over Tau Language,
 IDNI technologies, or general constraint solving methods. It applies ONLY to
 the specific gaming applications and mechanics developed by the licensor.
 

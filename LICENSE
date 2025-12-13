@@ -1,3 +1,95 @@
+MIT License with Commercial Restriction for Provably Fair Gaming
+==================================================================
+
+Copyright (c) 2025 l0g1x
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, subject to the following conditions:
+
+================================================================================
+RESTRICTION: PROVABLY FAIR MULTIPLAYER GAMING
+================================================================================
+
+COMMERCIAL USE OF THE FOLLOWING IS PROHIBITED without explicit written license:
+
+"Provably Fair Multiplayer Gaming Technology" means:
+
+1. Multi-party XOR-based cryptographic seed generation for randomness
+2. Simultaneous commitment-based multiplayer game mechanics
+3. Temporal constraint satisfaction for game state validation
+4. Real-time formal verification of game moves using constraint solvers
+5. Collision resolution via mathematical constraint solving
+6. Any combination of the above for multiplayer gaming applications
+
+PROHIBITED COMMERCIAL USES (without license):
+
+- Operating online casinos, gambling platforms, or betting services
+- Providing provably fair gaming as a commercial service
+- Integration into commercial gaming products or platforms
+- White-label gaming solutions using this technology
+- Any revenue-generating deployment of provably fair multiplayer gaming
+
+This restriction applies ONLY to provably fair multiplayer gaming technology.
+All other uses of this software remain unrestricted under standard MIT terms.
+
+================================================================================
+EXCEPTION: TAU NET ECOSYSTEM
+================================================================================
+
+The above restriction does NOT apply to deployments on Tau Net blockchain.
+
+YOU MAY use this technology commercially on Tau Net IF:
+
+1. Application executes on Tau Net blockchain infrastructure
+2. Core game logic uses Tau Language for verification
+3. Attribution is maintained: "Powered by l0g1x's provably fair tech"
+4. Source code modifications remain open source
+
+================================================================================
+NON-RESTRICTED USES
+================================================================================
+
+The following uses are NOT restricted and remain under standard MIT license:
+
+✓ Educational and research purposes
+✓ Personal non-commercial projects  
+✓ Other demos and applications in this repository (non-gaming)
+✓ Software development tools and utilities
+✓ Academic publications and studies
+✓ Open source contributions to this project
+
+Use for learning Tau Language, constraint programming, formal verification,
+or any other non-gaming application is fully permitted.
+
+================================================================================
+COMMERCIAL LICENSE
+================================================================================
+
+For commercial use of provably fair multiplayer gaming outside Tau Net:
+
+Contact: taumorrow@gmail.com
+Subject: "Provably Fair Gaming License"
+
+================================================================================
+ENFORCEMENT
+================================================================================
+
+Unauthorized commercial use of provably fair multiplayer gaming technology
+constitutes:
+1. Breach of this license agreement
+2. Potential patent infringement  
+3. Copyright violation
+
+The licensor reserves all legal remedies including injunctive relief and
+damages.
+
+GOOD FAITH PROVISION:
+Inadvertent violations will be given 30-day cure period before legal action.
+
+================================================================================
 STANDARD MIT LICENSE TERMS
 ================================================================================
 

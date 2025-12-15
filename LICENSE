@@ -37,25 +37,73 @@ RESTRICTION: PROVABLY FAIR MULTIPLAYER GAMING
 
 COMMERCIAL USE OF THE FOLLOWING IS PROHIBITED without explicit written license:
 
-"Provably Fair Multiplayer Gaming Technology" means:
+"Provably Fair Multiplayer Gaming Technology" means the SPECIFIC ARCHITECTURAL
+COMBINATION of the following innovations:
 
-1. Multi-party XOR-based cryptographic seed generation for randomness in gaming applications
-2. Simultaneous commitment-based multiplayer game mechanics
-3. Temporal constraint satisfaction for game state validation
-4. Real-time formal verification of game moves using constraint solvers
-5. Collision resolution via mathematical constraint solving
-6. Any combination of the above for multiplayer gaming applications
+1. TEMPORAL STATE MACHINE FOR GAMING RNG
+   Integration of multi-party cryptographic commitments with Tau Language temporal
+   state carryover, specifically:
+   
+   lfsr[t] = next[t-1] + seed[t]  // Temporal carryover from previous state
+   next[t] = xorshift(lfsr[t])    // PRNG transformation
+   dice[t] = (next[t] % 6) + 1    // Deterministic mapping
+   
+   Creating history-dependent randomness where identical commitment values at
+   different timesteps produce different outcomes, preventing pattern exploitation.
+
+2. INTERACTIVE MODE ARCHITECTURE FOR REAL-TIME FORMAL VERIFICATION
+   Use of Tau Language's `run always` interactive mode with persistent subprocess
+   architecture for stream-based validation in gaming, enabling:
+   - State preservation between validation steps
+   - Batch processing of multiple players simultaneously
+   - Practical real-time performance through architectural optimization
+   
+3. MICROSERVICES ARCHITECTURE FOR TAU-BASED GAMING
+   Decomposition of Tau-based game validation into independent microservices
+   each running persistent Tau subprocesses, enabling parallel initialization and scalable deployment.
+
+4. SIMULTANEOUS COMMITMENT-BASED GAMEPLAY WITH TAU VALIDATION
+   4-phase game loop (Commit → Reveal → Validate → Execute) where:
+   - All players submit cryptographic commitments simultaneously
+   - Fair dice generation via XOR of all commitments
+   - Tau Language validates all moves through decidable temporal logic
+   - All actions execute simultaneously with mathematical proof of fairness
+
+5. FAIR COLLISION RESOLUTION VIA TEMPORAL LOGIC
+   "Who moves survives" collision detection and resolution expressed as
+   Tau Language temporal constraints, providing provably fair multi-player
+   interaction without priority-based or first-come-first-served systems.
+
+EXPLICITLY EXCLUDED FROM THIS LICENSE (Prior Art / Third-Party IP):
+
+✗ XOR-based cryptographic commitments alone (standard cryptography, 40+ years old)
+✗ Tau Language itself and all IDNI intellectual property (separate license)
+✗ Generic constraint solving techniques (prior art)
+✗ Post-hoc cryptographic verification systems (e.g., Bitcoin casino-style)
+✗ Basic commitment schemes (prior art)
+✗ SAT/SMT solving in general (prior art)
+
+WHAT IS ACTUALLY PROTECTED:
+
+✓ The specific combination and integration of techniques listed above
+✓ The architectural patterns for Tau-based gaming
+✓ The temporal state machine design for gaming RNG
+✓ The interactive runner mode discoveries and implementation patterns
+✓ The microservices architecture for formal verification gaming
+✓ The specific Tau Language formulas and specifications developed
+✓ The  multi phase simultaneous gameplay validation loop
 
 PROHIBITED COMMERCIAL USES (without license):
 
-- Operating online casinos, gambling platforms, or betting services
-- Providing provably fair gaming as a commercial service
-- Integration into commercial gaming products or platforms
-- White-label gaming solutions using this technology
-- Any revenue-generating deployment of provably fair multiplayer gaming
+- Operating online casinos, gambling platforms, or betting services using
+  the protected technology combination
+- Providing provably fair gaming as a commercial service using this architecture
+- Integration of the protected technology into commercial gaming products
+- White-label gaming solutions using the protected architectural innovations
+- Any revenue-generating deployment of the specific technological combination
 
-This restriction applies ONLY to provably fair multiplayer gaming technology.
-All other uses of this software remain unrestricted under standard MIT terms.
+This restriction applies ONLY to the specific "Provably Fair Multiplayer Gaming
+Technology" as defined above. All other uses remain unrestricted under MIT terms.
 
 ================================================================================
 EXCEPTION: TAU NET ECOSYSTEM
@@ -82,6 +130,9 @@ The following uses are NOT restricted and remain under standard MIT license:
 ✓ Software development tools and utilities
 ✓ Academic publications and studies
 ✓ Open source contributions to this project
+✓ Use of XOR commitments alone (prior art)
+✓ Use of Tau Language for other purposes (subject to IDNI license)
+✓ Generic constraint solving applications
 
 Use for learning Tau Language, constraint programming, formal verification,
 or any other non-gaming application is fully permitted.
@@ -99,38 +150,49 @@ Subject: "Provably Fair Gaming License"
 PATENT NOTICE
 ================================================================================
 
-The licensor reserves all patent rights to the provably fair multiplayer gaming
-innovations described above (NOT to Tau Language itself, which belongs to IDNI).
+The licensor reserves all patent rights to the SPECIFIC ARCHITECTURAL COMBINATION
+of provably fair multiplayer gaming innovations described above.
 
-These gaming innovations may be subject to patent protection and include:
-- Multi-party XOR seed generation for gaming
-- Simultaneous commitment-based game mechanics
-- Novel collision resolution methods
-- Integration patterns for real-time constraint verification in games
+CLARIFICATION - PATENT CLAIMS:
 
+The licensor claims patent rights ONLY to:
+✓ The specific temporal state machine design for gaming RNG
+✓ The interactive mode architecture for real-time Tau validation
+✓ The microservices pattern for Tau-based gaming
+✓ The combination and integration of these techniques
+
+The licensor does NOT claim patent rights to:
+✗ XOR-based commitments (prior art)
+✗ Tau Language or IDNI technologies (third-party IP)
+✗ Generic constraint solving (prior art)
+✗ Commitment schemes in general (prior art)
+✗ Formal verification methods in general (prior art)
+
+These specific architectural innovations may be subject to patent protection.
 The licensor reserves the right to file patent applications for these innovations.
-Commercial use of these gaming innovations outside authorized channels may
-constitute patent infringement if patents are granted.
 
-CLARIFICATION: This notice does NOT claim any rights over Tau Language,
-IDNI technologies, or general constraint solving methods. It applies ONLY to
-the specific gaming applications and mechanics developed by the licensor.
+Commercial use of these SPECIFIC innovations outside authorized channels may
+constitute patent infringement if patents are granted.
 
 ================================================================================
 ENFORCEMENT
 ================================================================================
 
-Unauthorized commercial use of provably fair multiplayer gaming technology
-constitutes:
+Unauthorized commercial use of the specifically defined "Provably Fair Multiplayer
+Gaming Technology" constitutes:
 1. Breach of this license agreement
-2. Potential patent infringement  
+2. Potential patent infringement (for the specific protected innovations)
 3. Copyright violation
 
-The licensor reserves all legal remedies including injunctive relief and
-damages.
+The licensor reserves all legal remedies including injunctive relief and damages.
 
 GOOD FAITH PROVISION:
 Inadvertent violations will be given 30-day cure period before legal action.
+
+CLARIFICATION ON SCOPE:
+Use of individual techniques (XOR commitments, Tau Language, constraint solving)
+is NOT a violation. Only unauthorized commercial use of the SPECIFIC ARCHITECTURAL
+COMBINATION defined above constitutes a violation.
 
 ================================================================================
 STANDARD MIT LICENSE TERMS
@@ -185,19 +247,21 @@ to ensure license stability.
 SUMMARY
 ================================================================================
 
-┌─────────────────────────────────────────────────────────────┐
-│  USE CASE                          │  LICENSE REQUIRED?     │
-├─────────────────────────────────────────────────────────────┤
-│  Learning / Research               │  ✗ No (MIT)            │
-│  Personal hobby project            │  ✗ No (MIT)            │
-│  Tau Net commercial gaming         │  ✗ No (free exception) │
-│  Non-gaming commercial use         │  ✗ No (MIT)            │
-│  Commercial casino (not Tau Net)   │  ✓ Yes (contact us)    │
-│  Gaming-as-a-Service               │  ✓ Yes (contact us)    │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  USE CASE                                │  LICENSE REQUIRED?           │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Learning / Research                     │  ✗ No (MIT)                  │
+│  Personal hobby project                  │  ✗ No (MIT)                  │
+│  Tau Net commercial gaming               │  ✗ No (free exception)       │
+│  Non-gaming commercial use               │  ✗ No (MIT)                  │
+│  Using XOR commitments alone             │  ✗ No (prior art)            │
+│  Using Tau Language for other purposes   │  ✗ No (IDNI license applies) │
+│  Commercial casino with this architecture│  ✓ Yes (contact us)          │
+│  Gaming-as-a-Service with this tech      │  ✓ Yes (contact us)          │
+└─────────────────────────────────────────────────────────────────────────┘
 
 Questions? taumorrow@gmail.com
 
 ================================================================================
 
-Version 1.0 - December 2025
+Version 1.1 - December 2025

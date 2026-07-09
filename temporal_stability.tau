@@ -1,9 +1,32 @@
-# Title: Temporal Stability
-# Description: A rule that only changes its output when the input has been stable for two consecutive time steps.
+# ============================================================================
+# TEMPORAL STABILITY - Reacting Only to a Stable Input
+# ============================================================================
+# Description: A rule whose output depends not just on the current input but on
+# the input AND the output of the previous step. It reacts when the input has been
+# high for two consecutive steps, and then holds - a single, isolated change does
+# not flip it. This shows how history (both past input and past output) shapes the
+# present.
 
-# Define input and output files
-sbf i1 = ifile("input.in")
-sbf o1 = ofile("stable.out")
+# === STREAMS ===
+i1 : sbf := in file("io/sequence.in")   # input signal, one bit per line
+o1 : sbf := out file("io/stable.out")   # stabilized output
 
-# Rule: output changes only when input is stable for 2 time steps
-r o1[t] = (i1[t] & i1[t-1] & o1[t-1]') | (i1[t]' & i1[t-1]' & o1[t-1]) | ((i1[t] + i1[t-1]) & o1[t-1])
+# === THE RULE ===
+# The output o1[t] is 1 in exactly these three cases (an OR of them):
+#   1) input is 1 now AND was 1 last step, and the output was still 0
+#         (i1[t] & i1[t-1] & o1[t-1]')      -> rise once the input is stable-high
+#   2) input is 0 now AND was 0 last step, and the output was already 1
+#         (i1[t]' & i1[t-1]' & o1[t-1])     -> hold high through a stable-low stretch
+#   3) the input just changed, and the output was already 1
+#         ((i1[t] ^ i1[t-1]) & o1[t-1])     -> hold high across a single transition
+r o1[t] = (i1[t] & i1[t-1] & o1[t-1]') | (i1[t]' & i1[t-1]' & o1[t-1]) | ((i1[t] ^ i1[t-1]) & o1[t-1])
+
+# === HOW IT BEHAVES ===
+# Look-back [t-1] means step 0 is an initialization step (output 0).
+#
+# Example: io/sequence.in = 1,1,0,0,1
+#   step  : 0 1 2 3 4
+#   input : 1 1 0 0 1
+#   output: 0 1 1 1 1
+# The output latches high at step 1 (input high for two steps in a row) and then
+# holds through the following low and the change back to 1.

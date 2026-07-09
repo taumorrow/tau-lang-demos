@@ -1,134 +1,138 @@
-# Title: Binary Encoding Test Program
-# Description: A focused test program that demonstrates how to represent and manipulate
-# numerical values using binary encoding in Tau's boolean-only environment.
+# ============================================================================
+# BINARY ENCODING TUTORIAL - Numbers & Arithmetic in a Boolean-Only World
+# ============================================================================
+# Description: How to represent and manipulate 4-bit numbers using nothing but
+# Boolean functions in Tau. No bitvectors, no streams - just AND / OR / XOR / NOT
+# combined into adders, comparators, increment and decrement.
+#
+# Each number is a tuple of bit-FUNCTIONS; each operation is a composition of
+# Boolean functions. Tau normalizes them to 0 / 1. Show any result with
+# 'n <function>(x)'.
 
-# === BINARY NUMBER INPUTS ===
-# We'll use two 4-bit binary numbers as input
-# Number A (4 bits)
-sbf aBit0 = ifile("number_a_bit0.in")  # LSB
-sbf aBit1 = ifile("number_a_bit1.in")
-sbf aBit2 = ifile("number_a_bit2.in")
-sbf aBit3 = ifile("number_a_bit3.in")  # MSB
+# ============================================================================
+# PART 1 - THE BUILDING BLOCKS (general logic, no numbers yet)
+# ============================================================================
+# A half adder adds two bits: sum = XOR, carry = AND.
+halfAdderSum(a,b)   := a ^ b        # sum bit  = a XOR b
+halfAdderCarry(a,b) := a & b        # carry    = a AND b
 
-# Number B (4 bits)
-sbf bBit0 = ifile("number_b_bit0.in")  # LSB
-sbf bBit1 = ifile("number_b_bit1.in")
-sbf bBit2 = ifile("number_b_bit2.in")
-sbf bBit3 = ifile("number_b_bit3.in")  # MSB
+# A full adder adds two bits PLUS an incoming carry c.
+fullAdderSum(a,b,c)   := a ^ b ^ c                  # sum   = triple XOR
+fullAdderCarry(a,b,c) := (a & b) | (a & c) | (b & c) # carry = majority (>=2 of 3)
 
-# === BINARY OPERATION OUTPUTS ===
-# Addition: A + B (5 bits to handle overflow)
-sbf addBit0 = ofile("sum_bit0.out")  # LSB
-sbf addBit1 = ofile("sum_bit1.out")
-sbf addBit2 = ofile("sum_bit2.out")
-sbf addBit3 = ofile("sum_bit3.out")
-sbf addBit4 = ofile("sum_bit4.out")  # Overflow bit
+# You can inspect the logic SYMBOLICALLY before plugging in numbers:
+n halfAdderSum(a,b)       # expected: (a^b)
+n fullAdderCarry(a,b,c)   # expected: the majority function of a,b,c
 
-# Comparison operations
-sbf equals = ofile("a_equals_b.out")        # A == B
-sbf greater = ofile("a_greater_than_b.out") # A > B
-sbf less = ofile("a_less_than_b.out")       # A < B
+# ============================================================================
+# PART 2 - TWO CONCRETE 4-BIT NUMBERS
+# ============================================================================
+# Bit convention: Bit0 = LSB (least significant), Bit3 = MSB (most significant).
+# A = 6 = 0110  ->  aBit0=0, aBit1=1, aBit2=1, aBit3=0
+aBit0(x) := 0
+aBit1(x) := 1
+aBit2(x) := 1
+aBit3(x) := 0
+# B = 3 = 0011  ->  bBit0=1, bBit1=1, bBit2=0, bBit3=0
+bBit0(x) := 1
+bBit1(x) := 1
+bBit2(x) := 0
+bBit3(x) := 0
+# (To experiment, just change the 0/1 values above - everything below recomputes.)
 
-# Increment: A + 1 (5 bits to handle overflow)
-sbf incBit0 = ofile("a_plus_1_bit0.out")  # LSB
-sbf incBit1 = ofile("a_plus_1_bit1.out")
-sbf incBit2 = ofile("a_plus_1_bit2.out")
-sbf incBit3 = ofile("a_plus_1_bit3.out")
-sbf incBit4 = ofile("a_plus_1_bit4.out")  # Overflow bit
+# ============================================================================
+# PART 3 - ADDITION:  A + B   (expect 6 + 3 = 9 = 01001)
+# ============================================================================
+# Ripple-carry: bit 0 with a half adder, then each bit with a full adder whose
+# carry-in is the carry-out of the bits below. The carry chain is inlined so that
+# 'n' reduces each bit to a plain 0/1.
+addBit0(x) := halfAdderSum(aBit0(x), bBit0(x))
+addBit1(x) := fullAdderSum(aBit1(x), bBit1(x), halfAdderCarry(aBit0(x), bBit0(x)))
+addBit2(x) := fullAdderSum(aBit2(x), bBit2(x), fullAdderCarry(aBit1(x), bBit1(x), halfAdderCarry(aBit0(x), bBit0(x))))
+addBit3(x) := fullAdderSum(aBit3(x), bBit3(x), fullAdderCarry(aBit2(x), bBit2(x), fullAdderCarry(aBit1(x), bBit1(x), halfAdderCarry(aBit0(x), bBit0(x)))))
+addBit4(x) := fullAdderCarry(aBit3(x), bBit3(x), fullAdderCarry(aBit2(x), bBit2(x), fullAdderCarry(aBit1(x), bBit1(x), halfAdderCarry(aBit0(x), bBit0(x)))))   # overflow bit
 
-# Decrement: A - 1 (4 bits)
-sbf decBit0 = ofile("a_minus_1_bit0.out")  # LSB
-sbf decBit1 = ofile("a_minus_1_bit1.out")
-sbf decBit2 = ofile("a_minus_1_bit2.out")
-sbf decBit3 = ofile("a_minus_1_bit3.out")  # MSB
+# Result bit by bit (LSB -> MSB). Assembled: addBit4..addBit0 = 01001 = 9.
+n addBit0(x)   # expect 1
+n addBit1(x)   # expect 0
+n addBit2(x)   # expect 0
+n addBit3(x)   # expect 1
+n addBit4(x)   # expect 0
 
-# === BINARY ADDER IMPLEMENTATION ===
+# ============================================================================
+# PART 4 - COMPARISON:  A == B,  A > B,  A < B   (expect: 6>3, so greater=1)
+# ============================================================================
+# Two bits are equal if both are 1 OR both are 0 (that is XNOR).
+eqBit0(x) := (aBit0(x) & bBit0(x)) | (aBit0(x)' & bBit0(x)')
+eqBit1(x) := (aBit1(x) & bBit1(x)) | (aBit1(x)' & bBit1(x)')
+eqBit2(x) := (aBit2(x) & bBit2(x)) | (aBit2(x)' & bBit2(x)')
+eqBit3(x) := (aBit3(x) & bBit3(x)) | (aBit3(x)' & bBit3(x)')
+# A == B exactly when ALL four bits are equal.
+equals(x) := eqBit0(x) & eqBit1(x) & eqBit2(x) & eqBit3(x)
 
-# Half adder - used for adding two bits without carry-in
-r halfAdderSum[a, b] := a + b  # XOR operation
-r halfAdderCarry[a, b] := a & b  # AND operation
+# A > B: compare from the MSB down. A is greater as soon as, at the first position
+# (from the top) where they differ, A has a 1 and B has a 0.
+gtBit3(x) := aBit3(x) & bBit3(x)'
+gtBit2(x) := eqBit3(x) & aBit2(x) & bBit2(x)'
+gtBit1(x) := eqBit3(x) & eqBit2(x) & aBit1(x) & bBit1(x)'
+gtBit0(x) := eqBit3(x) & eqBit2(x) & eqBit1(x) & aBit0(x) & bBit0(x)'
+greater(x) := gtBit3(x) | gtBit2(x) | gtBit1(x) | gtBit0(x)
 
-# Full adder - used for adding two bits with carry-in
-r fullAdderSum[a, b, cIn] := a + b + cIn  # Triple XOR
-r fullAdderCarry[a, b, cIn] := (a & b) | (a & cIn) | (b & cIn)
+# A < B is everything else: neither equal nor greater.
+less(x) := equals(x)' & greater(x)'
 
-# === ADDITION OPERATION ===
-# Add A and B using full adders
+n equals(x)    # expect 0  (6 != 3)
+n greater(x)   # expect 1  (6 > 3)
+n less(x)      # expect 0
 
-# Bit 0 (LSB)
-r addBit0[t] = halfAdderSum[aBit0[t], bBit0[t]]
-r carry0[t] = halfAdderCarry[aBit0[t], bBit0[t]]
+# ============================================================================
+# PART 5 - INCREMENT:  A + 1   (expect 6 + 1 = 7 = 00111)
+# ============================================================================
+# Trick: add the constant 1 = 0001 with the same adder logic.
+constBit0(x) := 1
+constBit1(x) := 0
+constBit2(x) := 0
+constBit3(x) := 0
+incBit0(x) := halfAdderSum(aBit0(x), constBit0(x))
+incBit1(x) := fullAdderSum(aBit1(x), constBit1(x), halfAdderCarry(aBit0(x), constBit0(x)))
+incBit2(x) := fullAdderSum(aBit2(x), constBit2(x), fullAdderCarry(aBit1(x), constBit1(x), halfAdderCarry(aBit0(x), constBit0(x))))
+incBit3(x) := fullAdderSum(aBit3(x), constBit3(x), fullAdderCarry(aBit2(x), constBit2(x), fullAdderCarry(aBit1(x), constBit1(x), halfAdderCarry(aBit0(x), constBit0(x)))))
+incBit4(x) := fullAdderCarry(aBit3(x), constBit3(x), fullAdderCarry(aBit2(x), constBit2(x), fullAdderCarry(aBit1(x), constBit1(x), halfAdderCarry(aBit0(x), constBit0(x)))))
 
-# Bit 1
-r addBit1[t] = fullAdderSum[aBit1[t], bBit1[t], carry0[t]]
-r carry1[t] = fullAdderCarry[aBit1[t], bBit1[t], carry0[t]]
+n incBit0(x)   # expect 1
+n incBit1(x)   # expect 1
+n incBit2(x)   # expect 1
+n incBit3(x)   # expect 0
+n incBit4(x)   # expect 0
 
-# Bit 2
-r addBit2[t] = fullAdderSum[aBit2[t], bBit2[t], carry1[t]]
-r carry2[t] = fullAdderCarry[aBit2[t], bBit2[t], carry1[t]]
+# ============================================================================
+# PART 6 - DECREMENT:  A - 1   (expect 6 - 1 = 5 = 0101)
+# ============================================================================
+# A-1 is subtraction with a BORROW: bit0 is always flipped; the borrow propagates
+# upward while the lower bits are 0. So bit_i flips exactly when ALL bits below i
+# are 0.
+borrow1(x) := aBit0(x)'                                # borrow reaches bit1 if bit0=0
+borrow2(x) := aBit0(x)' & aBit1(x)'                    # ... bit2 if bit0,bit1 are both 0
+borrow3(x) := aBit0(x)' & aBit1(x)' & aBit2(x)'        # ... bit3 if bit0..2 are all 0
+decBit0(x) := aBit0(x)'                                # bit0 always flips
+decBit1(x) := aBit1(x) ^ borrow1(x)
+decBit2(x) := aBit2(x) ^ borrow2(x)
+decBit3(x) := aBit3(x) ^ borrow3(x)
 
-# Bit 3
-r addBit3[t] = fullAdderSum[aBit3[t], bBit3[t], carry2[t]]
-r addBit4[t] = fullAdderCarry[aBit3[t], bBit3[t], carry2[t]]  # Overflow bit
+n decBit0(x)   # expect 1
+n decBit1(x)   # expect 0
+n decBit2(x)   # expect 1
+n decBit3(x)   # expect 0
 
-# === COMPARISON OPERATIONS ===
-
-# Equal bits at each position
-r eqBit0[t] = (aBit0[t] & bBit0[t]) | (aBit0[t]' & bBit0[t]')
-r eqBit1[t] = (aBit1[t] & bBit1[t]) | (aBit1[t]' & bBit1[t]')
-r eqBit2[t] = (aBit2[t] & bBit2[t]) | (aBit2[t]' & bBit2[t]')
-r eqBit3[t] = (aBit3[t] & bBit3[t]) | (aBit3[t]' & bBit3[t]')
-
-# A equals B if all bits are equal
-r equals[t] = eqBit0[t] & eqBit1[t] & eqBit2[t] & eqBit3[t]
-
-# A greater than B logic
-# Check each bit position, starting from MSB
-r gtBit3[t] = aBit3[t] & bBit3[t]'
-r gtBit2[t] = eqBit3[t] & aBit2[t] & bBit2[t]'
-r gtBit1[t] = eqBit3[t] & eqBit2[t] & aBit1[t] & bBit1[t]'
-r gtBit0[t] = eqBit3[t] & eqBit2[t] & eqBit1[t] & aBit0[t] & bBit0[t]'
-
-# A is greater if any of these conditions is true
-r greater[t] = gtBit3[t] | gtBit2[t] | gtBit1[t] | gtBit0[t]
-
-# A less than B is true if A is not equal to B and A is not greater than B
-r less[t] = equals[t]' & greater[t]'
-
-# === INCREMENT OPERATION (A + 1) ===
-# This adds 1 to number A
-
-# Constant 1 is represented as: 0001
-r constBit0[t] = 1  # LSB
-r constBit1[t] = 0
-r constBit2[t] = 0
-r constBit3[t] = 0  # MSB
-
-# Use the adder logic to add 1 to A
-r incBit0[t] = halfAdderSum[aBit0[t], constBit0[t]]
-r carryInc0[t] = halfAdderCarry[aBit0[t], constBit0[t]]
-
-r incBit1[t] = fullAdderSum[aBit1[t], constBit1[t], carryInc0[t]]
-r carryInc1[t] = fullAdderCarry[aBit1[t], constBit1[t], carryInc0[t]]
-
-r incBit2[t] = fullAdderSum[aBit2[t], constBit2[t], carryInc1[t]]
-r carryInc2[t] = fullAdderCarry[aBit2[t], constBit2[t], carryInc1[t]]
-
-r incBit3[t] = fullAdderSum[aBit3[t], constBit3[t], carryInc2[t]]
-r incBit4[t] = fullAdderCarry[aBit3[t], constBit3[t], carryInc2[t]]
-
-# === DECREMENT OPERATION (A - 1) ===
-# This subtracts 1 from number A
-# In binary, A-1 can be computed by flipping all bits after the rightmost 1
-
-# Find the rightmost 1 in A
-r rightmost1Bit0[t] = aBit0[t]
-r rightmost1Bit1[t] = aBit1[t] & aBit0[t]'
-r rightmost1Bit2[t] = aBit2[t] & aBit1[t]' & aBit0[t]'
-r rightmost1Bit3[t] = aBit3[t] & aBit2[t]' & aBit1[t]' & aBit0[t]'
-
-# Compute A - 1
-r decBit0[t] = aBit0[t]'
-r decBit1[t] = aBit1[t] + rightmost1Bit0[t]
-r decBit2[t] = aBit2[t] + (rightmost1Bit0[t] | rightmost1Bit1[t])
-r decBit3[t] = aBit3[t] + (rightmost1Bit0[t] | rightmost1Bit1[t] | rightmost1Bit2[t])
+# ============================================================================
+# WHAT WE LEARNED
+# ============================================================================
+# - A number is just a tuple of bit FUNCTIONS (aBit0..aBit3), not a bitvector.
+# - Every arithmetic operation (addition, inc, dec) is a composition of
+#   half / full adders.
+# - Every comparison (==, >, <) is pure Boolean logic over the bits.
+# - Tau normalizes each of these functions to 0 or 1 - provably correct,
+#   entirely without arithmetic bitvector types.
+# ============================================================================
+# END OF BINARY ENCODING TUTORIAL
+# ============================================================================

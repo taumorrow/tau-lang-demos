@@ -1,9 +1,23 @@
-# Title: Delayed Signal
-# Description: A rule that outputs the input from the previous time step, demonstrating temporal operations.
+# ============================================================================
+# DELAYED SIGNAL - A One-Step Time Delay
+# ============================================================================
+# Description: The simplest temporal operation. The output at time t is the input
+# from the PREVIOUS time step (t-1) - a one-step delay line. It demonstrates how a
+# rule can look back in time with the [t-1] index.
 
-# Define input and output files
-sbf i1 = ifile("signal.in")
-sbf o1 = ofile("delayed.out")
+# === STREAMS ===
+i1 : sbf := in file("io/signal.in")     # input signal, one bit per line
+o1 : sbf := out file("io/delayed.out")  # the same signal, delayed by one step
 
-# Rule: output equals input from previous time step
+# === THE RULE ===
+# output at time t = input at time t-1
 r o1[t] = i1[t-1]
+
+# === HOW IT BEHAVES ===
+# At step 0 there is no previous input yet (i1[-1]), so the output starts at 0.
+# From step 1 on, each output simply repeats the input of the step before.
+#
+# Example: io/signal.in = 1,0,1,0
+#   step  : 0 1 2 3
+#   input : 1 0 1 0
+#   output: 0 1 0 1     (input shifted right by one; step 0 = 0)

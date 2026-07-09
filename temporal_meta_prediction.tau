@@ -43,22 +43,22 @@ run always (
   (i0queue[t] : bv[8] & { #xFF } : bv[8] = i0queue[t]) &&
   (i1pool[t] : bv[8] & { #xFF } : bv[8] = i1pool[t]) &&
   
-  # Step 2: Track history - Store previous queue value
-  # THIS IS THE MAGIC: o0qold[t] = i0queue[t-1]
-  # Tau remembers the queue from the previous step!
-  (o0qold[t] : bv[8] = i0queue[t-1]) &&
+  # Step 2: Track history - the caller feeds the previous queue value in as
+  # i2prev[t], so the trend is computed from two current inputs.
+  (i2prev[t] : bv[8] & { #xFF } : bv[8] = i2prev[t]) &&
+  (o0qold[t] : bv[8] = i2prev[t]) &&
   
   # Step 3: Intelligent spawning decision
   # PRE-EMPTIVE MODE: Detect growing trend
-  ((i0queue[t] > o0qold[t] &&                    # Queue is growing
-    i0queue[t] - o0qold[t] >= { #x03 } : bv[8] && # Trend >= 3
-    i0queue[t] > { #x02 } : bv[8] &&              # Queue > 2
-    i1pool[t] < { #x08 } : bv[8])                 # Pool < 8
+  ((i0queue[t] : bv[8] > o0qold[t] : bv[8] &&                    # Queue is growing
+    i0queue[t] : bv[8] - o0qold[t] : bv[8] >= { #x03 } : bv[8] && # Trend >= 3
+    i0queue[t] : bv[8] > { #x02 } : bv[8] &&              # Queue > 2
+    i1pool[t] : bv[8] < { #x08 } : bv[8])                 # Pool < 8
    ? (o1spawn[t] : bv[8] = { #x01 } : bv[8])      # → SPAWN!
    
    # REACTIVE MODE: Queue already high
-   : (i0queue[t] > { #x05 } : bv[8] &&            # Queue > 5
-      i1pool[t] < { #x08 } : bv[8])               # Pool < 8
+   : (i0queue[t] : bv[8] > { #x05 } : bv[8] &&            # Queue > 5
+      i1pool[t] : bv[8] < { #x08 } : bv[8])               # Pool < 8
    ? (o1spawn[t] = { #x01 } : bv[8])              # → SPAWN!
    
    # STABLE: No action needed

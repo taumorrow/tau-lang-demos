@@ -9,7 +9,8 @@ barber(X, Y) := X = Y'
 # This means Y is shaved by the barber X if and only if Y doesn't shave themselves.
 # Now we describe the whole paradox:
 
-paradox(b) := ex b all X barber(b, X)
+# (barber(b, X) is inlined here as its definition b = X')
+paradox(b) := ex b all X (b = X')
 
 # This statement says: there exists a barber b such that for all X, 
 # b shaves X if and only if X doesn't shave themselves.

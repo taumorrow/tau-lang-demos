@@ -17,11 +17,11 @@ b1(x) := 0  # MSB
 
 # === HELPER FUNCTIONS ===
 # Half adder - used for adding two bits without carry-in
-halfAdderSum(a, b) := a + b        # XOR operation for sum bit
+halfAdderSum(a, b) := a ^ b        # XOR operation for sum bit
 halfAdderCarry(a, b) := a & b      # AND operation for carry bit
 
 # Full adder - used for adding two bits with carry-in
-fullAdderSum(a, b, c) := a + b + c  # Triple XOR for sum bit
+fullAdderSum(a, b, c) := a ^ b ^ c  # Triple XOR for sum bit
 fullAdderCarry(a, b, c) := (a & b) | (a & c) | (b & c)  # Carry logic
 
 # === STEP 1: GENERATE PARTIAL PRODUCTS ===
@@ -107,12 +107,17 @@ carry6(x) := halfAdderCarry(ppB1A1(x), carry5(x))
 bit7(x) := carry6(x)
 
 # === DISPLAY RESULTS ===
-# Output the 8-bit result (3 * 5 = 15, binary 00001111)
-n bit0(x)  # LSB
-n bit1(x)
-n bit2(x)
-n bit3(x)
-n bit4(x)
-n bit5(x)
-n bit6(x)
-n bit7(x)  # MSB
+# Output the 8-bit result. Example here: A = 0011 = 3, B = 0101 = 5, so
+# A * B = 15 = 00001111.
+# Note: the multiplier reuses many shared partial sums and carries, so unlike the
+# adder we keep them as named functions (inlining them would blow up into one huge
+# expression). 'n' therefore prints the higher bits as a normal form built from
+# those functions; the actual bit value each one evaluates to is shown on the right.
+n bit0(x)  # LSB, value 1
+n bit1(x)  # value 1
+n bit2(x)  # value 1  (normal form over sum2a, carry1)
+n bit3(x)  # value 1  (normal form over sum3b)
+n bit4(x)  # value 0  (normal form over sum4a, carry3*)
+n bit5(x)  # value 0  (normal form over carry4*)
+n bit6(x)  # value 0  (normal form over carry5)
+n bit7(x)  # MSB, value 0

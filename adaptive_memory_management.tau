@@ -43,8 +43,9 @@ set charvar off
 # THE FORMULA - Adaptive Memory Management
 # ============================================================================
 
-# Inputs (1):
+# Inputs (2):
 #   i0total[t] - Total system memory in MB (bv[16])
+#   i3prev[t]  - Previous memory, fed in by the caller (0 at start)
 #
 # Outputs (4):
 #   o0old[t]      - Previous memory from t-1
@@ -69,28 +70,28 @@ run always (
   (i1rooms[t] : bv[8] & { #xFF } : bv[8] = i1rooms[t]) &&
   (i2rate[t] : bv[8] & { #xFF } : bv[8] = i2rate[t]) &&
   
-  # Step 2: Track history - Store previous memory value
-  # THIS IS THE MAGIC: o0old[t] = i0total[t-1]
-  # Tau remembers the memory from the previous step!
-  (o0old[t] : bv[16] = i0total[t-1]) &&
+  # Step 2: Track history - the caller feeds the previous memory value in as
+  # i3prev[t], so the trend is computed from two current inputs.
+  (i3prev[t] : bv[16] & { #xFFFF } : bv[16] = i3prev[t]) &&
+  (o0old[t] : bv[16] = i3prev[t]) &&
   
   # Step 3: Calculate trend - How much did memory change?
   (o1trend[t] : bv[16] = i0total[t] - o0old[t]) &&
   
   # Step 4: Three-tier decision system
   # CRISIS MODE: Memory > 11 GB (0x2C00 = 11264 MB)
-  ((i0total[t] > { #x2C00 } : bv[16]) 
-   ? (o2limit[t] : bv[8] = { #x00 } : bv[8] &&     # No new rooms!
-      o3throttle[t] : bv[8] = { #x01 } : bv[8])    # Reject requests!
+  ((i0total[t] : bv[16] > { #x2C00 } : bv[16]) 
+   ? ((o2limit[t] : bv[8] = { #x00 } : bv[8]) &&     # No new rooms!
+      (o3throttle[t] : bv[8] = { #x01 } : bv[8]))    # Reject requests!
    
    # WARNING MODE: Memory > 9 GB (0x2400 = 9216 MB)
-   : (i0total[t] > { #x2400 } : bv[16]) 
-   ? (o2limit[t] = { #x32 } : bv[8] &&             # Limit to 50 rooms
-      o3throttle[t] = { #x00 } : bv[8])            # Still accept
+   : (i0total[t] : bv[16] > { #x2400 } : bv[16]) 
+   ? ((o2limit[t] : bv[8] = { #x32 } : bv[8]) &&             # Limit to 50 rooms
+      (o3throttle[t] : bv[8] = { #x00 } : bv[8]))            # Still accept
    
    # NORMAL MODE: Memory < 9 GB
-   : (o2limit[t] = { #x64 } : bv[8] &&             # Full capacity (100)
-      o3throttle[t] = { #x00 } : bv[8]))           # Accept all
+   : ((o2limit[t] : bv[8] = { #x64 } : bv[8]) &&             # Full capacity (100)
+      (o3throttle[t] : bv[8] = { #x00 } : bv[8])))           # Accept all
 )
 
 # ============================================================================

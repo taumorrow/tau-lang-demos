@@ -1,4 +1,4 @@
-# ============================================================================
+n# ============================================================================
 # TEMPORAL STATE MACHINE - Casino Dice with State Carryover
 # Pure Tau Language with Bitvectors
 # Demonstrates temporal logic with evolving state
@@ -10,17 +10,22 @@ set charvar off
 # STREAM DEFINITIONS
 # ============================================================================
 
+# Streams follow the i*/o* convention and are used inline in the run block, each
+# term typed.
+#
 # Input streams: 3 players contribute random values each round
-i1 : bv[8] = in console   # Player 1 contribution (0-255)
-i2 : bv[8] = in console   # Player 2 contribution (0-255)
-i3 : bv[8] = in console   # Player 3 contribution (0-255)
-
+#   i1[t]     - Player 1 contribution (0-255)
+#   i2[t]     - Player 2 contribution (0-255)
+#   i3[t]     - Player 3 contribution (0-255)
+#   i4prev[t] - previous LFSR 'next' state, fed back in as an input (0 at the start);
+#               this is how the machine carries state across steps (state-as-I/O)
+#
 # Output streams: Show intermediate calculations and final result
-seed : bv[8] = out console   # Combined seed from XOR of all players
-lfsr : bv[8] = out console   # LFSR state (carries forward between rounds)
-next : bv[8] = out console   # Next LFSR state after transformation
-dice : bv[8] = out console   # Final dice result (1-6)
-o1 : bv[8] = out console     # Main output (copy of dice)
+#   o0seed[t]  - Combined seed from XOR of all players
+#   o1lfsr[t]  - LFSR state (carries forward between rounds)
+#   o2next[t]  - Next LFSR state after transformation
+#   o3dice[t]  - Final dice result (1-6)
+#   o4out[t]   - Main output (copy of dice)
 
 # ============================================================================
 # TEMPORAL STATE MACHINE SPECIFICATION
@@ -29,23 +34,23 @@ o1 : bv[8] = out console     # Main output (copy of dice)
 run always (
   # Step 1: Multi-party seed generation via XOR
   # XOR ensures no single player can control the outcome
-  (seed[t] = i1[t] ^ i2[t] ^ i3[t]) &&
-  
+  (o0seed[t]:bv[8] = ((i1[t]:bv[8] ^ i2[t]:bv[8]) ^ i3[t]:bv[8])) &&
+
   # Step 2: LFSR state evolution with temporal carryover
   # Current state = previous next state + current seed contribution
-  # This creates history-dependent randomness
-  (lfsr[t] = next[t-1] + seed[t] % { #x0F }:bv[8]) &&
-  
+  # This creates history-dependent randomness (state carried in via i4prev)
+  (o1lfsr[t]:bv[8] = (i4prev[t]:bv[8] + (o0seed[t]:bv[8] % { #x0F }:bv[8]))) &&
+
   # Step 3: LFSR state transition
   # Simple transformation: (state + 1) mod 15
-  (next[t] = (lfsr[t] + { #x01 }:bv[8]) % { #x0F }:bv[8]) &&
-  
+  (o2next[t]:bv[8] = ((o1lfsr[t]:bv[8] + { #x01 }:bv[8]) % { #x0F }:bv[8])) &&
+
   # Step 4: Map to dice value (1-6)
   # Modulo 6 gives 0-5, add 1 to get 1-6 range
-  (dice[t] = (next[t] % { #x06 }:bv[8]) + { #x01 }:bv[8]) &&
-  
+  (o3dice[t]:bv[8] = ((o2next[t]:bv[8] % { #x06 }:bv[8]) + { #x01 }:bv[8])) &&
+
   # Step 5: Output final result
-  (o1[t] = dice[t])
+  (o4out[t]:bv[8] = o3dice[t]:bv[8])
 )
 
 # ============================================================================

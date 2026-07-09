@@ -1,24 +1,24 @@
 # Title: Logic Gates
-# Description: Implementation of basic logic gates (AND, OR, NOT, XOR) with two inputs.
+# Description: The four basic logic gates AND, OR, NOT, XOR over two inputs.
+# All gates are computed in a single specification so the inputs are read once
+# per step and feed every output.
 
-# Define input files
-sbf i1 = ifile("input1.in")
-sbf i2 = ifile("input2.in")
+# === INPUTS ===
+i1 : sbf := in file("io/const1.in")   # input A
+i2 : sbf := in file("io/const0.in")   # input B
 
-# Define output files
-sbf o1 = ofile("and.out")
-sbf o2 = ofile("or.out")
-sbf o3 = ofile("not.out")
-sbf o4 = ofile("xor.out")
+# === OUTPUTS ===
+o1 : sbf := out file("io/and.out")    # AND
+o2 : sbf := out file("io/or.out")     # OR
+o3 : sbf := out file("io/not.out")    # NOT A
+o4 : sbf := out file("io/xor.out")    # XOR
 
-# AND gate
-r o1[t] = i1[t] & i2[t]
+# === ALL FOUR GATES, ONE SPEC ===
+run always (
+  (o1[t] = i1[t] & i2[t]) &&                          # AND
+  (o2[t] = i1[t] | i2[t]) &&                          # OR
+  (o3[t] = i1[t]') &&                                 # NOT (of the first input)
+  (o4[t] = (i1[t] & i2[t]') | (i1[t]' & i2[t]))       # XOR (built from AND/OR/NOT; = i1 ^ i2)
+)
 
-# OR gate
-r o2[t] = i1[t] | i2[t]
-
-# NOT gate (of first input)
-r o3[t] = i1[t]'
-
-# XOR gate
-r o4[t] = (i1[t] & i2[t]') | (i1[t]' & i2[t])
+# Example: A=1, B=0  ->  and=0, or=1, not=0, xor=1

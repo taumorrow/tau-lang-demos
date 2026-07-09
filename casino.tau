@@ -9,17 +9,14 @@ set charvar off
 # STREAM DEFINITIONS
 # ============================================================================
 
-# Input streams: 3 players contribute random values each round
-i1 : bv[8] = in console   # Player 1 contribution (0-255)
-i2 : bv[8] = in console   # Player 2 contribution (0-255)
-i3 : bv[8] = in console   # Player 3 contribution (0-255)
-
-# Output streams: Show intermediate calculations and final result
-seed : bv[8] = out console   # Combined seed from XOR of all players
-lfsr : bv[8] = out console   # LFSR state (0-14)
-next : bv[8] = out console   # Next LFSR state after transformation
-dice : bv[8] = out console   # Final dice result (1-6)
-o1 : bv[8] = out console     # Main output (copy of dice)
+# Streams follow the i*/o* convention and are used inline in the run block, each
+# term typed. Meaning of the streams:
+#   Inputs:  i1[t], i2[t], i3[t]  - the 3 player contributions (0-255)
+#   Outputs: o0seed[t]  - combined seed via XOR of all players
+#            o1lfsr[t]  - LFSR state (0-14)
+#            o2next[t]  - next LFSR state
+#            o3dice[t]  - final dice value (1-6)
+#            o4out[t]   - main output (copy of dice)
 
 # ============================================================================
 # GAME SPECIFICATION
@@ -29,26 +26,26 @@ run always (
   # Step 1: Multi-party seed generation via XOR
   # XOR ensures no single player can control the outcome
   # Formula: seed = player1 XOR player2 XOR player3
-  (seed[t] = i1[t] ^ i2[t] ^ i3[t]) &&
+  (o0seed[t]:bv[8] = ((i1[t]:bv[8] ^ i2[t]:bv[8]) ^ i3[t]:bv[8])) &&
   
   # Step 2: Map seed to LFSR state (0-14)
   # Modulo 15 to get valid LFSR state (avoiding 15 = deadlock)
   # Formula: lfsr = seed % 15
-  (lfsr[t] = seed[t] % { #x0F }:bv[8]) &&
+  (o1lfsr[t]:bv[8] = (o0seed[t]:bv[8] % { #x0F }:bv[8])) &&
   
   # Step 3: LFSR state transition
   # Simple transformation: (state + 1) mod 15
   # In production: use proper LFSR with shift + XOR feedback
   # Formula: next = (lfsr + 1) % 15
-  (next[t] = (lfsr[t] + { #x01 }:bv[8]) % { #x0F }:bv[8]) &&
+  (o2next[t]:bv[8] = ((o1lfsr[t]:bv[8] + { #x01 }:bv[8]) % { #x0F }:bv[8])) &&
   
   # Step 4: Map to dice value (1-6)
   # Modulo 6 gives 0-5, add 1 to get 1-6 range
   # Formula: dice = (next % 6) + 1
-  (dice[t] = (next[t] % { #x06 }:bv[8]) + { #x01 }:bv[8]) &&
+  (o3dice[t]:bv[8] = ((o2next[t]:bv[8] % { #x06 }:bv[8]) + { #x01 }:bv[8])) &&
   
   # Step 5: Output final result
-  (o1[t] = dice[t])
+  (o4out[t]:bv[8] = o3dice[t]:bv[8])
 )
 
 # ============================================================================

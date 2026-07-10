@@ -5,6 +5,8 @@
 # contract in its header:
 #   # EXPECTED-RESULTS: T F ...     (values of the %N result lines, in order)
 #   # EXPECTED-CODES:   0,9,8,...   (o0res verdict codes, run-based parts)
+#   # EXPECTED-TF:      F F T ...   (T/F values of all oN[k] output lines,
+#                                    in order - u-stream sessions, part 10)
 # This script runs every file against those contracts and reports PASS/FAIL.
 #
 #   TAU_BIN=/path/to/tau ./nomic_run_all.sh      (default: `tau` on PATH)
@@ -16,11 +18,12 @@ cd "$(dirname "$0")"
 strip_ansi() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g'; }
 fail=0; total=0
 
-for f in nomic_0*.tau; do
+for f in nomic_[0-9]*.tau; do
   total=$((total+1))
   exp_res=$(grep -m1 '^# EXPECTED-RESULTS:' "$f" | sed 's/^# EXPECTED-RESULTS: *//')
   exp_codes=$(grep -m1 '^# EXPECTED-CODES:' "$f" | sed 's/^# EXPECTED-CODES: *//')
-  if [ -z "$exp_res" ] && [ -z "$exp_codes" ]; then
+  exp_tf=$(grep -m1 '^# EXPECTED-TF:' "$f" | sed 's/^# EXPECTED-TF: *//')
+  if [ -z "$exp_res" ] && [ -z "$exp_codes" ] && [ -z "$exp_tf" ]; then
     echo "SKIP  $f (no contract)"; continue
   fi
   if LC_ALL=C grep -qP '[^\x00-\x7F]' "$f"; then
@@ -36,6 +39,10 @@ for f in nomic_0*.tau; do
   if [ -n "$exp_codes" ]; then
     act_codes=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE 'o0res\[[0-9]+\] *:= *[0-9]+' | grep -oE '[0-9]+$' | paste -sd, -)
     [ "$act_codes" = "$exp_codes" ] || { ok=0; detail="$detail codes: got [$act_codes] want [$exp_codes]"; }
+  fi
+  if [ -n "$exp_tf" ]; then
+    act_tf=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE 'o[0-9]+\[[0-9]+\] := [TF]' | grep -oE '[TF]$' | paste -sd' ' -)
+    [ "$act_tf" = "$exp_tf" ] || { ok=0; detail="$detail tf: got [$act_tf] want [$exp_tf]"; }
   fi
   if [ "$ok" = 1 ]; then echo "PASS  $f"; else echo "FAIL  $f ($detail)"; fail=$((fail+1)); fi
 done

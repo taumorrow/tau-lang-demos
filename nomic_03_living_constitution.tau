@@ -117,6 +117,17 @@ set charvar off
 # deployment this run never ends - it is the LIVING constitution, driven
 # step by step by a host process. The verdict codes you saw ARE the
 # machine's complete public interface; any frontend merely labels them.
+#
+# ONE HONEST LIMITATION, ON PURPOSE: this machine only ever ADDS law.
+# There is no operation that un-adopts a right - a mistake, once
+# adopted, is exactly as permanent as the core, and over a fixed set of
+# subjects the space of adoptable new rights only narrows. (It never
+# closes: the algebra always admits further consistent refinements -
+# but a constitution that cannot shed anything ossifies politically
+# long before it exhausts mathematically.) This is the deliberately
+# simplest living machine, not the finished design: part 5 adds the
+# missing operations - REPLACE, which lets law FALL, and the seal that
+# decides what no replacement can ever touch.
 
 # ============================================================================
 # 3. THE MACHINE ITSELF - then the session

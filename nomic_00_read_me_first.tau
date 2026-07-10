@@ -1,6 +1,6 @@
 # ============================================================================
 # THE TAU-NOMIC TUTORIAL SERIES - READ ME FIRST
-# A living, self-amending constitution, explained in eight runnable files (plus one appendix)
+# A living, self-amending constitution, explained in eight runnable files (plus two appendices)
 # ============================================================================
 #
 # WHAT THIS IS
@@ -37,6 +37,11 @@
 #                           exceptions, quantitative (bv thresholds),
 #                           temporal ([t-1] inside a right), and one
 #                           guarantee over ALL future amendments.
+#   10 the_trilemma         Appendix II: who amends the amendment rule?
+#                           Tau's u stream (the spec rewrites ITSELF),
+#                           a two-step coup, self-binding via `this` -
+#                           and the proved trilemma that forces the
+#                           fixed-spec + law-as-state architecture.
 #
 # REQUIREMENTS
 #   The Tau Language framework: https://github.com/IDNI/tau-lang
@@ -56,6 +61,9 @@
 #   first - scan past it. On a POSIX shell:
 #     tau -q < file.tau 2>&1 | grep -E '^%[0-9]+:'           (parts 1,2,7,8)
 #     tau -q < file.tau 2>&1 | grep -E '^(o0res|o0law|o0seal|o0s)\[' (3-6)
+#   Part 10's session prints its own streams: u[k] := F means the step-k
+#   proposal was rejected (or none was made); u[k] := a specification
+#   means it was adopted.
 #
 # ONE QUERY TO CHECK YOUR SETUP (expected result: T)
 

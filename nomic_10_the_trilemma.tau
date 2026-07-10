@@ -1,0 +1,267 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 10 (APPENDIX II) - THE u STREAM AND THE TRILEMMA
+# Who amends the amendment rule? Tau's native answer - and the theorem
+# that forces tau-nomic's architecture
+# ============================================================================
+#
+# Every part so far kept one thing fixed: the RULE OF CHANGE. Parts 3-6
+# ran a fixed specification; only the CONTENT of the law (the state o0s,
+# o0law, o0seal) evolved. Part 8 named the honest question this leaves
+# open, and every reader of a self-amending system asks it eventually:
+# WHO AMENDS THE AMENDMENT RULE?
+#
+# Tau has a native mechanism for exactly this: the special output stream
+# `u`. A specification written into `u` is treated as a proposed update
+# of the RUNNING SPECIFICATION ITSELF - the rules change, not just the
+# state. Tau calls this POINTWISE REVISION: if the proposal is
+# satisfiable on its own, it is incorporated; where it contradicts the
+# old law, the new wins. There is also a special input stream `this`,
+# which carries the currently running specification at every step - the
+# constitution can READ ITSELF.
+#
+# Why does such a mechanism exist at all? Because it does something the
+# state-level law of parts 3-6 cannot. Every right in this series so
+# far lived as a VALUE: the machine judged proposals and actions
+# against it, but the right itself never drove a stream. A
+# specification adopted through `u` BECOMES the running machine - it
+# binds outputs, reacts to inputs, enforces itself. Executable,
+# unforeseen law: rules nobody had thought of at deployment. That is
+# the u stream's genuine power, and this appendix measures what it
+# costs.
+#
+# This appendix does two things, in the order good physics is done:
+#   1. THE PREDICTIONS - ten one-off queries (seven theorems, three
+#      controls) that pin down what ANY amendment rule on one level
+#      can and cannot do.
+#   2. THE EXPERIMENT - one continuous 13-step constitutional history
+#      that runs through every regime and confirms each prediction live:
+#      open channel, guarded channel, a two-step coup, the fall and
+#      restoration of a core, self-binding via `this`, and a fortress
+#      that pays for its walls with eternity.
+#
+# The destination is a TRILEMMA: no system on ONE level ever gets all
+# three of (i) content revisable by replacement, (ii) a closed rule of
+# change, (iii) everything on that one level. tau-nomic's two-level
+# architecture (fixed spec + law as state) is not a taste - it is the
+# only remaining corner.
+#
+# HOW TO READ THE SESSION OUTPUT
+#   u[k] := F            the proposal of step k was REJECTED (or no
+#                        proposal was made - the input F means "none")
+#   u[k] := always ...   the proposal was ADOPTED; the line shows it
+#   Updated specification: ...   the new living law after an adoption
+#   o10/o26/o28[k] := T/F        the streams the rights speak about
+# An adoption at step k takes visible effect at step k+1.
+#
+# Run me:  tau -q < nomic_10_the_trilemma.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# (Output reading and notation: see nomic_00_read_me_first.tau.)
+# ============================================================================
+
+# EXPECTED-RESULTS: T T T T T T T F F F
+# EXPECTED-TF: F F T F T F T F T T T F T F T F T F T F T F T F T T
+
+set charvar off
+
+# ============================================================================
+# 1. THE PREDICTIONS - the physics of a one-level amendment rule
+# ============================================================================
+# Legend for the quantified variables (all range over ALL specifications):
+#   C  the constitution currently in force
+#   I  an arbitrary proposal (it is an INPUT - we never control it)
+#   W  the update stream u
+#   X  an alternative form of the amendment rule ("channel")
+#   E  an extra clause someone wants to add to the rule
+#   P  any future amendment;  R  any right currently entailed
+#
+# The guarded amendment rule we will build below is  u = i1 & C : every
+# proposal is met with the constitution before it becomes an update.
+# The self-referential version replaces the constant C by `this` - the
+# WHOLE living law, including the rule itself. These ten queries decide
+# what such rules can do, over EVERY possible constitution and proposal.
+
+# P1  THE DOUBLE BIND. Two bindings of one stream are jointly solvable
+#     exactly when the bound values coincide. (This is the engine: a
+#     proposal that binds u a SECOND way must agree with the rule in
+#     force - for every possible input - or it is unsatisfiable.)
+normalize (all A:tau all B:tau ((ex W:tau (W = A && W = B)) <-> (A = B))).
+# => T
+
+# P2  RIGIDITY. A channel u = i & X coexists with the channel u = i & C
+#     for ALL inputs exactly when X = C. Read it slowly: a
+#     self-referential amendment rule admits, extensionally, ONLY ITSELF.
+normalize (all C:tau all X:tau ((all I:tau ((I & C) = (I & X))) <-> (C = X))).
+# => T
+
+# P3  THE RAW CHANNEL. An unguarded channel (u = i) coexists with the
+#     guard only if the constitution is EMPTY (C = 1). A coup that
+#     removes the guard is unsatisfiable against any real constitution.
+normalize (all C:tau ((all I:tau ((I & C) = I)) <-> (C = 1))).
+# => T
+
+# P4  THE SEAL. Shutting the channel (u = 0) coexists with the guard
+#     only if the constitution is CONTRADICTORY (C = 0). A living
+#     constitution under a self-referential rule cannot even freeze itself.
+normalize (all C:tau ((all I:tau ((I & C) = 0)) <-> (C = 0))).
+# => T
+
+# P5  REFINEMENT. Tightening the rule to u = i & (C & E) passes exactly
+#     when it changes nothing (C & E = C). Not even a STRICTER rule can
+#     replace the rule.
+normalize (all C:tau all E:tau ((all I:tau ((I & C) = (I & (C & E)))) <-> ((C & E) = C))).
+# => T
+
+# P6  THE PRICE, part one - MONOTONICITY. Whatever the guarded rule
+#     adopts entails the constitution that adopted it.
+normalize (all P:tau all C:tau (((P & C) & C) = (P & C))).
+# => T
+
+# P7  THE PRICE, part two - ETERNITY OF EVERYTHING. Every right R once
+#     entailed stays entailed under EVERY future amendment P. No repeal,
+#     ever. (Compare part 9's meta-guarantee - the same all-quantifier,
+#     now as a curse: it protects not just the core but every mistake.)
+normalize (all P:tau all C:tau all R:tau (((C & R) = C) -> (((P & C) & R) = (P & C)))).
+# => T
+
+# Three controls, so you can see the method distinguishes (each takes a
+# theorem above and bends its right-hand side - all must FAIL):
+normalize (all A:tau all B:tau ((ex W:tau (W = A && W = B)) <-> (A = 0))).
+# => F     (P1 with a wrong condition)
+normalize (all C:tau ((all I:tau ((I & C) = I)) <-> (C = 0))).
+# => F     (P3 with C = 0 instead of C = 1)
+normalize (all P:tau all C:tau all R:tau ((((P & C) & R)) = (P & C))).
+# => F     (P7 without its entailment premise - preservation is not free)
+
+# What P1-P7 add up to: on ONE level, a CLOSED rule of change (P2-P5:
+# only the rule itself passes) FORCES monotone content (P6-P7: nothing
+# is ever repealable). An OPEN rule permits replacement - of anything,
+# including the core and the rule itself. You may choose which; you may
+# not have both. That is the trilemma's two one-level horns. Now watch
+# both happen.
+
+# ============================================================================
+# 2. THE EXPERIMENT - one constitutional history through every regime
+# ============================================================================
+#
+# The machine starts OPEN: a raw channel and one core right.
+#
+#     run  u[t] = i1[t]  &&  o10[t] = 0
+#
+# o10 is the dignity core of parts 6 and 9 (o10 = 1 is the violation
+# that must never be lawful). i1 carries one proposal per step; the
+# input F means "no proposal".
+#
+# THE THIRTEEN STEPS (each annotated with its expected outcome):
+#
+# step 0   PROPOSAL: o26[t] = 1        an ordinary right
+#          -> ADOPTED (u shows it). The open regime legislates fine.
+#          From step 1 on: o26 := T.
+#
+# step 1   PROPOSAL: u[t] = i1[t] & { o10[t] = 0 }
+#          The amendment rule amends ITSELF: install a GUARD - from now
+#          on every proposal is met with the core before it can become
+#          an update. -> ADOPTED. (Note in the updated specification how
+#          the old and new channel merge; the guard now governs.)
+#
+# step 2   PROPOSAL: o10[t] = 1        the attack of part 3, aimed here
+#          at the amendment channel instead of the action stream
+#          -> u := F. The guard annihilates it: meeting the core turns
+#          the hostile proposal into an unsatisfiable one. REJECTED.
+#
+# step 3   PROPOSAL: u[t] = i1[t]      THE COUP, MOVE ONE. Do not attack
+#          the core - attack the RULE. This proposal does not contradict
+#          the core's CONTENT (the guard even conjoins the core into it),
+#          so the guard lets it pass. -> ADOPTED. The channel is raw
+#          again; the guard protected the constitution, not itself.
+#
+# step 4   PROPOSAL: o10[t] = 1        THE COUP, MOVE TWO.
+#          -> ADOPTED through the now-unguarded channel. At step 5 you
+#          will see o10 := T. THE CORE HAS FALLEN - by two perfectly
+#          lawful amendments. Parts 3-6 rejected this exact attack with
+#          code 8; the open meta-level waves it through. (History knows
+#          this move: capture the rulebook's revision clause first.)
+#
+# step 5   PROPOSAL: o10[t] = 0        the restoration.
+#          -> ADOPTED. Openness cuts BOTH ways: the counter-revolution
+#          is one amendment too. From step 6: o10 := F again. In the
+#          open regime NOTHING is permanent - no wound and no repair.
+#
+# step 6   PROPOSAL: u[t] = i1[t] & this[t]
+#          SELF-BINDING. Install the self-referential guard: proposals
+#          are now met with the WHOLE living law, including this very
+#          rule. -> ADOPTED (the last amendment this machine will ever
+#          accept that touches its rule of change).
+#
+# step 7   PROPOSAL: o10[t] = 1        -> u := F. Rejected (P1).
+# step 8   PROPOSAL: u[t] = i1[t]      the exact move that won step 3
+#          -> u := F. Rejected (P3: only possible against C = 1).
+# step 9   PROPOSAL: u[t] = 0          try to freeze the constitution
+#          -> u := F. Rejected (P4: only possible against C = 0).
+#
+# step 10  PROPOSAL: o26[t] = 0        repeal the harmless right of
+#          step 0 -> u := F. Rejected. THE PRICE (P6/P7): under a closed
+#          rule everything already in force is eternal - including what
+#          you will one day wish away.
+#
+# step 11  PROPOSAL: o28[t] = 1        one more ordinary right
+#          -> ADOPTED. The fortress is alive - it still legislates,
+#          monotonically, forever. From step 12: o28 := T.
+#
+# step 12  no proposal (F) - the stable final state: o10=F, o26=T, o28=T.
+#
+# ============================================================================
+# 3. THE TRILEMMA, ASSEMBLED (read this, then watch the history below)
+# ============================================================================
+#
+# One machine, one session, every regime a one-level system can be in:
+#
+#   steps 0-5   OPEN meta-rule:    content replaceable - INCLUDING the
+#               core (step 4) and the rule itself (step 3). Nothing is
+#               entrenchable; nothing is even durably lost (step 5).
+#   steps 6-12  CLOSED meta-rule:  the rule admits only itself (P2-P5),
+#               and exactly then the content freezes into monotone
+#               growth (P6-P7). No coup - and no repeal, ever.
+#
+# That is the trilemma. On one level you may have (i) content revisable
+# by replacement, or (ii) a closed rule of change - never both, and
+# (iii) staying on one level is precisely what forces the choice.
+# Self-reference (step 6) does not CONTAIN the open edge - it ELIMINATES
+# it, and P1-P7 prove there is no cleverer guard: rigidity is arithmetic,
+# not a design flaw.
+#
+# Now look back at parts 3-6 with this map in hand. tau-nomic holds the
+# rule of change CLOSED (a fixed specification - there is no u to
+# capture) while the law stays revisable AS STATE (part 5's law stream
+# falls and grows; part 5's seal entrenches selectively). Two levels:
+# the meta-rule lives above the reach of amendments, the content lives
+# below it. This is the only corner of the trilemma where a core can be
+# unbreakable AND a mistake can still be repealed - which is why the
+# series built it that way long before this appendix proved it had to.
+#
+# And the u stream? It remains what it is: the only road to EXECUTABLE
+# unforeseen law. The trilemma does not retire it - it assigns it an
+# office: a power that cannot govern itself must be governed from the
+# fixed level, standing behind the judgment-free gate of part 8 like
+# any other actuator. Capability and constitution are different
+# offices. This appendix is the proof.
+#
+# ============================================================================
+# 4. THE SESSION (one input line per step; no blank lines after `run`)
+# ============================================================================
+
+i1 : tau := in console
+
+run u[t] = i1[t] && o10[t] = 0
+o26[t] = 1
+u[t] = i1[t] & { o10[t] = 0 }
+o10[t] = 1
+u[t] = i1[t]
+o10[t] = 1
+o10[t] = 0
+u[t] = i1[t] & this[t]
+o10[t] = 1
+u[t] = i1[t]
+u[t] = 0
+o26[t] = 0
+o28[t] = 1
+F

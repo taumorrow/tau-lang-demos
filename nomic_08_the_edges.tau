@@ -123,6 +123,13 @@ normalize (({ o1[t]=1 -> o4[t]=1 }) = ({ o4[t]=0 -> o1[t]=0 })).
 # future amendment. The skeleton of parts 1-8 was the curriculum,
 # not the ceiling.
 #
+# APPENDIX II: nomic_10_the_trilemma.tau answers the question this part
+# left standing at the outermost edge - who amends the amendment rule? -
+# with Tau's u stream (a specification that rewrites itself), a two-step
+# coup, self-binding via `this`, and a proved trilemma showing why the
+# fixed-spec + law-as-state architecture of parts 3-6 is forced, not
+# chosen.
+#
 # ============================================================================
 # END OF THE SERIES
 # ============================================================================

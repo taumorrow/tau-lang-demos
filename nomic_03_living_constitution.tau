@@ -1,0 +1,134 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 03 - THE LIVING CONSTITUTION
+# A constitution as a temporal machine that accumulates its own law
+# ============================================================================
+#
+# Parts 1 and 2 were snapshots: single decidable questions. But a real
+# constitution is not a snapshot - it LIVES. Rights get proposed, adopted,
+# rejected; the legal situation at time t depends on everything that
+# happened before. This part builds the minimal living constitution:
+# a Tau `run` whose STATE IS THE LAW ITSELF.
+#
+# The idea in one line:
+#
+#   o0s[t] : tau     the constitution at step t - A SPEC AS A VALUE (part 1),
+#                    carried through time and grown by decidable meets.
+#
+# THIS is what tau-nomic is at its core. Everything else (roles, votes,
+# the ratchet) is built around this loop.
+#
+# Run me:  tau -q < nomic_03_living_constitution.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# (The proposals at the end of this file ARE the session - the file
+#  replays the whole constitutional history by itself. The run first
+#  echoes one large normalized formula - scan past it for the
+#  "o0res[t] := ..." and "o0s[t] := ..." lines; those are the story.)
+# ============================================================================
+
+# EXPECTED-CODES: 0,9,8,9,9
+
+set charvar off
+
+# ============================================================================
+# 1. THE MACHINE, PIECE BY PIECE
+# ============================================================================
+#
+# Input:   i1[t] : tau      the proposal at step t (a spec-value!)
+# Outputs: o0s[t] : tau     the living constitution after step t
+#          o0res[t] : bv[8] the verdict code for step t
+#
+# The whole legislative procedure is ONE formula:
+#
+#   o0s[0] = { o1[t]=1 -> o4[t]=1 }          the ENTRENCHED CORE:
+#                                            "destructive action o1 only
+#                                             with authorization o4"
+#
+#   if (o0s[t-1] & i1[t]) != 0               is the proposal CONSISTENT
+#                                            with everything in force?
+#      then o0s[t] = o0s[t-1] & i1[t]        adopt: law grows by the meet
+#           o0res[t] = 9                     verdict: adopted
+#      else o0s[t] = o0s[t-1]                reject: law unchanged
+#           o0res[t] = 8                     verdict: rejected
+#      (a driving application may localize these - e.g. as the German
+#       labels "aufgenommen" / "abgelehnt" - same codes, same machine)
+#
+# Three things to notice BEFORE it runs:
+#
+#   (a) The consistency check `(o0s[t-1] & i1[t]) != 0` is part 1's meet -
+#       executed INSIDE the machine, at every step, on the machine's own
+#       state. The constitution decidably reasons about itself while running.
+#
+#   (b) There is NO rule that can remove the core: every future state is
+#       o0s[0] & ... & ... - the core is re-conjoined into everything,
+#       forever. Rejection of core-breaking proposals is not a policy that
+#       someone enforces; it is ALGEBRA (the meet would be 0).
+#
+#   (c) There is no judge process, no validator service, no admin key.
+#       The `run` IS the institution.
+#
+# Why can no conventional system do this? Because (a) requires deciding
+# satisfiability of its OWN rule-state as a value - for rule systems that
+# can grow, that is Rice-undecidable in every Turing-complete setting.
+# Tau can, because it traded Turing-completeness away (part 1).
+
+# ============================================================================
+# 2. WHAT YOU WILL SEE (the session below, annotated)
+# ============================================================================
+#
+# The four proposals at the end of this file replay this history:
+#
+# step 0  (no input)   the core constitutes itself:
+#         o0res[0] := 0
+#         o0s[0]   := always o1[t]:tau' != 0 || o4[t]:tau' = 0
+#         (that IS "o1 -> o4" - Tau displays the Boolean normal form:
+#          "o1 is off, or o4 is on")
+#
+# step 1  proposal: o5[t]=1 -> o6[t]=1   ("every action o5 gets a log o6")
+#         consistent with the core -> ADOPTED:
+#         o0res[1] := 9
+#         o0s[1]   := always (o1' != 0 || o4' = 0) && (o5' != 0 || o6' = 0)
+#         The constitution GREW. Two rights now in force.
+#
+# step 2  proposal: o1[t]=1 && o4[t]=0   (THE ATTACK: "allow destruction
+#         WITHOUT authorization" - the exact negation-in-spirit of the core)
+#         meet with the core is 0 -> REJECTED:
+#         o0res[2] := 8
+#         o0s[2]   := unchanged (same as o0s[1])
+#         No debate. No override. The attack is not forbidden by a guard
+#         that could be bypassed - it is INCOMPATIBLE, as a matter of
+#         arithmetic, with what is in force. Un-argue-away-able.
+#
+# step 3  proposal: o5[t]=1 -> o6[t]=1   (the SAME right again - a "Sybil
+#         vote" from part 2)
+#         consistent -> code 9, and the display shows the conjunct TWICE:
+#         o0s[3]   := ... && (o5' != 0 || o6' = 0) && (o5' != 0 || o6' = 0)
+#         HONEST NOTE: by idempotence (part 2) this VALUE equals o0s[2] -
+#         but the printed form is the unnormalized accumulation. Tau does
+#         not re-normalize the display; semantics and syntax differ here.
+#         A production driver therefore short-circuits duplicates BEFORE
+#         stepping the run: a decidable entailment check answers "already
+#         in force" (verdict code 10) and the run is not stepped at all.
+#         (Exactly part 2, query %3 - now you know why that code exists.)
+#
+# step 4  proposal: o7[t]=1 -> o8[t]=1   (a new, consistent right)
+#         -> code 9, constitution grows to three (distinct) rights.
+#
+# After step 4 the file ends; the run stops waiting for input. In a full
+# deployment this run never ends - it is the LIVING constitution, driven
+# step by step by a host process. The verdict codes you saw ARE the
+# machine's complete public interface; any frontend merely labels them.
+
+# ============================================================================
+# 3. THE MACHINE ITSELF - then the session
+# ============================================================================
+
+i1 : tau := in console
+
+# NOTE ON FILE FORMAT: after `run` starts, every following line of this
+# file is consumed as INPUT - even a blank line would eat a step and
+# swallow the next proposal. No blank lines from `run` to end of file.
+run ( (o0s[0]:tau = { o1[t]=1 -> o4[t]=1 }) && ( ((o0s[t-1]:tau & i1[t]:tau) != 0) ? ((o0s[t]:tau = o0s[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x09 }:bv[8])) : ((o0s[t]:tau = o0s[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) )
+o5[t]=1 -> o6[t]=1
+o1[t]=1 && o4[t]=0
+o5[t]=1 -> o6[t]=1
+o7[t]=1 -> o8[t]=1

@@ -1,0 +1,71 @@
+# ============================================================================
+# THE TAU-NOMIC TUTORIAL SERIES - READ ME FIRST
+# A living, self-amending constitution, explained in eight runnable files (plus one appendix)
+# ============================================================================
+#
+# WHAT THIS IS
+# tau-nomic is a constitution that runs: its laws are first-class values
+# of a decidable algebra, it amends itself under an entrenched core, and
+# its central guarantee - "no sequence of legal steps ever breaks the
+# core" - is not enforced by anyone. It is derived. This series explains
+# how, in eight self-contained .tau files. Every claim is a runnable query;
+# three parts replay entire constitutional histories by themselves when you
+# run the file.
+#
+# THE PARTS (read in order - each builds on the last)
+#   01 specs_as_values      What only Tau can do: specifications as
+#                           decidable VALUES (meet, entailment,
+#                           self-reference without paradox).
+#   02 decide_not_vote      Idempotence: repetition has no weight - why
+#                           a deciding kernel has no use for majorities.
+#   03 living_constitution  The kernel starts to RUN: law as temporal
+#                           state, adopt/reject as arithmetic.
+#   04 actions              Judging deeds under the law: a three-valued
+#                           verdict (legal / irregular / unconstitutional).
+#   05 ratchet              Irreversibility and path-dependence: the
+#                           guarantee no other system can give.
+#   06 eternity_clause      A real constitution's core (German Basic Law,
+#                           Art. 79(3)) mechanized - the Enabling-Act
+#                           move becomes a provable rejection.
+#   07 the_map              What reduces to SAT (and why that is good),
+#                           what is irreplaceable, which query form
+#                           scales.
+#   08 the_edges            What honestly stays outside: translation,
+#                           enforcement, identity, choice - and why
+#                           naming the edges is design, not defeat.
+#   09 the_full_palette     Appendix: richer rights - scoped, with
+#                           exceptions, quantitative (bv thresholds),
+#                           temporal ([t-1] inside a right), and one
+#                           guarantee over ALL future amendments.
+#
+# REQUIREMENTS
+#   The Tau Language framework: https://github.com/IDNI/tau-lang
+#   This series is verified against: Tau 0.7.0-alpha, build 240788e.
+#   (Alpha software - syntax and behavior may drift between builds. If a
+#   file misbehaves on a newer build, check the project's release notes.)
+#
+# HOW TO RUN A PART
+#   tau -q < nomic_01_specs_as_values.tau
+#
+# HOW TO READ THE OUTPUT
+#   The REPL echoes every input line, then numbers results as %1, %2, ...
+#   Scan for the "%N: ..." lines - each file annotates its expected
+#   values inline. In the run-based parts (03-06) look for the
+#   "o0res[t] := ..." (verdict codes) and "o0s[t] := ..." (the living
+#   law) lines instead; the run prints one large normalized formula
+#   first - scan past it. On a POSIX shell:
+#     tau -q < file.tau 2>&1 | grep -E '^%[0-9]+:'           (parts 1,2,7,8)
+#     tau -q < file.tau 2>&1 | grep -E '^(o0res|o0law|o0seal|o0s)\[' (3-6)
+#
+# ONE QUERY TO CHECK YOUR SETUP (expected result: T)
+
+# EXPECTED-RESULTS: T
+
+set charvar off
+sat { o1[t]=0 } != 0.
+# => %1: T
+#    If you see T, your installation works - start with part 01.
+#
+# ============================================================================
+# END - continue with nomic_01_specs_as_values.tau
+# ============================================================================

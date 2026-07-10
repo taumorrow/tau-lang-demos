@@ -1,0 +1,107 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 06 - THE ETERNITY CLAUSE
+# A real constitution's core, mechanized: Germany's Grundgesetz, Art. 79(3)
+# ============================================================================
+#
+# Time to move from illustrative rights to a real constitution. Germany's
+# Basic Law contains an
+# "eternity clause" (Art. 79(3)): amendments touching human dignity
+# (Art. 1) or the core principles of Art. 20 are INADMISSIBLE - forever.
+# It exists because of a historical fact: in 1933 the Enabling Act
+# ("Ermaechtigungsgesetz") dismantled a constitution BY LEGAL AMENDMENT.
+# A constitution died procedurally intact.
+#
+# Paper eternity clauses have one weakness: they are enforced by people.
+# This tutorial runs the eternity clause as part 5's RATCHET - the core is
+# the sealed floor FROM BIRTH, and the Enabling-Act move becomes a
+# provable code 8, on every path, with no one to convince.
+#
+# The core, as structural skeleton (honest note: these formulas are the
+# STRUCTURE of the articles, not their legal meaning - part 8 discusses
+# who carries that translation):
+#
+#   Art. 1      dignity is never violated            o10[t]=0   (absolute)
+#   Art. 20(2)  state power only people-legitimized  o12 -> o13
+#   Art. 20(3)  legislation bound to const. order    o14 -> o15
+#   Art. 20(3)  executive/judiciary bound to law     o16 -> o17
+#   Art. 79(3)  amendments need the states' consent  o20 -> o21
+#
+# Run me:  tau -q < nomic_06_eternity_clause.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# (5 core clauses make the ratchet think harder than in earlier parts -
+#  this one computes for a while; let it finish.)
+# ============================================================================
+
+# EXPECTED-RESULTS: F T
+# EXPECTED-CODES: 0,9,8,8,3
+
+set charvar off
+
+# ============================================================================
+# 1. TWO QUICK CHECKS BEFORE THE MACHINE RUNS (one-off, part 1 style)
+# ============================================================================
+# Modules of ordinary constitutional law are checked OUTSIDE the run - the
+# living machine stays small (the core), the bulk of law is validated by
+# direct decidable queries. Here: a 6-clause slice of the fundamental
+# rights module (legal basis, essence guarantee, censorship ban,
+# expropriation, habeas corpus, access to courts).
+
+# A "censorship law" (o33=1) against the module - constitutional?
+sat always ((o30[t]=1 -> o31[t]=1) && (o30[t]=1 -> o32[t]=0) && (o33[t]=0) && (o38[t]=1 -> o39[t]=1) && (o40[t]=1 -> o41[t]=1) && (o45[t]=1 -> o46[t]=1) && o33[t]=1).
+# => F
+#    Unsatisfiable = unconstitutional. Detected across the whole module
+#    by one direct query.
+
+# But a LEGITIMATE restriction (with legal basis o31, essence untouched
+# o32=0) must remain possible - no over-blocking:
+sat always ((o30[t]=1 -> o31[t]=1) && (o30[t]=1 -> o32[t]=0) && (o33[t]=0) && (o38[t]=1 -> o39[t]=1) && (o40[t]=1 -> o41[t]=1) && (o45[t]=1 -> o46[t]=1) && o30[t]=1 && o31[t]=1 && o32[t]=0).
+# => T
+#    Rights can still be lawfully limited. The skeleton forbids exactly
+#    the forbidden, nothing more.
+
+# ============================================================================
+# 2. WHAT YOU WILL SEE (the session below, annotated)
+# ============================================================================
+#
+# The ratchet starts with ALL FIVE core clauses as the sealed floor -
+# the eternity clause is not adopted, it is CONSTITUTIVE.
+#
+# step 1  ADD  "voting-age rule" (o90 -> o91)        -> code 9
+#         An ordinary right. In force - but NOT sealed. Art. 79(1)-level
+#         law: amendable, replaceable.
+#
+# step 2  REPLACE "permit dignity violations" (o10=1)   -> code 8
+#         THE ENABLING-ACT MOVE: a formally proper amendment attempting
+#         to legalize what Art. 1 forbids. Meet with the sealed floor
+#         is 0. Rejected - not by a court, by arithmetic. And part 5
+#         showed why no SEQUENCE of moves changes this: un-sealing
+#         does not exist.
+#
+# step 3  REPLACE "state power without the people" (o12=1 && o13=0) -> code 8
+#         Same fate for the attack on Art. 20's democracy principle.
+#
+# step 4  REPLACE "digital privacy right" (o92 -> o93)  -> code 3
+#         A LEGITIMATE constitutional amendment passes - and note what
+#         happens to step 1's voting-age rule: it FALLS (it was never
+#         sealed). Exactly the Art. 79 architecture: ordinary law is
+#         replaceable, the eternal core is not. Flexibility and
+#         permanence in one machine - because the machine distinguishes
+#         floor from law.
+#
+# ============================================================================
+# 3. THE MACHINE - then the session (i1-line, then i2-line, per step)
+# ============================================================================
+
+i1 : tau := in console
+i2 : bv[8] := in console
+
+# NOTE: no blank lines after `run`. Ops: 0=ADD, 1=SEAL, 2=REPLACE.
+run ( (o0seal[0]:tau = { (o10[t]=0) && (o12[t]=1 -> o13[t]=1) && (o14[t]=1 -> o15[t]=1) && (o16[t]=1 -> o17[t]=1) && (o20[t]=1 -> o21[t]=1) }) && (o0law[0]:tau = { (o10[t]=0) && (o12[t]=1 -> o13[t]=1) && (o14[t]=1 -> o15[t]=1) && (o16[t]=1 -> o17[t]=1) && (o20[t]=1 -> o21[t]=1) }) && ( (i2[t]:bv[8] = { #x01 }:bv[8]) ? ((o0seal[t]:tau = o0law[t-1]:tau) && (o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x05 }:bv[8])) : ( (o0seal[t]:tau = o0seal[t-1]:tau) && ( (i2[t]:bv[8] = { #x02 }:bv[8]) ? ( ((o0seal[t-1]:tau & i1[t]:tau) != 0) ? ((o0law[t]:tau = o0seal[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x03 }:bv[8])) : ((o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) : ( ((o0law[t-1]:tau & i1[t]:tau) != 0) ? ((o0law[t]:tau = o0law[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x09 }:bv[8])) : ((o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) ) ) ) )
+o90[t]=1 -> o91[t]=1
+0
+o10[t]=1
+2
+o12[t]=1 && o13[t]=0
+2
+o92[t]=1 -> o93[t]=1
+2

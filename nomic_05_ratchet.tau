@@ -1,0 +1,127 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 05 - THE RATCHET
+# Irreversibility, path-dependence, and the guarantee nobody else can give
+# ============================================================================
+#
+# Everything so far had one quiet limitation: the constitution only GREW.
+# Real constitutions also REPEAL and REPLACE law - and the moment repeal
+# exists, a grave question appears:
+#
+#   "Can some SEQUENCE of perfectly legal steps eventually dismantle
+#    everything - including the rights we meant to be permanent?"
+#
+# History says yes: legal step by legal step is exactly how constitutions
+# have been hollowed out. The fix cannot be "no repeal" (rigid systems fail)
+# and cannot be "trust the process" (that IS the attack surface).
+#
+# tau-nomic's answer is the RATCHET - a one-way floor over spec-VALUES:
+#
+#   o0seal[t] : tau   the FLOOR - permanent law. Grows monotonically. Never shrinks.
+#   o0law[t]  : tau   the LIVING law - can grow AND be replaced.
+#
+#   Op ADD     (i2=0): law := law & proposal        (as before; 9/8)
+#   Op SEAL    (i2=1): floor := current law          (freeze; verdict 5)
+#   Op REPLACE (i2=2): law := floor & proposal       (verdict 3) -
+#                      everything UNSEALED falls away; the floor is
+#                      re-conjoined ALWAYS. If the proposal contradicts
+#                      the floor: rejected (verdict 8).
+#
+# The guarantee, in one line:  law[t] = floor & ...  BY CONSTRUCTION,
+# so NO sequence of legal operations - none, ever - drops sealed law.
+# Not "we checked many sequences": it is structurally impossible.
+#
+# WHY NOBODY ELSE CAN GIVE THIS GUARANTEE:
+#   - SAT solvers: bounded model checking can unroll time for a FIXED
+#     horizon - but "no reachable sequence EVER breaks X" is unbounded,
+#     and every step draws rights from an infinite value space. No
+#     finite unrolling covers both.
+#   - a present-state check: two states with the SAME law but different
+#     seal history behave differently under REPLACE - the answer depends
+#     on HISTORY, which a snapshot cannot see.
+#   - finite model checkers: rights here are arbitrary SPECS from an
+#     infinite value space - nothing finite to enumerate.
+#   - any Turing-complete rule system: "every future self-modification
+#     preserves K" is Rice-undecidable for them in general. (Freeze a
+#     specific finite instance and you can check it - but a constitution
+#     is exactly NOT a frozen finite instance.)
+# Tau sits exactly in the intersection: infinite spec space AND
+# path-dependence AND temporal reachability - decidable. This is the
+# capability that is not just elegant but IRREPLACEABLE.
+#
+# Run me:  tau -q < nomic_05_ratchet.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# ============================================================================
+
+# EXPECTED-CODES: 0,9,5,3,8
+
+set charvar off
+
+# ============================================================================
+# 1. WHAT YOU WILL SEE (the session below, annotated)
+# ============================================================================
+#
+# The floor starts as the entrenched core (o1 -> o4) - sealed from birth.
+#
+# step 1  ADD  R = o5[t]=1 -> o6[t]=1        -> code 9
+#         law  = core & R          (R is in force, but NOT yet sealed)
+#         seal = core              (unchanged)
+#
+# step 2  SEAL                               -> code 5
+#         seal = core & R          (the whole current law becomes floor -
+#                                   R is now PERMANENT)
+#         (SEAL ignores its proposal input, but the input slot must still
+#          hold a parseable spec - we feed the core as a harmless filler.)
+#
+# step 3  REPLACE with o7[t]=1 -> o8[t]=1    -> code 3
+#         law  = core & R & (o7 -> o8)
+#         R SURVIVED the replacement - it is in the floor. Compare part 3,
+#         where a replace would simply have dropped everything unprotected.
+#
+# step 4  REPLACE with o5[t]=1 && o6[t]=0    -> code 8  (THE ATTACK)
+#         "replace the law with one that permits o5 without log" - this
+#         CONTRADICTS the sealed R. The meet with the floor is 0:
+#         law unchanged, seal unchanged. The ratchet holds. There is no
+#         sequence of further operations that changes this - un-sealing
+#         does not exist.
+#
+# ============================================================================
+# 2. THE EXPERIMENT THAT PROVES PATH-DEPENDENCE (do it yourself!)
+# ============================================================================
+#
+# Take the three operations  ADD R / SEAL / REPLACE(o7->o8)  and swap the
+# order of SEAL and REPLACE in the session below. Concretely: inputs come
+# in LINE PAIRS (an i1 spec line followed by its i2 op-code line). Swap
+# the pair  "o1[t]=1 -> o4[t]=1" / "1"  with the pair
+# "o7[t]=1 -> o8[t]=1" / "2"  at the end of this file, then rerun:
+#
+#     ADD R (9)  ->  REPLACE o7->o8 (3)  ->  SEAL (5)
+#
+# Verified result of that ordering:
+#     law after replace = core & (o7 -> o8)      <- R IS GONE
+# R was still unsealed when the replace came - so it fell, and the later
+# seal freezes a floor WITHOUT R. Forever.
+#
+# SAME three operations. DIFFERENT order. DIFFERENT permanent law.
+# That is path-dependence - and it is precisely why no snapshot check can
+# ever certify a constitution with repeal: the certificate must speak
+# about ALL orderings, over time, over an infinite space of rights.
+# Tau's run does - by construction, as you are about to watch.
+#
+# ============================================================================
+# 3. THE MACHINE - then the session (i1-line, then i2-line, per step)
+# ============================================================================
+
+i1 : tau := in console
+i2 : bv[8] := in console
+
+# NOTE: no blank lines after `run` - lines alternate i1 (spec), i2 (op code:
+# 0=ADD, 1=SEAL, 2=REPLACE).
+run ( (o0seal[0]:tau = { o1[t]=1 -> o4[t]=1 }) && (o0law[0]:tau = { o1[t]=1 -> o4[t]=1 }) && ( (i2[t]:bv[8] = { #x01 }:bv[8]) ? ((o0seal[t]:tau = o0law[t-1]:tau) && (o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x05 }:bv[8])) : ( (o0seal[t]:tau = o0seal[t-1]:tau) && ( (i2[t]:bv[8] = { #x02 }:bv[8]) ? ( ((o0seal[t-1]:tau & i1[t]:tau) != 0) ? ((o0law[t]:tau = o0seal[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x03 }:bv[8])) : ((o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) : ( ((o0law[t-1]:tau & i1[t]:tau) != 0) ? ((o0law[t]:tau = o0law[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x09 }:bv[8])) : ((o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) ) ) ) )
+o5[t]=1 -> o6[t]=1
+0
+o1[t]=1 -> o4[t]=1
+1
+o7[t]=1 -> o8[t]=1
+2
+o5[t]=1 && o6[t]=0
+2

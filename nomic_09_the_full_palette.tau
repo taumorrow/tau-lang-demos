@@ -1,0 +1,156 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 09 (APPENDIX) - THE FULL PALETTE
+# Richer rights: scoped, conditional, quantitative, temporal, universal
+# ============================================================================
+#
+# The core series (01-08) deliberately wrote every right in two skeletal
+# forms - absolute bans (oX=0) and simple implications (oX -> oY) - so
+# that every verdict could be checked in your head. Part 01's honest-scope
+# note promised that the real strength lives in HOW rights are written.
+# This appendix keeps that promise: five richer forms, each verified live,
+# and at the end the SAME machine from parts 3-4 running one of them.
+#
+# Run me:  tau -q < nomic_09_the_full_palette.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# (Output reading and notation: see nomic_00_read_me_first.tau.)
+# ============================================================================
+
+# EXPECTED-RESULTS: T F T T T T F T T F T T F
+# EXPECTED-CODES: 0,9,0,1,2
+
+set charvar off
+
+# ============================================================================
+# 1. THE SCOPED RIGHT - conditions with teeth
+# ============================================================================
+# Part 1 warned: "o1 -> o4" is a weak skeleton. Here is the strong form -
+# the destructive action o1 requires authorization o4 AND four-eyes review
+# o3 AND a log entry o5, all at once:
+#
+#   R_scoped = { o1[t]=1 -> (o4[t]=1 && o3[t]=1 && o5[t]=1) }
+#
+#   (Names like R_scoped are prose labels for THIS TEXT only. Tau
+#    identifiers allow letters and digits, no underscores - which is why
+#    the actual expressions below use plain stream names.)
+
+sat ({ o1[t]=1 -> (o4[t]=1 && o3[t]=1 && o5[t]=1) }) != 0.
+# => T     (the right is coherent law)
+
+# An action that has authorization but SKIPS the review - caught:
+sat ({ o1[t]=1 -> (o4[t]=1 && o3[t]=1 && o5[t]=1) } & { o1[t]=1 && o4[t]=1 && o3[t]=0 }) != 0.
+# => F     Under the skeletal "o1 -> o4" this action would have passed.
+#          The scope is not commentary - it is arithmetic.
+
+# The fully compliant action remains legal - no over-blocking:
+sat ({ o1[t]=1 -> (o4[t]=1 && o3[t]=1 && o5[t]=1) } & { o1[t]=1 && o4[t]=1 && o3[t]=1 && o5[t]=1 }) != 0.
+# => T
+
+# And the jewel: the FINER right provably CONTAINS the coarser one -
+valid always ((o1[t]=1 -> (o4[t]=1 && o3[t]=1 && o5[t]=1)) -> (o1[t]=1 -> o4[t]=1)).
+# => T     Refining a law is an ENTAILMENT relation: once R_scoped is in
+#          force, the old "o1 -> o4" is redundant (part 2's verdict 10
+#          would fire on it). Law can be refactored - with proofs.
+
+# ============================================================================
+# 2. THE EXCEPTION - disjunction without losing decidability
+# ============================================================================
+# Real law has lawful alternatives: "o1 only with authorization o4 - OR
+# under emergency powers o9". An emergency action without o4:
+
+sat ({ o1[t]=1 -> (o4[t]=1 || o9[t]=1) } & { o1[t]=1 && o4[t]=0 && o9[t]=1 }) != 0.
+# => T     The exception path is honored. Alternatives, exceptions and
+#          fallbacks are ordinary Boolean structure - every verdict of
+#          parts 3-6 works over them unchanged.
+
+# ============================================================================
+# 3. THE QUANTITATIVE RIGHT - a number is not a flag
+# ============================================================================
+# A skeletal flag can only say THAT a limit is respected (o84 -> o85,
+# in the style of parts 1-8). The honest form is a THRESHOLD:
+# "credit-taking o84 only while the amount o24 stays within the limit" -
+# a bitvector comparison INSIDE a right:
+#
+#   R_debt = { o84[t]=1 -> o24[t]:bv[8] <= { #x64 }:bv[8] }     (limit: 100)
+
+sat ({ o84[t]=1 -> o24[t]:bv[8] <= { #x64 }:bv[8] }) != 0.
+# => T     (tau-typed streams and bitvector streams compose in ONE right)
+
+# Borrowing 200 against a limit of 100:
+sat ({ o84[t]=1 -> o24[t]:bv[8] <= { #x64 }:bv[8] } & { o84[t]=1 && o24[t]:bv[8] = { #xC8 }:bv[8] }) != 0.
+# => F     Over the limit - unconstitutional, by comparison, not by flag.
+
+# Borrowing 50:
+sat ({ o84[t]=1 -> o24[t]:bv[8] <= { #x64 }:bv[8] } & { o84[t]=1 && o24[t]:bv[8] = { #x32 }:bv[8] }) != 0.
+# => T     Within the limit - legal. Quotas, caps, budgets, thresholds:
+#          all of quantitative law fits inside decidable rights.
+
+# ============================================================================
+# 4. THE TEMPORAL RIGHT - time inside the law, not only under it
+# ============================================================================
+# Parts 3-6 used time as the CARRIER of law (the run). Time can also be
+# CONTENT of a right: "the action o1 is lawful only if it was announced
+# (o2) in the PREVIOUS step":
+#
+#   R_notice = { o1[t]=1 -> o2[t-1]=1 }
+
+sat ({ o1[t]=1 -> o2[t-1]=1 }) != 0.
+# => T
+
+# Acting without yesterday's announcement:
+sat ({ o1[t]=1 -> o2[t-1]=1 } & { o1[t]=1 && o2[t-1]=0 }) != 0.
+# => F     History becomes a legal precondition - notice periods, waiting
+#          times, cool-downs are one lookback away.
+
+# Announced yesterday, acting today:
+sat ({ o1[t]=1 -> o2[t-1]=1 } & { o1[t]=1 && o2[t-1]=1 }) != 0.
+# => T
+
+# ============================================================================
+# 5. THE META-RIGHT - one guarantee over ALL future amendments
+# ============================================================================
+# Part 1 showed the quantifier `all X:tau` over the infinite space of
+# specifications and promised it would carry guarantees over all future
+# amendments. Here is that guarantee, earned: with the dignity core
+# { o10[t]=0 } in force, NO amendment X - none of the infinitely many -
+# can ever produce a constitution that permits the violation o10=1:
+
+normalize (all X:tau (((({ o10[t]=0 } & X) & { o10[t]=1 })) = 0)).
+# => T     A statement about EVERY possible future amendment, decided.
+#          This is the eternity clause of part 6, restated as a theorem
+#          about the whole amendment space.
+
+# The counter-probe - WITHOUT the core, the guarantee honestly fails:
+normalize (all X:tau ((X & { o10[t]=1 }) = 0)).
+# => F     (X = { o10[t]=1 } itself is the witness.) The protection comes
+#          from the entrenched core, not from wishful quantification -
+#          and Tau can tell the difference, provably.
+
+# ============================================================================
+# 6. THE SAME MACHINE - a scoped right in the living run
+# ============================================================================
+# None of this needs a special engine. Below, the exact machine of part 4
+# receives R_scoped as an ordinary amendment, then judges three actions:
+#
+# step 1  AMENDMENT: R_scoped                         -> 9  (adopted)
+# step 2  ACTION: o1 with o4, o3 and o5 all in place  -> 0  (full consensus)
+# step 3  ACTION: o1 with o4 but WITHOUT review o3    -> 1  (irregular: it
+#         breaks the scoped right, but the entrenched core "o1 -> o4" is
+#         still respected - the three-valued verdict of part 4, now with
+#         a right rich enough to make the middle band meaningful)
+# step 4  ACTION: o1 without o4                       -> 2  (core violation)
+
+i1 : tau := in console
+i2 : bv[8] := in console
+
+# NOTE ON FILE FORMAT: after `run` starts, every following line of this
+# file is consumed as INPUT - even a blank line would eat a step and
+# swallow the next proposal. No blank lines from `run` to end of file.
+run ( (o0s[0]:tau = { o1[t]=1 -> o4[t]=1 }) && ( (i2[t]:bv[8] = { #x00 }:bv[8]) ? ( ((o0s[t-1]:tau & i1[t]:tau) != 0) ? ((o0s[t]:tau = o0s[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x09 }:bv[8])) : ((o0s[t]:tau = o0s[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) : ( (o0s[t]:tau = o0s[t-1]:tau) && ( ((o0s[t-1]:tau & i1[t]:tau) != 0) ? (o0res[t]:bv[8] = { #x00 }:bv[8]) : ( (({ o1[t]=1 -> o4[t]=1 } & i1[t]:tau) != 0) ? (o0res[t]:bv[8] = { #x01 }:bv[8]) : (o0res[t]:bv[8] = { #x02 }:bv[8]) ) ) ) ) )
+o1[t]=1 -> (o4[t]=1 && o3[t]=1 && o5[t]=1)
+0
+o1[t]=1 && o4[t]=1 && o3[t]=1 && o5[t]=1
+1
+o1[t]=1 && o4[t]=1 && o3[t]=0
+1
+o1[t]=1 && o4[t]=0
+1

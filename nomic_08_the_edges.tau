@@ -1,0 +1,128 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 08 - THE EDGES
+# What stays genuinely outside the decidable core - and why naming it
+# precisely is design, not defeat
+# ============================================================================
+#
+# Series so far: specs are decidable values (1), deciding replaces voting
+# (2), the constitution lives as a run (3), it judges actions (4), the
+# ratchet makes permanence provable (5), a real eternity clause runs (6),
+# and the honest map shows what reduces and which form scales (7).
+#
+# Final question: WHAT IS LEFT? Every closed formal core has edges it
+# cannot contain. The design principle of tau-nomic is not to deny them -
+# it is: MAKE EVERY EDGE SMALL, EXPLICIT, AND GOVERNED BY THE SAME NOMIC.
+# What remains after that is always one of two kinds:
+#   (A) a hard fact about the physical world (no system closes it), or
+#   (B) a political question about power and values (no formalism should).
+#
+# Run me:  tau -q < nomic_08_the_edges.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# ============================================================================
+
+# EXPECTED-RESULTS: F T F
+
+set charvar off
+
+# ============================================================================
+# EDGE 1: TRANSLATION - who says what the words mean?
+# ============================================================================
+# Part 6 encoded Art. 14(3) ("expropriation only with compensation") as
+# o38 -> o39. But someone could encode it as o38 -> o31 ("...only by
+# statute"). Both LOOK plausible. Are they the same law?
+
+normalize (({ o38[t]=1 -> o39[t]=1 }) = ({ o38[t]=1 -> o31[t]=1 })).
+# => F
+#    Tau PROVES the two readings differ - no two people can silently
+#    believe they agreed while holding different laws. But notice what
+#    Tau cannot do: it cannot say WHICH reading is faithful to the
+#    German text. That act - translation of meaning into structure -
+#    carries real power (whoever frames the encoding frames the law),
+#    and it stays human. Edge type (B).
+#
+# What Tau DOES eliminate: fights over mere reformulation. The correct
+# contrapositive of the core is provably THE SAME law:
+
+normalize (({ o1[t]=1 -> o4[t]=1 }) = ({ o4[t]!=1 -> o1[t]!=1 })).
+# => T
+#    Different words, same value. Debate collapses to substance.
+#
+# And a subtlety your two-valued intuition will get wrong: replacing
+# "not equal to 1" by "equal to 0" is NOT the same statement here -
+
+normalize (({ o1[t]=1 -> o4[t]=1 }) = ({ o4[t]=0 -> o1[t]=0 })).
+# => F
+#    - because the tau algebra is ATOMLESS: a stream's value is a SPEC,
+#    and between 0 and 1 lie infinitely many values. "o4 != 1" admits
+#    them; "o4 = 0" excludes all of them. Even the translator's logic
+#    is held to a finer standard than two-valued intuition.
+
+# ============================================================================
+# EDGE 2: ENFORCEMENT - a theorem does not switch off a server
+# ============================================================================
+# Parts 3-6 proved verdicts: code 8, forbidden, on every path. But the
+# verdict is a VALUE. Whether the datacenter API call is actually blocked
+# is a fact about actuators, not algebras - EVERY governance system,
+# legal or digital, ends at this same edge. Type (A).
+#
+# What tau-nomic does at this edge: shrinks it to a minimal, auditable,
+# judgment-free gate ("execute only if the verdict allows") - a component
+# with no interpretive latitude of its own, hence nothing in it to
+# persuade or corrupt - and keeps everything with CONTENT (what is legal, what
+# is permanent, what follows) inside the decidable core. Compare: an
+# LLM guardrail is a PERSUADABLE judge at the same position; here the
+# gate has nothing to be persuaded about. And inside the run itself,
+# there is no bypass: the machine of parts 3-6 has no admin input, no
+# override stream - unbypassability is architectural, not promised.
+
+# ============================================================================
+# EDGE 3: IDENTITY - the algebra cannot know who is speaking
+# ============================================================================
+# WHO may propose, WHO may seal (part 5), WHO holds the constitutional
+# rank (tau-nomic's role gate, verdict code 7) - binding a request to a
+# person/key is authentication: a fact about the world. Type (A) at the
+# root. BUT: everything built ON TOP of the root is in-language again -
+# role structure, scoped delegation, separation of powers are just more
+# decidable rules (the same meets and entailments you have watched for
+# seven parts). The edge is exactly as thick as "is this signature
+# genuine" - and no thicker.
+
+# ============================================================================
+# EDGE 4: THE RESIDUE OF CHOICE - and of framing
+# ============================================================================
+# Part 2 was honest: when two proposals are each consistent with the core
+# but conflict with EACH OTHER, no algebra picks a winner. tau-nomic
+# hands exactly that residue - and nothing more - to a vote (its L2
+# mechanism). And beneath every vote lies the deeper human power: WHAT
+# gets proposed, WHICH questions are asked, WHOSE encoding is used
+# (edge 1). Type (B), permanently. A formalism that claimed to close
+# THIS edge would not be safe - it would be a ruler.
+#
+# ============================================================================
+# THE SHAPE OF THE WHOLE THING (series conclusion)
+# ============================================================================
+#
+# What only Tau can:    decide questions about specs AS VALUES - including
+#                       over its own state, over all amendments, over all
+#                       paths through time (parts 1, 3, 5).
+# What tau-nomic makes of it:  a constitution that is un-argue-away-able
+#                       where it must be (core, ratchet, eternity clause)
+#                       and honestly human where it should be (choice,
+#                       framing, translation).
+# How:                  one algebra, three uses - living run for the
+#                       irreplaceable core, direct queries for law at
+#                       scale, human procedure at the named edges.
+# Why:                  because history shows constitutions fall by legal
+#                       steps and persuadable judges - and because for the
+#                       first time, "this core survives every future" is
+#                       not a promise. It is arithmetic.
+#
+# APPENDIX: nomic_09_the_full_palette.tau shows the same machinery with
+# richer rights - scoped conditions, exceptions, numeric thresholds,
+# temporal preconditions, and a proved guarantee over every possible
+# future amendment. The skeleton of parts 1-8 was the curriculum,
+# not the ceiling.
+#
+# ============================================================================
+# END OF THE SERIES
+# ============================================================================

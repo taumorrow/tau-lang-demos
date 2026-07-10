@@ -1,0 +1,108 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 02 - DECIDING, NOT VOTING
+# Why a decidable kernel has no use for majorities
+# ============================================================================
+#
+# Part 1 showed THE capability: specifications are values, and questions
+# about them are decidable arithmetic. This part shows the first consequence
+# for governance - and it is a remarkable one:
+#
+#   A KERNEL THAT CAN DECIDE DOES NOT NEED TO COUNT.
+#
+# Voting exists because ordinary institutions cannot DERIVE what follows
+# from their rules - so they aggregate opinions instead. Tau's algebra
+# derives. And in a Boolean algebra, the meet is IDEMPOTENT:
+#
+#   r & r = r
+#
+# One law stated a thousand times is exactly one law. Read that as a
+# governance statement: REPETITION HAS NO WEIGHT. There is no "more votes";
+# there is only "consistent or not", "entailed or not".
+#
+# Run me:  tau -q < nomic_02_decide_not_vote.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# ============================================================================
+
+# EXPECTED-RESULTS: T 0 T T F
+
+set charvar off
+
+# ============================================================================
+# 1. FIVE "VOTES" ARE ONE LAW (idempotence)
+# ============================================================================
+# The same right R = "action o5 only with log o6", submitted five times.
+# Is the five-fold meet exactly equal to R alone?
+
+normalize (({ o5[t]=1 -> o6[t]=1 } & { o5[t]=1 -> o6[t]=1 } & { o5[t]=1 -> o6[t]=1 } & { o5[t]=1 -> o6[t]=1 } & { o5[t]=1 -> o6[t]=1 }) = ({ o5[t]=1 -> o6[t]=1 })).
+# => T
+#    A Sybil attack - one actor, many identities, same proposal - is not
+#    "defended against" here. It is MEANINGLESS. The algebra cannot even
+#    express the difference between one voice and a thousand.
+
+# ============================================================================
+# 2. REPETITION CANNOT OVERRIDE THE CORE
+# ============================================================================
+# The core says "never o1" ({ o1[t]=0 }). Three "votes" for the opposite:
+
+normalize ({ o1[t]=0 } & { o1[t]=1 } & { o1[t]=1 } & { o1[t]=1 }).
+# => 0
+#    Still the impossible spec. A contradiction does not become law by
+#    being demanded loudly. In a counting system, 3 beats 1. In a deciding
+#    system, 0 stays 0.
+
+# ============================================================================
+# 3. WHAT IS ALREADY LAW CANNOT BE "PASSED AGAIN"
+# ============================================================================
+# Current law: core (o1 -> o4) plus the log right (o5 -> o6).
+# Someone re-submits the log right. Does the legal situation change?
+
+normalize (((({ o1[t]=1 -> o4[t]=1 } & { o5[t]=1 -> o6[t]=1 })) & { o5[t]=1 -> o6[t]=1 }) = ({ o1[t]=1 -> o4[t]=1 } & { o5[t]=1 -> o6[t]=1 })).
+# => T
+#    Nothing changed - decidably. tau-nomic surfaces exactly this as its
+#    verdict code 10, "already in force (idempotent)": the proposal is
+#    acknowledged and the constitution is left untouched. No duplicate
+#    entries, no inflation of the law by repetition.
+
+# ============================================================================
+# 4. CONSEQUENCES ARE NOT VOTED IN - THEY ALREADY HOLD
+# ============================================================================
+# Law: "o1 only with authorization o4" and "o4 only after review o5".
+# Question: is "o1 only after review o5" - never explicitly enacted -
+# already law?
+
+normalize ((({ o1[t]=1 -> o4[t]=1 } & { o4[t]=1 -> o5[t]=1 }) & { o1[t]=1 -> o5[t]=1 }) = ({ o1[t]=1 -> o4[t]=1 } & { o4[t]=1 -> o5[t]=1 })).
+# => T
+#    The transitive consequence already HOLDS - without anyone proposing
+#    it. A deciding kernel does not legislate consequences; they are
+#    contained in the meet. (Ask a committee to notice every consequence
+#    of its own bylaws. This is that, for free, with proof.)
+
+# And a non-consequence stays out - no false positives:
+
+normalize ((({ o1[t]=1 -> o4[t]=1 } & { o4[t]=1 -> o5[t]=1 }) & { o1[t]=1 -> o7[t]=1 }) = ({ o1[t]=1 -> o4[t]=1 } & { o4[t]=1 -> o5[t]=1 })).
+# => F
+#    o7 appears in no law, so "o1 -> o7" is NOT entailed. Deciding cuts
+#    both ways: everything that follows, nothing that does not.
+
+# ============================================================================
+# 5. WHAT THIS MEANS - AND WHAT IT HONESTLY DOES NOT
+# ============================================================================
+#
+# Inside the deciding kernel:
+#   - majority is not a concept (idempotence),
+#   - Sybil / vote-buying / concentration attack nothing (there is no vote),
+#   - consequences of law are instantly, provably law.
+#
+# Honest boundary: voting does not disappear from the world - it retreats
+# to its irreducible minimum. When two proposals are BOTH consistent with
+# the core but conflict with each other, no algebra can pick one: that
+# residual choice (and the deeper power of FRAMING what gets proposed at
+# all) stays human. tau-nomic pushes voting to that edge and no further -
+# part 7 of this series maps this boundary precisely.
+#
+# NEXT: nomic_03_living_constitution.tau - the kernel starts to RUN:
+# a constitution as a temporal machine that accumulates its own law.
+#
+# ============================================================================
+# END OF TUTORIAL 02
+# ============================================================================

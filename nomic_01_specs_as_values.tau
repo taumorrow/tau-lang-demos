@@ -1,0 +1,174 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 01 - SPECS AS VALUES
+# The one capability everything else is built on
+# ============================================================================
+#
+# This is part 1 of a series that explains tau-nomic - a living, self-amending
+# constitution running on Tau - to anyone interested
+# Each part is
+# a runnable .tau file: read the comments, run the file, check the outputs.
+#
+#   Part 1 (this file): WHAT ONLY TAU CAN DO - specifications as first-class,
+#                       decidable values.
+#   Part 2: deciding vs. voting (idempotence)
+#   Part 3: the living constitution (a run that amends itself)
+#   ...
+#
+# Run me:  tau -q < nomic_01_specs_as_values.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+#
+# READING THE OUTPUT: the REPL echoes every line it reads and then numbers
+# its results as %1, %2, ... - scan for the "%N: ..." lines; those are the
+# answers annotated below. Everything else is echo. On a POSIX shell you
+# can filter:   tau -q < file.tau 2>&1 | grep -E '^%[0-9]+:'
+# (In the run-based parts 3-6, look for "o0res[t] := ..." lines instead.)
+#
+# NOTATION IN 60 SECONDS: names like o1, o4, o5 are OUTPUT STREAMS -
+# time-indexed variables over a Boolean algebra; o1[t] is stream o1 at
+# step t. A formula with a free t inside { } is implicitly closed with
+# "always": the law holds at EVERY step. (i-names are input streams;
+# time becomes real in part 3 - until then each example is a one-step
+# skeleton.)
+# ============================================================================
+
+# EXPECTED-RESULTS: 0 T F T F T
+
+set charvar off
+
+# ============================================================================
+# 1. THE CLAIM
+# ============================================================================
+#
+# Every serious tool can CHECK a formula:
+#   - a SAT solver tells you if a formula is satisfiable,
+#   - a model checker tells you if a system violates a property,
+#   - a smart contract EXECUTES rules.
+#
+# But in all of them, the rules themselves are SYNTAX - text, bytecode, AST.
+# The system computes WITH them, never ABOUT them. Ask a smart contract
+# "is your rule set consistent?" and there is no such operation. Ask Z3
+# "is this formula, AS AN OBJECT, compatible with that one?" and you must
+# encode it yourself - and the moment rules can rewrite rules, Rice's
+# theorem ends the conversation for every Turing-complete system.
+#
+# Tau's foundation is different: a SPECIFICATION IS A VALUE. It lives in a
+# Boolean algebra (the "tau" type). You can take the meet (&) of two specs,
+# compare specs with =, quantify over ALL possible specs - and every such
+# question is DECIDABLE. Not "usually terminates": decidable, by
+# construction, because Tau trades Turing-completeness for decidability.
+#
+# That single trade is the root of everything tau-nomic does.
+
+# ============================================================================
+# 2. A SPEC AS A VALUE - and the meet as "living together"
+# ============================================================================
+#
+# { ... } wraps a specification into a VALUE of the tau Boolean algebra.
+# Read { o1[t]=0 } as the LAW "output 1 is never raised" (say: "the system
+# never performs the destructive action o1").
+#
+# The meet (&) of two spec-values is the spec that enforces BOTH.
+# The key fact: the meet is 0 (the empty/impossible spec) EXACTLY WHEN the
+# two laws cannot coexist. Consistency of law becomes ARITHMETIC.
+#
+# (Scope note: we use small { } meets here - a handful of values, which
+#  is exactly what this tool is for. For LARGE one-off conjunctions,
+#  part 7 shows the query form to prefer on current alpha builds.)
+
+# Two laws that contradict each other - their meet is the impossible spec:
+normalize ({ o1[t]=0 } & { o1[t]=1 }).
+# => %1: 0
+#    "never do o1" AND "always do o1" annihilate. No judge, no debate:
+#    the algebra itself says these two cannot both be law.
+
+# Two laws that can coexist - their meet is satisfiable (not 0):
+sat ({ o1[t]=1 -> o4[t]=1 } & { o5[t]=1 -> o6[t]=1 }) != 0.
+# => %2: T
+#    "o1 only with authorization o4" and "o5 only with log o6" live together.
+#
+#    HONEST SCOPE: "satisfiable together" is a deliberately WEAK bar - two
+#    implications can always coexist by simply never being triggered.
+#    Consistency is the SKELETON of legality, not the whole verdict. That
+#    is by design: the skeleton is what can be decided with certainty;
+#    the finer judgments live in HOW rights are written (conditional,
+#    scoped obligations) and in the entrenchment machinery of parts 4-6,
+#    which give the skeleton its teeth. (Appendix 09 shows those richer
+#    right-forms live.)
+
+# The same question with a contradiction inside - decidably NO:
+sat ({ o1[t]=0 } & { o1[t]=1 }) != 0.
+# => %3: F
+
+# ============================================================================
+# 3. ENTAILMENT AS AN EQUATION - law reasoning without a lawyer
+# ============================================================================
+#
+# "Does the rule set R already entail rule r?" is in Tau the equation
+#     (R & r) = R
+# because adding something already implied changes nothing.
+# Here: R = "o1 only if authorized (o4)" together with the fact "o1 happens".
+# Does R entail "o4 happens"? It must - that is what the implication says.
+
+normalize ((({ o1[t]=1 -> o4[t]=1 } & { o1[t]=1 }) & { o4[t]=1 }) = ({ o1[t]=1 -> o4[t]=1 } & { o1[t]=1 })).
+# => %4: T
+#    The consequence o4 is already contained. Redundancy, entailment,
+#    conflict - all of law's logic collapses into decidable equations.
+
+# ============================================================================
+# 4. SELF-REFERENCE WITHOUT PARADOX - the historic wall falls
+# ============================================================================
+#
+# Since Russell, self-reference has been where formal systems break: the set of all
+# sets that do not contain themselves; the sentence that says "I am false";
+# Goedel; Rice. Every Turing-complete rule system inherits this: it cannot
+# decide global questions about its own rules.
+#
+# Tau quantifies over ITS OWN value space - the space of ALL specifications -
+# and stays decidable. Ask: "is there a spec X that equals its own
+# complement?" (the Russell-style question):
+
+normalize (ex X:tau (X = X')).
+# => %5: F
+#    No crash, no paradox, no "undecidable": a clean, provable NO.
+#    The question about all specs is itself a decidable question.
+
+# And the universal version - a statement about EVERY possible spec X,
+# an INFINITE space of values (here a trivially true one, to show the
+# quantifier itself is decidable):
+
+normalize (all X:tau (({ o1[t]=0 } & X) = ({ o1[t]=0 } & X))).
+# => %6: T
+#    "For all conceivable laws X ..." is a legal, decidable sentence.
+#    THIS is what makes guarantees over all future amendments possible
+#    (part 5 of this series builds exactly that).
+
+# ============================================================================
+# 5. WHY NOTHING ELSE DOES THIS
+# ============================================================================
+#
+#   - SAT/SMT (Z3, cvc5): decide formulas - but formulas are INPUTS, not
+#     values. There is no meet of two "problem instances", no quantifier
+#     over all instances, no execution.
+#   - Model checkers: verify a FIXED system against a FIXED property. The
+#     system cannot soundly rewrite itself under a preserved invariant -
+#     that question is Rice-undecidable in their world.
+#   - Smart contracts / DAOs: rules execute and can even amend rules, but
+#     "no reachable amendment chain ever breaks invariant K" is undecidable
+#     for them IN GENERAL - they are Turing-complete. (A specific finite
+#     contract can be model-checked; but then it is finite and fixed,
+#     not an open-ended, self-extending rule space.)
+#   - Proof assistants (Coq/Lean): can talk about their own terms, but are
+#     not decidable (you write the proofs) and not reactive systems.
+#
+# Tau gives up Turing-completeness and gains, in one language:
+#   specs as values  +  decidable meta-questions  +  execution over time.
+# The rest of this series is nothing but this one trade, applied:
+# a constitution whose rules are DATA it can decidably reason about -
+# while it runs.
+#
+# NEXT: nomic_02_decide_not_vote.tau - why such a kernel DECIDES instead of
+# counting votes, and why that makes Sybil attacks meaningless inside it.
+#
+# ============================================================================
+# END OF TUTORIAL 01
+# ============================================================================

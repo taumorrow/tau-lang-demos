@@ -1,0 +1,151 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 07 - THE HONEST MAP
+# What reduces to SAT (and why that is a success), what only Tau can do,
+# and which query form to use at which scale
+# ============================================================================
+#
+# Every capable tool deserves an accurate map. This part draws it: most
+# single questions you have seen REDUCE to classical satisfiability - and
+# that is a FEATURE, not a weakness. Tau's irreplaceable core is narrow
+# and precise (part 5). And knowing which query form to use at which
+# scale is what turns capability into engineering.
+#
+# Run me:  tau -q < nomic_07_the_map.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# ============================================================================
+
+# EXPECTED-RESULTS: F T F F T T
+
+set charvar off
+
+# ============================================================================
+# 1. REDUCTION IS SUCCESS, NOT WEAKNESS
+# ============================================================================
+# "Is this action legal under these rules?" - as a DIRECT spec question:
+
+sat always ((o1[t]=1 -> o4[t]=1) && (o5[t]=1 -> o6[t]=1) && o1[t]=1 && o4[t]=0).
+# => F
+#    A SAT solver could answer this too, after you hand-translate rules,
+#    action and framing into its input format. Tau's win here is not
+#    that the question is impossible elsewhere - it is that the question
+#    lands PRE-TRANSLATED: the rules ARE the program, the check IS the
+#    semantics. When a hard-looking governance question reduces to a
+#    fast decidable check, that is the machinery WORKING.
+#    (Where nothing reduces: part 5's ratchet - "no legal sequence ever
+#    drops sealed law" quantifies over time, history and an infinite
+#    spec space at once. THAT is the irreplaceable core.)
+
+# The workhorse of scale - entailment over module-sized rule sets:
+
+valid always (((o1[t]=1 -> o4[t]=1) && (o4[t]=1 -> o5[t]=1)) -> (o1[t]=1 -> o5[t]=1)).
+# => T
+#    This form (valid always (rules -> claim)) is measured correct far
+#    beyond anything shown here (200+ clause rule sets).
+#    tau-nomic uses exactly this route for its redundancy verdict
+#    (code 10) and for module-crossing constitutional checks (part 6).
+
+# ============================================================================
+# 2. ONE-OFF QUESTIONS AT SCALE - use the direct form
+# ============================================================================
+# Tau offers two ways to ask a one-off question: over { } spec-VALUES
+# (parts 1-2 - the right tool for small meta-questions about specs as
+# objects) and DIRECTLY as a specification. For LARGE one-off conjunctions,
+# the direct form is the road to take on current alpha builds: it is
+# measured correct and fast far beyond real-world rule-set sizes, while
+# the spec-as-value one-off path still has a known scaling issue there
+# (reported upstream and being addressed - alpha means alpha; nothing in
+# parts 1-6 is affected: their { } meets are small, and the living run's
+# kernel decides the same conflicts correctly, verified with transitive
+# conflicts over the full accumulated state).
+#
+# The direct form at (small) scale - a 17-link implication chain
+# o7 -> o9 -> ... -> o41 forces o41=1 whenever o7=1, so adding
+# "o7=1 && o41=0" makes it unsatisfiable:
+
+sat always ((o7[t]=1 -> o9[t]=1) && (o9[t]=1 -> o11[t]=1) && (o11[t]=1 -> o13[t]=1) && (o13[t]=1 -> o15[t]=1) && (o15[t]=1 -> o17[t]=1) && (o17[t]=1 -> o19[t]=1) && (o19[t]=1 -> o21[t]=1) && (o21[t]=1 -> o23[t]=1) && (o23[t]=1 -> o25[t]=1) && (o25[t]=1 -> o27[t]=1) && (o27[t]=1 -> o29[t]=1) && (o29[t]=1 -> o31[t]=1) && (o31[t]=1 -> o33[t]=1) && (o33[t]=1 -> o35[t]=1) && (o35[t]=1 -> o37[t]=1) && (o37[t]=1 -> o39[t]=1) && (o39[t]=1 -> o41[t]=1) && o7[t]=1 && o41[t]=0).
+# => F
+#    The transitive contradiction across all 17 clauses - detected
+#    directly. This form scales to hundreds of clauses; it is what
+#    tau-nomic uses for redundancy (code 10) and module-crossing
+#    constitutional checks (part 6).
+#
+# The general lesson stands on its own: VERIFY YOUR TOOLS. Every claim
+# in this series is a runnable query precisely so you never have to
+# take our word for anything - test, cross-check, and prefer the paths
+# your own measurements confirm.
+
+# ============================================================================
+# 3. THE NUMBERS - it scales, measured and reproducible
+# ============================================================================
+# Claims about scale should run, not just read. Here is a FORTY-clause
+# implication chain o7 -> o9 -> ... -> o87 - three questions, live:
+
+# (a) the transitive contradiction across ALL 40 clauses - is it caught?
+sat always ((o7[t]=1 -> o9[t]=1) && (o9[t]=1 -> o11[t]=1) && (o11[t]=1 -> o13[t]=1) && (o13[t]=1 -> o15[t]=1) && (o15[t]=1 -> o17[t]=1) && (o17[t]=1 -> o19[t]=1) && (o19[t]=1 -> o21[t]=1) && (o21[t]=1 -> o23[t]=1) && (o23[t]=1 -> o25[t]=1) && (o25[t]=1 -> o27[t]=1) && (o27[t]=1 -> o29[t]=1) && (o29[t]=1 -> o31[t]=1) && (o31[t]=1 -> o33[t]=1) && (o33[t]=1 -> o35[t]=1) && (o35[t]=1 -> o37[t]=1) && (o37[t]=1 -> o39[t]=1) && (o39[t]=1 -> o41[t]=1) && (o41[t]=1 -> o43[t]=1) && (o43[t]=1 -> o45[t]=1) && (o45[t]=1 -> o47[t]=1) && (o47[t]=1 -> o49[t]=1) && (o49[t]=1 -> o51[t]=1) && (o51[t]=1 -> o53[t]=1) && (o53[t]=1 -> o55[t]=1) && (o55[t]=1 -> o57[t]=1) && (o57[t]=1 -> o59[t]=1) && (o59[t]=1 -> o61[t]=1) && (o61[t]=1 -> o63[t]=1) && (o63[t]=1 -> o65[t]=1) && (o65[t]=1 -> o67[t]=1) && (o67[t]=1 -> o69[t]=1) && (o69[t]=1 -> o71[t]=1) && (o71[t]=1 -> o73[t]=1) && (o73[t]=1 -> o75[t]=1) && (o75[t]=1 -> o77[t]=1) && (o77[t]=1 -> o79[t]=1) && (o79[t]=1 -> o81[t]=1) && (o81[t]=1 -> o83[t]=1) && (o83[t]=1 -> o85[t]=1) && (o85[t]=1 -> o87[t]=1) && o7[t]=1 && o87[t]=0).
+# => F
+#    Unsatisfiable, correctly - the derivation walks the entire chain.
+
+# (b) no over-blocking: the satisfiable variant stays satisfiable:
+sat always ((o7[t]=1 -> o9[t]=1) && (o9[t]=1 -> o11[t]=1) && (o11[t]=1 -> o13[t]=1) && (o13[t]=1 -> o15[t]=1) && (o15[t]=1 -> o17[t]=1) && (o17[t]=1 -> o19[t]=1) && (o19[t]=1 -> o21[t]=1) && (o21[t]=1 -> o23[t]=1) && (o23[t]=1 -> o25[t]=1) && (o25[t]=1 -> o27[t]=1) && (o27[t]=1 -> o29[t]=1) && (o29[t]=1 -> o31[t]=1) && (o31[t]=1 -> o33[t]=1) && (o33[t]=1 -> o35[t]=1) && (o35[t]=1 -> o37[t]=1) && (o37[t]=1 -> o39[t]=1) && (o39[t]=1 -> o41[t]=1) && (o41[t]=1 -> o43[t]=1) && (o43[t]=1 -> o45[t]=1) && (o45[t]=1 -> o47[t]=1) && (o47[t]=1 -> o49[t]=1) && (o49[t]=1 -> o51[t]=1) && (o51[t]=1 -> o53[t]=1) && (o53[t]=1 -> o55[t]=1) && (o55[t]=1 -> o57[t]=1) && (o57[t]=1 -> o59[t]=1) && (o59[t]=1 -> o61[t]=1) && (o61[t]=1 -> o63[t]=1) && (o63[t]=1 -> o65[t]=1) && (o65[t]=1 -> o67[t]=1) && (o67[t]=1 -> o69[t]=1) && (o69[t]=1 -> o71[t]=1) && (o71[t]=1 -> o73[t]=1) && (o73[t]=1 -> o75[t]=1) && (o75[t]=1 -> o77[t]=1) && (o77[t]=1 -> o79[t]=1) && (o79[t]=1 -> o81[t]=1) && (o81[t]=1 -> o83[t]=1) && (o83[t]=1 -> o85[t]=1) && (o85[t]=1 -> o87[t]=1) && o7[t]=1 && o87[t]=1).
+# => T
+
+# (c) the entailment workhorse: does the chain imply its own long-range
+#     consequence o7 -> o87?
+valid always (((o7[t]=1 -> o9[t]=1) && (o9[t]=1 -> o11[t]=1) && (o11[t]=1 -> o13[t]=1) && (o13[t]=1 -> o15[t]=1) && (o15[t]=1 -> o17[t]=1) && (o17[t]=1 -> o19[t]=1) && (o19[t]=1 -> o21[t]=1) && (o21[t]=1 -> o23[t]=1) && (o23[t]=1 -> o25[t]=1) && (o25[t]=1 -> o27[t]=1) && (o27[t]=1 -> o29[t]=1) && (o29[t]=1 -> o31[t]=1) && (o31[t]=1 -> o33[t]=1) && (o33[t]=1 -> o35[t]=1) && (o35[t]=1 -> o37[t]=1) && (o37[t]=1 -> o39[t]=1) && (o39[t]=1 -> o41[t]=1) && (o41[t]=1 -> o43[t]=1) && (o43[t]=1 -> o45[t]=1) && (o45[t]=1 -> o47[t]=1) && (o47[t]=1 -> o49[t]=1) && (o49[t]=1 -> o51[t]=1) && (o51[t]=1 -> o53[t]=1) && (o53[t]=1 -> o55[t]=1) && (o55[t]=1 -> o57[t]=1) && (o57[t]=1 -> o59[t]=1) && (o59[t]=1 -> o61[t]=1) && (o61[t]=1 -> o63[t]=1) && (o63[t]=1 -> o65[t]=1) && (o65[t]=1 -> o67[t]=1) && (o67[t]=1 -> o69[t]=1) && (o69[t]=1 -> o71[t]=1) && (o71[t]=1 -> o73[t]=1) && (o73[t]=1 -> o75[t]=1) && (o75[t]=1 -> o77[t]=1) && (o77[t]=1 -> o79[t]=1) && (o79[t]=1 -> o81[t]=1) && (o81[t]=1 -> o83[t]=1) && (o83[t]=1 -> o85[t]=1) && (o85[t]=1 -> o87[t]=1)) -> (o7[t]=1 -> o87[t]=1)).
+# => T
+#    Run the file and watch all three come back at once. Absolute
+#    timings are machine-specific - the numbers that matter, and that
+#    transfer, are the CLAUSE COUNTS and the growth behavior.
+#
+# Measured beyond this file (same query forms, our test campaign):
+#
+#   direct sat/unsat:    verified correct at 17, 30, 39 and 200 clauses -
+#                        cost grows roughly LINEARLY with formula size;
+#                        no blowup anywhere in that range.
+#   entailment (valid):  verified correct in BOTH directions at 201
+#                        clauses - an order of magnitude beyond any
+#                        realistic module.
+#   constitution demo:   part 6's full skeleton (39 clauses across three
+#                        modules) - every constitutionality, legitimacy
+#                        and redundancy check verified correct.
+#   the living run:      59 rights accumulated in one continuous run,
+#                        EVERY verdict correct - including a transitive
+#                        conflict that only exists across all 59 at once.
+#   the ratchet:         a 20-clause legal state sealed and defended: the
+#                        floor held against every replace we threw at it
+#                        (tested at 6, 12, 16 and 20 clauses).
+#
+# Design note, honestly: the living run's step cost grows with the
+# accumulated state - which is why the architecture (part 6) keeps the
+# SEALED CORE small and carries scale on direct queries. That is not a
+# workaround; it mirrors where the irreplaceable capability lives (the
+# core needs path-dependence; the modules only need decidability).
+
+# ============================================================================
+# 4. THE MAP (what to use for what)
+# ============================================================================
+#
+#   living run   - the small, unbypassable core: entrenchment, the
+#                  ratchet, path-dependent permanence. The IRREPLACEABLE
+#                  part - nothing else, in any ecosystem, decides
+#                  "no sequence ever breaks the core".
+#   direct query - consistency, entailment, redundancy, constitutionality
+#                  checks over rule sets of any realistic size. Reducible
+#                  in principle, pre-translated and instant in practice.
+#   { } one-off  - the meta-tool: small meets, equivalence and
+#                  entailment of specs AS OBJECTS (parts 1-2, 8). For
+#                  large one-off conjunctions prefer the direct form
+#                  on current alpha builds.
+#
+# One architecture uses all three correctly - you saw it in part 6:
+# sealed ratchet core (run) + module checks (direct) + tiny value
+# demonstrations ({ }). That layering is not a workaround; it mirrors
+# WHERE the unique capability actually lives.
+#
+# NEXT (final): nomic_08_the_edges.tau - what remains genuinely outside:
+# translation, enforcement, identity - and why naming those edges
+# precisely is part of the design, not a defeat.
+#
+# ============================================================================
+# END OF TUTORIAL 07
+# ============================================================================

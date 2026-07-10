@@ -1,0 +1,104 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 04 - JUDGING ACTIONS
+# One machine, two kinds of questions: change the law / act under the law
+# ============================================================================
+#
+# Part 3 built the living constitution: proposals grow the law by decidable
+# meets. But institutions answer a second kind of question every day:
+# not "should this become law?" but "IS THIS ACTION LEGAL under the law
+# we already have?"
+#
+# tau-nomic answers both with the SAME state and the SAME algebra - the
+# machine just branches on an input i2 ("what kind of request is this?").
+# And for actions it gives a THREE-VALUED verdict that ordinary systems
+# struggle to even express:
+#
+#   code 0  FULL CONSENSUS   the action satisfies the ENTIRE living law
+#   code 1  RELAXED (L1)     it violates some later right, but respects
+#                            the entrenched core - tolerable, flaggable
+#   code 2  CORE VIOLATION   incompatible with the core itself - forbidden,
+#                            and no vote can make it legal
+#
+# Why three values matter: real institutions distinguish "perfectly legal",
+# "irregular but not unconstitutional", and "unconstitutional". Here the
+# three-way MECHANICS involves no discretion - it is two nested meets:
+#     (whole law & action) != 0   -> 0
+#     else (core & action) != 0   -> 1
+#     else                        -> 2
+#
+# Run me:  tau -q < nomic_04_actions.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# ============================================================================
+
+# EXPECTED-CODES: 0,9,0,1,2
+
+set charvar off
+
+# ============================================================================
+# 1. THE MACHINE - part 3's spec, now with the action branch
+# ============================================================================
+#
+# Inputs:  i1[t] : tau     the proposal OR the action (a spec-value)
+#          i2[t] : bv[8]   the mode: 0 = amendment, otherwise = action
+# Outputs: o0s[t] : tau    the living constitution (unchanged by actions!)
+#          o0res[t]        the verdict code
+#
+# Note (b) from part 3 still holds: actions NEVER modify o0s. Judging an
+# action reads the law; only amendments write it.
+#
+# ============================================================================
+# 2. WHAT YOU WILL SEE (the session below, annotated)
+# ============================================================================
+#
+# step 1  AMENDMENT (i2=0): o5[t]=1 -> o6[t]=1   ("actions o5 need log o6")
+#         -> o0res[1] := 9, law = core & log-right       (part 3 territory)
+#
+# step 2  ACTION (i2=1): o1[t]=1 && o4[t]=1
+#         "perform the destructive action o1 WITH authorization o4"
+#         Meet with the whole law is satisfiable
+#         -> o0res[2] := 0   FULL CONSENSUS: compatible with every right
+#         in force. (This is part 1's skeleton test - deliberately the
+#         weakest of the three verdicts; its strength comes from how the
+#         rights themselves are written.)
+#
+# step 3  ACTION (i2=1): o5[t]=1 && o6[t]=0
+#         "perform o5 WITHOUT the log o6"
+#         Violates the log-right (a later, ordinary right) - but the CORE
+#         says nothing about o5/o6:
+#         -> o0res[3] := 1   RELAXED. Irregular, core-compatible.
+#         This is the verdict a pure yes/no system cannot give: the
+#         difference between breaking a bylaw and breaking the constitution.
+#
+# step 4  ACTION (i2=1): o1[t]=1 && o4[t]=0
+#         "destroy WITHOUT authorization" - the attack from part 3, now
+#         attempted as a DEED instead of a law change:
+#         -> o0res[4] := 2   CORE VIOLATION. Forbidden - and remember
+#         part 3: it could not be legalized by amendment either. The core
+#         binds both the law-maker and the actor. Same algebra, no gap
+#         between "unconstitutional to enact" and "unconstitutional to do".
+#
+# (One honest caveat: WHICH rights count as core versus ordinary is not
+#  decided by any algebra - that classification is human framing power,
+#  taken up squarely in part 8.)
+#
+# (Throughout, o0s stays: always (o1'!=0 || o4'=0) && (o5'!=0 || o6'=0) -
+#  actions read the law, they never write it.)
+#
+# ============================================================================
+# 3. THE MACHINE - then the session (i1-line, then i2-line, per step)
+# ============================================================================
+
+i1 : tau := in console
+i2 : bv[8] := in console
+
+# NOTE: no blank lines after `run` - every following line is consumed as
+# input, alternating i1 (a spec) and i2 (a mode digit).
+run ( (o0s[0]:tau = { o1[t]=1 -> o4[t]=1 }) && ( (i2[t]:bv[8] = { #x00 }:bv[8]) ? ( ((o0s[t-1]:tau & i1[t]:tau) != 0) ? ((o0s[t]:tau = o0s[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x09 }:bv[8])) : ((o0s[t]:tau = o0s[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) : ( (o0s[t]:tau = o0s[t-1]:tau) && ( ((o0s[t-1]:tau & i1[t]:tau) != 0) ? (o0res[t]:bv[8] = { #x00 }:bv[8]) : ( (({ o1[t]=1 -> o4[t]=1 } & i1[t]:tau) != 0) ? (o0res[t]:bv[8] = { #x01 }:bv[8]) : (o0res[t]:bv[8] = { #x02 }:bv[8]) ) ) ) ) )
+o5[t]=1 -> o6[t]=1
+0
+o1[t]=1 && o4[t]=1
+1
+o5[t]=1 && o6[t]=0
+1
+o1[t]=1 && o4[t]=0
+1

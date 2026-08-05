@@ -1,134 +1,94 @@
-# Tau Demo Runner
+# Tau Language Demos
 
-A sophisticated Windows application for executing and managing Tau language demonstrations, featuring an advanced theme system, intelligent help integration, and real-time syntax highlighting.
+Runnable demos and tutorials for the [Tau Language](https://github.com/IDNI/tau-lang) —
+a language whose specifications are first-class values of a decidable algebra.
 
-## Core Features
+The centerpiece is the **Tau-Nomic Tutorial Series**: a living, self-amending
+constitution, explained in eleven self-contained `.tau` files. Every claim in
+the series is a runnable query, and every file declares its expected outputs
+as a machine-readable contract — so the series **checks itself** against your
+binary.
 
-### Execution Controls
-- **Run/Play**: Execute demo scripts with configurable automation
-- **Step Control**: Next, Back, and Skip functionality for precise navigation
-- **Process Management**: Restart and clear capabilities with state preservation
-- **Timing Analysis**: Microsecond precision execution tracking
-- **Progress Monitoring**: Visual progress tracking with percentage display
+## The Tau-Nomic Tutorial Series
 
-### Advanced Interface
-- **Modern UI**: Sleek design with custom-rendered controls and smooth animations
-- **Visual Feedback**: Status indicator with dynamic state visualization
-- **Shadow Effects**: Sophisticated panel rendering with customizable shadows
-- **Command Panel**: Integrated command interface with quick access buttons
-- **Split Layout**: Efficient space utilization with adjustable panels
+| Part | File | What it shows |
+|------|------|---------------|
+| 00 | `nomic_00_read_me_first.tau` | Orientation: what tau-nomic is, how to read the series |
+| 01 | `nomic_01_specs_as_values.tau` | Specifications as decidable values: meet, entailment, self-reference without paradox |
+| 02 | `nomic_02_decide_not_vote.tau` | Idempotence: why a deciding kernel has no use for majorities |
+| 03 | `nomic_03_living_constitution.tau` | The kernel starts to run: law as temporal state, adopt/reject as arithmetic |
+| 04 | `nomic_04_actions.tau` | Judging deeds under the law: legal / irregular / unconstitutional |
+| 05 | `nomic_05_ratchet.tau` | Irreversibility and path-dependence |
+| 06 | `nomic_06_eternity_clause.tau` | A real constitution's core (German Basic Law, Art. 79(3)) mechanized |
+| 07 | `nomic_07_the_map.tau` | What reduces to SAT, what is irreplaceable, which query form scales |
+| 08 | `nomic_08_the_edges.tau` | What honestly stays outside: translation, enforcement, identity, choice |
+| 09 | `nomic_09_the_full_palette.tau` | Appendix: scoped, quantitative and temporal rights; a guarantee over all future amendments |
+| 10 | `nomic_10_the_trilemma.tau` | Appendix II: who amends the amendment rule? |
 
-### Intelligent Help System
-- **Context-Sensitive Help**: Pattern-based code analysis for relevant documentation
-- **Interactive Search**: Real-time help content filtering
-- **Category Organization**: Structured documentation with intuitive navigation
-- **Rich Examples**: Comprehensive code samples with explanations
-- **Pattern Recognition**: Smart identification of code structures and concepts
+Read them in order — each part builds on the last. Three parts replay entire
+constitutional histories by themselves when you run the file.
 
-### Professional Syntax Highlighting
-- **Real-time Processing**: Immediate syntax analysis and coloring
-- **ANSI Support**: Full ANSI color code interpretation
-- **Optimized Performance**: Batched processing and caching for large files
-- **Smart Detection**: Automatic identification of:
-  - Command structures
-  - Logical operators
-  - Function definitions
-  - Temporal expressions
-  - Variable references
-  - Type annotations
+### Running the series
 
-### Extensive Theme System
-#### Built-in Collections
-- **Professional**: GitHub, Dracula, One Dark/Light
-- **Natural**: Forest, Ocean, Arctic
-- **Retro**: Synthwave84, Neon City
-- **Classic**: Solarized, Gruvbox, Monokai
-- **Specialized**: Matrix, Minimal, Cotton Candy
+You need a `tau` binary (build it from [IDNI/tau-lang](https://github.com/IDNI/tau-lang);
+the series was developed against 0.7.0-alpha builds). Then:
 
-#### Theme Features
-- Light/Dark variants with system theme detection
-- XML-based configuration for easy customization
-- Runtime theme switching with smooth transitions
-- Consistent styling across all UI elements
-- Color interpolation for visual effects
+```bash
+# the whole series, checked against the contracts in each file header:
+TAU_BIN=/path/to/tau ./nomic_run_all.sh
 
-### Advanced Configuration
-- **Window Management**: Size, position, and state persistence
-- **Font Control**: Dynamic size adjustment (8-24pt)
-- **Execution Settings**: Configurable delays and automation
-- **Visual Options**: Comment visibility and display preferences
-- **Process Configuration**: Tau executable path management
+# a single part:
+/path/to/tau -q < nomic_01_specs_as_values.tau
+```
 
-## Technical Highlights
+`nomic_run_all.sh` runs every file and compares the actual outputs against the
+`EXPECTED-RESULTS` / `EXPECTED-CODES` / `EXPECTED-TF` headers. On a matching
+binary it ends with `ALL PASS`. If a file fails on your build, the script
+tells you exactly which claim diverged — the contracts are the documentation.
 
-### Performance Optimization
-- Efficient graphics rendering with hardware acceleration
-- Smart caching for syntax highlighting and theme colors
-- Batch processing for large files
-- Thread-safe settings management
-- Memory-efficient resource handling
+Two practical notes:
 
-### Robust Architecture
-- Pattern-based code analysis
-- Thread-safe operations
-- Comprehensive error handling
-- Resource cleanup management
-- Event-driven updates
+- Always **pipe a whole file** into `tau` as shown (one file = one session).
+  Typing the parts interactively works too, but the replay parts are designed
+  to run end-to-end.
+- The files are pure ASCII on purpose; the runner enforces this.
 
-### Security Considerations
-- Safe file handling
-- Protected settings storage
-- Controlled process management
-- Secure resource disposal
-- Input validation
+## Classic demos
 
-## Getting Started
+Smaller stand-alone demos, from the early days of this repository:
 
-1. **Installation**
-   - Download the latest release
-   - Extract to desired location
-   - Ensure Tau executable is available
+- **Arithmetic as logic:** `4bit_binary_adder.tau` (+ `_io`, `_sbf` variants),
+  `4bit_binary_substractor.tau`, `4bit_binary_multiplier.tau`, `logic_gates.tau`,
+  `binary_encoding.tau`, `bitvector_tutorial.tau`
+- **Self-reference:** `barber_demo_1.tau`, `barber_demo_2.tau` (Russell's barber,
+  handled without paradox)
+- **Temporal behavior:** `temporal_state_machine.tau`, `temporal_stability.tau`,
+  `temporal_meta_prediction.tau`, `delayed_signal.tau`, `feedback_loop.tau`,
+  `adaptive_memory_management.tau`
+- **Applications:** `casino.tau` (provably fair gaming — see LICENSE)
 
-2. **Initial Setup**
-   ```
-   - Launch Tau Demo Runner
-   - Configure Tau path if not auto-detected
-   - Select preferred theme and font size
-   - Open a demo file (*.tau)
-   ```
+The `io/` directory holds sample input streams (`.in` files) used by the
+IO-variant demos.
 
-3. **Basic Usage**
-   ```
-   - Use toolbar controls for execution
-   - Enter commands in command panel
-   - Monitor status in status bar
-   - Access help with context clicks
-   ```
+These predate the tutorial series and carry no self-check contracts; run them
+the same way (`tau -q < file.tau`). Some were written against older alpha
+builds and may need small adjustments on current ones.
 
-## Configuration Files
+## Legacy: Tau Demo Runner
 
-- **settings.xml**: User preferences and window state
-- **themes.xml**: Theme definitions and customization
-- **help.xml**: Documentation and examples
-
-## System Requirements
-
-- Windows OS
-- Tau executable
-- some Tau Language Demo Files
-- Display resolution: 1280x720 or higher
-
-## Development
-
-- Built with C#
-- Modern UI rendering techniques
-- Thread-safe implementation
-- Extensive XML configuration
-- Modular architecture
+`tdr-0.5-windows-TAUMORROW.zip` is an archived Windows GUI runner for these
+demos (C#, themes, syntax highlighting). It predates the current Tau builds
+and is **no longer maintained** — kept for the archive only. Use the shell
+workflow above instead.
 
 ## License
 
-MIT - free to use for everyone, but dont forget the credits :)
+See [LICENSE](LICENSE) (v2.0): the Tau-Nomic Tutorial Series is free for
+research, education, verification and the Tau-Net ecosystem (other commercial
+use requires a written license); the provably-fair-gaming architecture carries
+its own commercial restriction; the remaining classic demos are MIT.
 
-still a work in progress, with some gdi+ rendering bugs here and there, 
-help system also needs improvements and better structured content. 
+Tau Language itself is (c) IDNI AG under
+[its own license](https://github.com/IDNI/tau-lang/blob/main/LICENSE.md).
+
+(c) 2025-2026 Taumorrow (taumorrow@gmail.com)

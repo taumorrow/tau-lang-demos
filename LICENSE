@@ -1,7 +1,7 @@
 MIT License with Commercial Restriction for Provably Fair Gaming
 ==================================================================
 
-Copyright (c) 2025 l0g1x
+Copyright (c) 2025-2026 Taumorrow (taumorrow@gmail.com; earlier releases as 'l0g1x')
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -43,11 +43,11 @@ COMBINATION of the following innovations:
 1. TEMPORAL STATE MACHINE FOR GAMING RNG
    Integration of multi-party cryptographic commitments with Tau Language temporal
    state carryover, specifically:
-   
+
    lfsr[t] = next[t-1] + seed[t]  // Temporal carryover from previous state
    next[t] = xorshift(lfsr[t])    // PRNG transformation
    dice[t] = (next[t] % 6) + 1    // Deterministic mapping
-   
+
    Creating history-dependent randomness where identical commitment values at
    different timesteps produce different outcomes, preventing pattern exploitation.
 
@@ -57,7 +57,7 @@ COMBINATION of the following innovations:
    - State preservation between validation steps
    - Batch processing of multiple players simultaneously
    - Practical real-time performance through architectural optimization
-   
+
 3. MICROSERVICES ARCHITECTURE FOR TAU-BASED GAMING
    Decomposition of Tau-based game validation into independent microservices
    each running persistent Tau subprocesses, enabling parallel initialization and scalable deployment.
@@ -119,14 +119,39 @@ YOU MAY use this technology commercially on Tau Net IF:
 4. Source code modifications remain open source
 
 ================================================================================
+TAU-NOMIC TUTORIAL SERIES (added in v2.0)
+================================================================================
+
+The files nomic_00_read_me_first.tau through nomic_10_the_trilemma.tau,
+consensus_decomposed.tau, nomic_run_all.sh and their EXPECTED contracts
+(the "Tau-Nomic Tutorial Series") are NOT covered by the unrestricted MIT
+grant below. From v2.0 they are licensed as follows:
+
+FREE, with attribution ("Tau-Nomic Tutorial Series by Taumorrow"):
+- research, education, academic publication, peer review, and independent
+  verification (running the suite, reproducing the results);
+- personal, noncommercial study and modification;
+- use within the Tau-Net ecosystem, including commercial use in that
+  context;
+- use by IDNI AG in Tau Language / Tau-Net development, including as test
+  or regression material, with attribution.
+
+RESTRICTED: any other commercial use (paid courses or trainings built on
+the series, commercial republication, integration into commercial products
+outside Tau-Net) requires a written license: taumorrow@gmail.com.
+
+Releases before v2.0 of this repository remain under their original terms
+(see LICENSE MODIFICATION below).
+
+================================================================================
 NON-RESTRICTED USES
 ================================================================================
 
 The following uses are NOT restricted and remain under standard MIT license:
 
 ✓ Educational and research purposes
-✓ Personal non-commercial projects  
-✓ Other demos and applications in this repository (non-gaming)
+✓ Personal non-commercial projects
+✓ Other demos and applications in this repository (non-gaming, excluding the Tau-Nomic Tutorial Series - see its own section)
 ✓ Software development tools and utilities
 ✓ Academic publications and studies
 ✓ Open source contributions to this project
@@ -144,7 +169,7 @@ COMMERCIAL LICENSE
 For commercial use of provably fair multiplayer gaming outside Tau Net:
 
 Contact: taumorrow@gmail.com
-Subject: "Provably Fair Gaming License"
+Subject: "License"
 
 ================================================================================
 PATENT NOTICE
@@ -264,4 +289,4 @@ Questions? taumorrow@gmail.com
 
 ================================================================================
 
-Version 1.1 - December 2025
+Version 2.0 - August 2026 (v1.1: December 2025)

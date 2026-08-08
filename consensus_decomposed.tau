@@ -1,0 +1,250 @@
+# ============================================================================
+# CONSENSUS, DECOMPOSED
+# Why a chain of self-amending law barely needs a consensus algorithm -
+# and can prove exactly where it still does
+# ============================================================================
+#
+# A standalone tutorial. No prerequisites; if you enjoy it, the nomic
+# series in this repository builds the full constitutional machinery.
+#
+# THE DEBATE THIS FILE ANSWERS
+# Proof-of-work and proof-of-stake bundle FOUR jobs into one
+# resource-weighted mechanism - deciding VALIDITY, agreeing on ORDER,
+# reaching FINALITY, and resisting SYBILS - and pay for all four with a
+# scarce resource (energy or capital). So a single resource weights all
+# four decisions at once. But the four need not travel together, and two
+# of them barely need the mechanism at all. Validity is already
+# DETERMINISTIC: every full node re-checks it for free, no stake
+# required - unpaid Bitcoin full nodes already do exactly this. And
+# compatible growth needs no ordering whatsoever. When the law is
+# written in a decidable algebra, this file MEASURES what is actually
+# left: only provably-conflicting moments need ordering, and finality
+# becomes an entailment. What it does NOT shrink it names honestly in
+# section 7 - the Sybil root, the network's own impossibility limits
+# (FLP/CAP), and the real BFT/DAG cost of ordering the residue all stay.
+# Consensus is not abolished here. It is unbundled, shrunk, and located.
+#
+# The decomposition, each line backed by a runnable proof below:
+#
+#   validity            computed, not voted          (the whole file)
+#   compatible growth   needs NO ordering at all     (sections 1-2)
+#   conflicting growth  detected, sent to the vote   (section 3)
+#   ratchet moments     ordering as a ceremony       (section 4)
+#   which pairs?        decidable, per case          (sections 3-4)
+#   finality            an entailment, not a habit   (section 5)
+#   who validates?      a governed, guarded object   (section 6)
+#   sybil roots, votes  stay human - named, small    (section 7)
+#
+# Run me:  tau -q < consensus_decomposed.tau
+# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# Output guide: one-off results appear as "%N: T/F" lines; the run at
+# the end prints "o0res[t] := CODE" verdicts (scan past the big formula).
+# ============================================================================
+
+# EXPECTED-RESULTS: T T F T F F T F F T T F T F
+# EXPECTED-CODES: 0,9,9,5,3,8
+
+set charvar off
+
+# ============================================================================
+# 1. ORDINARY LAWMAKING IS A CRDT - proved, not benchmarked
+# ============================================================================
+# A CRDT is a data structure that replicas can update independently and
+# still converge, no coordinator needed. The mathematical requirement:
+# updates must commute and be idempotent. For law that grows by
+# intersection (new law = old law AND amendment), both are THEOREMS -
+# quantified over ALL constitutions C and ALL amendments A, B. Not
+# tested on examples. Proved over the infinite space.
+
+# Order does not matter - receiving A then B equals receiving B then A:
+normalize (all C:tau all A:tau all B:tau (((C & A) & B) = ((C & B) & A))).
+# => T   Gossip in any order: same law. No leader, no blocks, no fees.
+
+# Duplicates do not matter - a sybil flood delivers nothing new:
+normalize (all C:tau all A:tau (((C & A) & A) = (C & A))).
+# => T   A thousand copies of one amendment ARE one amendment.
+
+# Control - so you can see the method can say no. "Adding B never
+# changes anything" would make lawmaking trivial. It is false:
+normalize (all C:tau all A:tau all B:tau (((C & A) & B) = (C & A))).
+# => F   Amendments do change the law. Only the ORDER is irrelevant.
+
+# ============================================================================
+# 2. TWO NODES, TWO ORDERS, ONE LAW - the instance you can touch
+# ============================================================================
+# Node one receives a core and three amendments as P1, P2, P3.
+# Node two receives the same four in the order P3, P1, P2.
+# Are their constitutions equal? One decidable question:
+
+normalize (((({ o1[t]=1 -> o2[t]=1 } & { o3[t]=1 -> o4[t]=1 }) & { o5[t]=1 -> o6[t]=1 }) & { o7[t]=1 -> o8[t]=1 }) = ((({ o1[t]=1 -> o2[t]=1 } & { o7[t]=1 -> o8[t]=1 }) & { o3[t]=1 -> o4[t]=1 }) & { o5[t]=1 -> o6[t]=1 })).
+# => T   And note what this line IS: two replicas reconciling is itself
+#        just an equality query. Convergence checking costs one verdict.
+
+# ============================================================================
+# 3. THE HONEST EXCEPTION - conflicting proposals do not commute
+# ============================================================================
+# Sections 1-2 hold for law that ACCEPTS both amendments. Real machines
+# guard adoption: a proposal only enters if it is compatible with the
+# law in force. And guarded adoption is order-dependent the moment two
+# proposals contradict EACH OTHER: the node that hears P first rejects
+# Q; the node that hears Q first rejects P. Two nodes, two laws. We
+# falsified our own naive claim this way - and the falsification is
+# itself decidable, three queries against the current core:
+
+normalize (({ o1[t]=1 -> o2[t]=1 } & { o30[t]=1 }) = 0).
+# => F    proposal P alone: admissible
+
+normalize (({ o1[t]=1 -> o2[t]=1 } & { o30[t]=0 }) = 0).
+# => F    proposal Q alone: admissible
+
+normalize ((({ o1[t]=1 -> o2[t]=1 } & { o30[t]=1 }) & { o30[t]=0 }) = 0).
+# => T    together: impossible. THIS pair needs ordering - or a vote.
+#
+# And notice what the exception IS: two lawful proposals that exclude
+# each other is not a networking problem. It is a genuine political
+# conflict - exactly the case constitutional practice sends to a vote
+# anyway. The coordination-free lane was never going to cover politics;
+# the algebra just tells you, pair by pair, where politics begins.
+
+# ============================================================================
+# 4. WHERE ORDER COUNTS BY DESIGN - the ratchet ceremony
+# ============================================================================
+# Not all operations commute. A SEAL (freeze the current law as a
+# permanent floor) and a REPLACE (drop everything unsealed) interact:
+# seal-then-replace keeps a right that replace-then-seal destroys.
+# Is that order-dependence universal? Ask over ALL states and inputs.
+# After seal-first the law is L & X; after replace-first it is S & X
+# (L = current law, S = current floor, X = the replacement):
+
+normalize (all L:tau all S:tau all X:tau ((L & X) = (S & X))).
+# => F   Not universally equal: ratchet moments genuinely need ordering.
+#        THIS is the consensus residue - rare, constitutional, worth
+#        a heavyweight ceremony. Everything else rides the CRDT lane.
+
+# But "SEAL and REPLACE conflict" is a rule about OPERATION TYPES.
+# The algebra can do better: it decides commutation PER CASE.
+# Floor { o10=0 }, law additionally carries an unsealed right o12.
+# Replacement X = { o14=1 } does not re-add o12 - order matters:
+
+normalize (({ o10[t]=0 && o12[t]=1 } & { o14[t]=1 }) = ({ o10[t]=0 } & { o14[t]=1 })).
+# => F   Conflict detected: this pair goes to the ordering ceremony.
+
+# Same state, but the replacement itself carries o12 along:
+normalize (({ o10[t]=0 && o12[t]=1 } & { o12[t]=1 && o14[t]=1 }) = ({ o10[t]=0 } & { o12[t]=1 && o14[t]=1 })).
+# => T   Same operation TYPES - yet provably order-free, because the
+#        replacement re-adds the unsealed content. A type-based
+#        scheduler would serialize this; the algebra proves it need
+#        not. Consensus only where order PROVABLY matters, decided
+#        case by case, one verdict per pair.
+
+# ============================================================================
+# 5. FINALITY AS ENTAILMENT - reorg protection you can compute
+# ============================================================================
+# Chains treat finality as a social convention ("we do not reorg that
+# deep") or an economic threat. Here a sealed checkpoint gives a harder
+# currency: a fork is acceptable if and only if its law still ENTAILS
+# every sealed checkpoint. Checkpoint: { o10=0 && o16=1 }.
+
+# Fork one grew new law o18 and still carries the checkpoint:
+normalize ((({ o10[t]=0 && o16[t]=1 && o18[t]=1 }) & ({ o10[t]=0 && o16[t]=1 })) = ({ o10[t]=0 && o16[t]=1 && o18[t]=1 })).
+# => T   Valid fork - it contains the sealed past.
+
+# Fork two "reorganized away" the sealed right o16:
+normalize ((({ o10[t]=0 && o18[t]=1 }) & ({ o10[t]=0 && o16[t]=1 })) = ({ o10[t]=0 && o18[t]=1 })).
+# => F   Rejected - not by node policy, by an empty intersection.
+#        Rolling back a sealed checkpoint is not rude. It is false.
+#
+# One honest dependency: this reduces finality to "does the fork keep the
+# seal" - but agreeing WHICH state was sealed is itself the rare ordering
+# ceremony of section 4. Finality is not free; it is an entailment
+# RELATIVE TO an already-ordered seal. What section 5 buys is only that,
+# once a checkpoint is sealed, no further social "we don't reorg that
+# deep" convention is needed - the intersection decides the rest.
+
+# ============================================================================
+# 6. WHO VALIDATES? - the validator set as a governed object
+# ============================================================================
+# The residue that DOES need ordering needs somebody to order it - and
+# "who chooses the choosers?" is where delegated systems rot into
+# oligarchy. Here the rotation rule itself can be entrenched law:
+# validator change o60 requires rotation proof o61. Guarantee, over
+# EVERY amendment X that any future governance could ever adopt:
+
+normalize (all X:tau (((({ o60[t]=1 -> o61[t]=1 } & X) & { o60[t]=1 && o61[t]=0 })) = 0)).
+# => T   No amendment path ever legalizes rotation-free capture.
+
+# Counter-probe - without the entrenched rule the guarantee must fail:
+normalize (all X:tau (((X & { o60[t]=1 && o61[t]=0 })) = 0)).
+# => F   (X can simply permit it.) The protection is the entrenchment,
+#        not wishful quantification - and the machine knows the difference.
+#
+# The double edge (as wherever the ratchet appears): this same guarantee
+# preserves a CAPTURED validator set exactly as faithfully as a fair one.
+# The algebra proves no amendment escapes the entrenched rule; it cannot
+# tell a just first seal from an unjust one. Legitimacy of the initial
+# validator set is a social fact, external to the machine - preservation,
+# not wisdom.
+
+# ============================================================================
+# 7. THE HONEST RESIDUE - what no algebra buys you
+# ============================================================================
+# - Governance, not payments: this whole decomposition is about LAW that
+#   grows by intersection (meet). Value transfer is a different animal -
+#   a token spend is neither idempotent nor commutative (double-spend) -
+#   so payments do NOT ride the CRDT lane. The detector PRINCIPLE still
+#   generalizes (order only non-commuting pairs = the same-account rule
+#   of DAG chains like Avalanche), but a payment layer needs its own
+#   conflict relation, not this one.
+# - Networks stay hard: the ordering ceremony still needs a real BFT or
+#   DAG protocol, with its timing assumptions. The algebra shrinks WHAT
+#   needs agreement, not the difficulty of agreeing over an unreliable
+#   network.
+# - The sybil ROOT stays external: whether a key is one person or one
+#   datacenter, no algebra can see. Weigh the residual, genuine value
+#   choices by persons - the one place counting belongs.
+# - Where order matters, ordering power exists (front-running in
+#   miniature). The surface is small and public - but not zero.
+# - "Every node computes the same verdict" presupposes every node runs
+#   the SAME decision procedure. Different implementations that
+#   disagree on one verdict fork the chain on validity itself - so a
+#   verdict-level reference semantics is consensus-critical
+#   infrastructure, not a nicety.
+# - Computing a verdict costs work, and some inputs are crafted to be
+#   expensive. A verdict chain needs a decidable cost bound per
+#   proposal - size caps play the role that gas plays elsewhere.
+#ja
+# ============================================================================
+# 8. THE QUIET CHAIN - one node's day, live
+# ============================================================================
+# The machine below is a sealed-floor ratchet (two tau state streams).
+# Inputs per step: i1 = a proposal (a specification), i2 = the mode:
+# 0 ADD, 1 SEAL, 2 REPLACE. Verdict codes: 9 adopted, 5 sealed,
+# 3 replaced, 8 rejected. Step zero is initialization (code 0).
+#
+# step 1  ADD  fee rule           -> 9   CRDT lane: any arrival order
+# step 2  ADD  reserve rule       -> 9   would yield this same law
+# step 3  SEAL                    -> 5   the one ordered ceremony:
+#                                        current law becomes the floor
+# step 4  REPLACE with new rule   -> 3   unsealed law swapped freely -
+#                                        the floor rides along
+# step 5  REPLACE breaking floor  -> 8   the "deep reorg": rejected as
+#                                        an empty intersection, not as
+#                                        a policy violation
+#
+# NOTE: after `run`, every following line is consumed as input
+# (i1, then i2, per step) - no blank lines from here to end of file.
+
+i1 : tau := in console
+i2 : bv[8] := in console
+
+run ( (o0seal[0]:tau = { o1[t]=1 -> o2[t]=1 }) && (o0law[0]:tau = { o1[t]=1 -> o2[t]=1 }) && ( (i2[t]:bv[8] = { #x01 }:bv[8]) ? ((o0seal[t]:tau = o0law[t-1]:tau) && (o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x05 }:bv[8])) : ( (o0seal[t]:tau = o0seal[t-1]:tau) && ( (i2[t]:bv[8] = { #x02 }:bv[8]) ? ( ((o0seal[t-1]:tau & i1[t]:tau) != 0) ? ((o0law[t]:tau = o0seal[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x03 }:bv[8])) : ((o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) : ( ((o0law[t-1]:tau & i1[t]:tau) != 0) ? ((o0law[t]:tau = o0law[t-1]:tau & i1[t]:tau) && (o0res[t]:bv[8] = { #x09 }:bv[8])) : ((o0law[t]:tau = o0law[t-1]:tau) && (o0res[t]:bv[8] = { #x08 }:bv[8])) ) ) ) ) )
+o3[t]=1 -> o4[t]=1
+0
+o5[t]=1 -> o6[t]=1
+0
+o7[t]=1 -> o8[t]=1
+1
+o20[t]=1
+2
+o1[t]=1 && o2[t]=0
+2

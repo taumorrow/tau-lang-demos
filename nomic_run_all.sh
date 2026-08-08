@@ -18,7 +18,7 @@ cd "$(dirname "$0")"
 strip_ansi() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g'; }
 fail=0; total=0
 
-for f in nomic_[0-9]*.tau; do
+for f in nomic_[0-9]*.tau consensus_*.tau; do
   total=$((total+1))
   exp_res=$(grep -m1 '^# EXPECTED-RESULTS:' "$f" | sed 's/^# EXPECTED-RESULTS: *//')
   exp_codes=$(grep -m1 '^# EXPECTED-CODES:' "$f" | sed 's/^# EXPECTED-CODES: *//')

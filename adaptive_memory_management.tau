@@ -309,9 +309,11 @@ run always (
 #    - Priority-based resource allocation
 
 # 2. PREDICTIVE SCALING
-#    Use trend to predict future memory:
-#    - predicted[t+10] = current + (trend * 10)
-#    - Act even earlier based on predictions
+#    Use trend to act earlier:
+#    - A prediction is an OUTPUT stream derived from past values, e.g.
+#      o4pred[t] = o0mem[t-1] + trend -- Tau references the past ([t-N]),
+#      never the future: there is no [t+N].
+#    - Act on that stream before the threshold is crossed
 #    - Machine learning integration possible
 
 # 3. ADAPTIVE THRESHOLDS

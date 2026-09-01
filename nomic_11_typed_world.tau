@@ -1,0 +1,181 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 11 - A TYPED WORLD (APPENDIX III)
+# Giving the law's world a shape: abstract data types
+# ============================================================================
+#
+# Parts 01-10 built a living constitution - but its WORLD was flat: a zoo of
+# numbered streams (o1, o4, o5...), commands as magic numbers on a bare
+# bitvector, and every invariant that ties them together left implicit.
+#
+# Since 2026-08-28 the engine can do better: ABSTRACT DATA TYPES. Type
+# aliases give domains a name; tuple types collect named members; member
+# paths reach into them; and streams can carry whole tuples as one value.
+# The deep point for tau-nomic: STRUCTURE IS ITSELF A KIND OF LAW - a type
+# is a constitution for data, enforced at the border, before any rule runs.
+# And because tuples flatten at PARSE TIME, the decidable kernel underneath
+# is exactly the one parts 01-10 built on: nothing new to trust.
+#
+# Run me (minimal cost):
+#   TAU_BA_COMPONENT_FACTORING=1 tau -q < nomic_11_typed_world.tau
+# (nomic_run_all.sh sets this for you. Both cost switches - the env var and
+# maxsplits below - change COST only, never a verdict; every
+# expected value in this file is switch-invariant.)
+# Needs a build with ADTs (merged 2026-08-28); verified against Tau
+# 0.7.0-alpha, build 0ac2756f. Earlier builds reject the type keyword.
+#
+# READING THE OUTPUT: as in part 01, scan for "%N: ..." result lines.
+# The run section at the end prints tuple wire lines instead:
+#   o[k] := { law: "...", res: "..." }
+# - the res member carries the verdict code, exactly like o0res in part 03.
+# ============================================================================
+
+# EXPECTED-RESULTS: T T T T T T F T T
+# EXPECTED-TUPLE-RES: 0,9,8,5
+
+set charvar off
+
+# Cost knob, not a semantics knob: cap the anti-prenexing block split. On
+# accumulating runs this is the difference between milliseconds and minutes
+# per first step (see part 07's cost map); verdicts are unaffected.
+# (Option names are single alnum words - maxsplits, not block_max_splits.)
+set maxsplits 1
+
+# ============================================================================
+# 1. AN ALIAS IS A NAMED DOMAIN
+# ============================================================================
+#
+# The simplest type declaration renames an existing domain. After it, byte
+# and bv[8] are the SAME type - the alias resolves before inference:
+
+type byte = bv[8]. n x:byte = x:bv[8]
+
+# %1: T - one domain, two names. Cheap, but it already changes how a spec
+# READS: "track: byte" says what a thing is for, "bv[8]" only how wide it is.
+
+# ============================================================================
+# 2. A TUPLE IS A CONSTITUTION FOR DATA
+# ============================================================================
+#
+# A tuple type collects named members, each with its own type - including
+# tau itself. This is the shape of a MOVE in the constitutional game of
+# part 03: a command plus a proposed law, as ONE value:
+
+type Move = {cmd: bv[8], prop: tau}. n ex m:Move (m.cmd = { #x02 }:bv[8] && m.prop != 0)
+
+# %2: T - structured values exist; members are reached with a dot.
+#
+# What did the engine actually see? Not a tuple. ADTs flatten at parse
+# time: m becomes the member family m.cmd, m.prop, and the kernel below is
+# the untouched decidable kernel of part 01. Two theorems pin down that
+# equality really is member-wise - in both directions:
+
+type Point = {a: sbf, b: sbf}. n all x:Point all y:Point (x = y -> x.a = y.a)
+type Point = {a: sbf, b: sbf}. n all x:Point all y:Point ((x.a = y.a && x.b = y.b) -> x = y)
+
+# %3: T - equal tuples have equal members (projection).
+# %4: T - equal members make equal tuples (no hidden state in a tuple).
+# Together: a tuple IS exactly its members. Structure without metaphysics.
+
+# ============================================================================
+# 3. INHERITANCE: CONSTITUTIONS EXTEND CONSTITUTIONS
+# ============================================================================
+#
+# A tuple type may inherit members with "of (...)" - parents first, then
+# its own; nesting works to any depth, and a member path walks the whole
+# chain:
+
+type byte = bv[8]. type Tagged = {tag: byte}. type Point = {a: sbf, b: sbf}. type Line of (Tagged) is {p: Point, q: Point}. n ex l:Line (l.tag = { #x07 }:bv[8] && l.p.a = 1)
+
+# %5: T - l.tag is inherited, l.p.a is two levels deep. An amendment to a
+# type is a new type that extends the old - the data constitution grows
+# the same way the legal one did in part 03.
+
+# ============================================================================
+# 4. THE PAYOFF: GUARANTEES OVER A STRUCTURED SPACE
+# ============================================================================
+#
+# Part 09 proved guarantees over ALL future amendments - quantifying over
+# the unstructured space of specs. With tuples, the quantifier ranges over
+# a SHAPED space: every possible move, command and proposal at once.
+#
+# "Any move whose proposal is compatible with the current law carries a
+# non-contradictory proposal" - for every conceivable Move:
+
+type Move = {cmd: bv[8], prop: tau}. n all m:Move ((({ o1[t]=1 }:tau & m.prop) != 0) -> m.prop != 0)
+
+# %6: T - adoptable implies consistent, for the WHOLE structured space.
+# And the honest unsat control (part 07's discipline - every T needs an F
+# that shows the question is not vacuous):
+
+type Move = {cmd: bv[8], prop: tau}. n ex m:Move (m.prop = 0 && (({ o1[t]=1 }:tau & m.prop) != 0))
+
+# %7: F - no contradiction ever passes the meet test. The gate of part 03,
+# now stated as a theorem over every structured move at once.
+
+# ============================================================================
+# 5. A GOTCHA THAT BECOMES A LESSON: WHO BINDS THE NAMES IN A CONSTANT?
+# ============================================================================
+#
+# Inside a { } constant, i-named streams are read as FOR-ALL-INPUTS and
+# o-named streams as THERE-EXIST-OUTPUTS (part 01: sat means "for all
+# inputs there exist outputs"). So the same implication is F with i-names
+# and satisfiable with o-names:
+
+n { i1[t]=1 -> i2[t]=1 } = 0
+n { o1[t]=1 -> o2[t]=1 } != 0
+
+# %8: T - "for ALL inputs i1,i2: i1=1 -> i2=1" is refutable, the constant
+#          collapses to 0. A proposal written with i-names is dead on
+#          arrival - this is why every proposal in parts 03-06 speaks in
+#          o-names.
+# %9: T - the o-named twin is a live, non-zero law.
+
+# ============================================================================
+# 6. WHAT THIS IS NOT (the part 08 discipline)
+# ============================================================================
+#
+# - These are PRODUCT types: records, aliases, inheritance. There are no
+#   sum types - a command is still a number, not an enum with named cases.
+# - Flattening is parse-time: k members mean k underlying streams. The
+#   engine's cost model is per-stream; structure organizes it, it does not
+#   shrink it.
+# - The wire format excludes double quotes inside values, and a tau member
+#   must end in a period. The border checks shape, not meaning: a
+#   well-formed lie parses fine. Judging it is still the law's job -
+#   which is exactly the separation parts 03-08 argued for.
+#
+# ============================================================================
+# 7. FINALE: THE LIVING CONSTITUTION, TYPED
+# ============================================================================
+#
+# Part 03's kernel, re-drawn with one structured input (the move) and one
+# structured output (the state). One wire value per step on each side -
+# the "same tick" invariant that was implicit across i1/i2/o0law/o0res is
+# now structural:
+#
+#   cmd 2 = propose (meet test decides: adopt 9 / reject 8), else 5.
+#
+# Wire format for inputs, one line per step:
+#   { cmd: "2", prop: "o3[t]=1 -> o4[t]=1." }
+# A tau member is written as BARE spec text ending in a period - the same
+# convention as a tau-valued console stream, quoted inside the tuple.
+
+# What the four steps will show (read this BEFORE the output below):
+#   Step 0: res 0 - the genesis law stands.
+#   Step 1: res 9 - a compatible proposal is ADOPTED; law grows by a clause.
+#   Step 2: res 8 - a self-contradictory proposal is REJECTED; law unchanged.
+#   Step 3: res 5 - cmd 1 is not a proposal; the law simply persists.
+# Same ratchet, same verdicts, same kernel as part 03 - but the move is one
+# value with named parts, and every future field of the game state is a
+# MEMBER of State, not yet another numbered stream. The series' claim, one
+# last time: the kernel decides, structure now says WHAT it decides about.
+#
+# (The three wire lines below are the last lines of this file on purpose:
+# a tuple console stream reads every further line as wire text, so the run
+# ends cleanly at end-of-file.)
+
+type Move = {cmd: bv[8], prop: tau}. type State = {law: tau, res: bv[8]}. i:Move := in console. o:State := out console. run (o[0].law = { o1[t]=1 -> o2[t]=1 }) && ((i[t].cmd = { #x02 }:bv[8]) ? ( ((o[t-1].law & i[t].prop) != 0) ? ((o[t].law = o[t-1].law & i[t].prop) && (o[t].res = { #x09 }:bv[8])) : ((o[t].law = o[t-1].law) && (o[t].res = { #x08 }:bv[8])) ) : ((o[t].law = o[t-1].law) && (o[t].res = { #x05 }:bv[8])))
+{ cmd: "2", prop: "o3[t]=1 -> o4[t]=1." }
+{ cmd: "2", prop: "o1[t]=1 && o1[t]!=1." }
+{ cmd: "1", prop: "o1[t]=1." }
+

@@ -4,7 +4,7 @@ Runnable demos and tutorials for the [Tau Language](https://github.com/IDNI/tau-
 a language whose specifications are first-class values of a decidable algebra.
 
 The centerpiece is the **Tau-Nomic Tutorial Series**: a living, self-amending
-constitution, explained in eleven self-contained `.tau` files. Every claim in
+constitution, explained in twelve self-contained `.tau` files. Every claim in
 the series is a runnable query, and every file declares its expected outputs
 as a machine-readable contract — so the series **checks itself** against your
 binary.
@@ -24,6 +24,7 @@ binary.
 | 08 | `nomic_08_the_edges.tau` | What honestly stays outside: translation, enforcement, identity, choice |
 | 09 | `nomic_09_the_full_palette.tau` | Appendix: scoped, quantitative and temporal rights; a guarantee over all future amendments |
 | 10 | `nomic_10_the_trilemma.tau` | Appendix II: who amends the amendment rule? |
+| 11 | `nomic_11_typed_world.tau` | Appendix III: a typed world - ADTs, structured moves, the ratchet over tuple streams (needs a 2026-08-28+ build) |
 
 Read them in order — each part builds on the last. Three parts replay entire
 constitutional histories by themselves when you run the file.

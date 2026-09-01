@@ -8,8 +8,10 @@
 # build 0ac2756f. ADT basics: adt_tutorial_basic.tau. GROWING tables
 # (rows over time, tables as row-sets): tables_tutorial_advanced.tau.
 #
-# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines; "solve"
-# prints one "member := value" line per cell.
+# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - the N
+# restarts whenever a statement carries type declarations, so match the
+# answers by ORDER, not by number (annotations below say "Answer:").
+# "solve" prints one "member := value" line per cell.
 # ============================================================================
 
 # EXPECTED-RESULTS: T F T T T
@@ -37,10 +39,10 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. solv
 # the table below? Is id 7?
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex t:Tab (t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8] && (t.r1.id = { #x02 }:bv[8] || t.r2.id = { #x02 }:bv[8] || t.r3.id = { #x02 }:bv[8]))
-# %1: T - id 2 is present (row 2 matches).
+# Answer: T - id 2 is present (row 2 matches).
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex t:Tab (t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8] && (t.r1.id = { #x07 }:bv[8] || t.r2.id = { #x07 }:bv[8] || t.r3.id = { #x07 }:bv[8]))
-# %2: F - id 7 is not: no assignment can make any row match.
+# Answer: F - id 7 is not: no assignment can make any row match.
 
 # ============================================================================
 # PART 3: AGGREGATION - a proven total
@@ -50,7 +52,7 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex
 # it is PROVED: every table with these quantities totals 60:
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> t.r1.qty + t.r2.qty + t.r3.qty = { #x3C }:bv[8])
-# %3: T - 10 + 20 + 30 = 60, as a theorem over all such tables.
+# Answer: T - 10 + 20 + 30 = 60, as a theorem over all such tables.
 
 # And as a solver query, computing the sum as a value:
 
@@ -68,7 +70,7 @@ type Calc = {qty: bv[8], total: bv[8]}. solve c:Calc = c && c.qty = { #x0A }:bv[
 # Output (order not guaranteed): c.total := { 30 }:bv[8], c.qty := { 10 }:bv[8]
 
 type Calc = {qty: bv[8], total: bv[8]}. n all c:Calc ((c.qty = { #x0A }:bv[8] && c.total = c.qty * { #x03 }:bv[8]) -> c.total = { #x1E }:bv[8])
-# %4: T - the derived value is forced, for every such record.
+# Answer: T - the derived value is forced, for every such record.
 
 # ============================================================================
 # PART 5: FUNCTIONAL UPDATE - a new table that differs in one cell
@@ -78,7 +80,7 @@ type Calc = {qty: bv[8], total: bv[8]}. n all c:Calc ((c.qty = { #x0A }:bv[8] &&
 # everywhere except the changed cell:
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab all u:Tab ((t.r3.qty = { #x1E }:bv[8] && u.r1 = t.r1 && u.r2 = t.r2 && u.r3.id = t.r3.id && u.r3.qty = { #x28 }:bv[8]) -> (u.r3.qty != t.r3.qty && u.r1.qty = t.r1.qty))
-# %5: T - u is t with r3.qty set to 40: one cell moved, the rest carried.
+# Answer: T - u is t with r3.qty set to 40: one cell moved, the rest carried.
 
 # ============================================================================
 # RULES OF THUMB

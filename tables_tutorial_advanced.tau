@@ -12,7 +12,9 @@
 # Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
 # build 0ac2756f.
 #
-# READING THE OUTPUT: "%N: ..." lines answer the n queries. The ledger
+# READING THE OUTPUT: "%N: ..." lines answer the n queries - the N
+# restarts whenever a statement carries type declarations, so match the
+# answers by ORDER, not by number (annotations say "Answer:"). The ledger
 # run at the end prints tuple wire lines ob[k] := { tab: "...", sel: "..." }
 # whose expected content is annotated at the run - the formulas themselves
 # are the results there, so this file's machine contract covers the %N
@@ -35,10 +37,10 @@ set maxsplits 1
 # for EVERY table at once:
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> t.r1.qty + t.r2.qty + t.r3.qty = { #x3C }:bv[8])
-# %1: T - every such table totals 60.
+# Answer: T - every such table totals 60.
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex t:Tab (t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8] && t.r1.qty + t.r2.qty + t.r3.qty != { #x3C }:bv[8])
-# %2: F - no counterexample exists: the rule is a theorem, not a habit.
+# Answer: F - no counterexample exists: the rule is a theorem, not a habit.
 
 # ============================================================================
 # PART 2: A TABLE AS ONE TAU VALUE - rows as facts, SELECT as meet
@@ -62,25 +64,25 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex
 #   { oid=1, oqty=10 } | { oid=2, oqty=20 }
 
 n ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] }) != 0
-# %3: T - the table is a live, non-zero value.
+# Answer: T - the table is a live, non-zero value.
 
 n (({ oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })) != 0
-# %4: T - row (2,20) IS in the table: its meet with the table is not 0.
+# Answer: T - row (2,20) IS in the table: its meet with the table is not 0.
 
 n (({ oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })') = 0
-# %5: T - and row (2,20) is a MEMBER in the strict sense too: its meet
+# Answer: T - and row (2,20) is a MEMBER in the strict sense too: its meet
 #         with the table's complement is empty (row <= table).
 
 n (({ oid[t]:bv[8] = { #x03 }:bv[8] && oqty[t]:bv[8] = { #x1E }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })) = 0
-# %6: T - row (3,30) is NOT in the table: even the overlap is empty.
+# Answer: T - row (3,30) is NOT in the table: even the overlap is empty.
 #         Negative answers are proofs too.
 
 n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })) != 0
-# %7: T - SELECT WHERE id=2: the PARTIAL row (only the key) overlaps the
+# Answer: T - SELECT WHERE id=2: the PARTIAL row (only the key) overlaps the
 #         table; the meet itself IS the matching row set.
 
 n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })') = 0
-# %8: F - but the key is NOT a member: it does not entail the table.
+# Answer: F - but the key is NOT a member: it does not entail the table.
 #         Overlap found it; membership rightly refuses it. That is the
 #         whole difference between a query and a row.
 
@@ -101,10 +103,12 @@ n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqt
 #   ob[0]: tab F (empty table); sel F is a free witness here - nothing
 #          constrains sel[0], the engine just picks one
 #   ob[1]: tab = row(1,10)          sel F (the probe was F)
-#   ob[2]: tab = rows(1,10)|(2,20)  sel = row(1,10): the id=1 probe runs
+#   ob[2]: tab = both rows (printed order may differ)
+#                                   sel = row(1,10): the id=1 probe runs
 #                                   against tab[t-1] = row(1,10), finds it,
 #                                   and the meet IS the matching row
-#   ob[3]: tab unchanged            sel F (id=3 is in no row)
+#   ob[3]: tab unchanged - byte-identical to ob[2]'s (appending the F row
+#          is a no-op: tab | F = tab)  sel F (id=3 is in no row)
 #
 # On the wire a tau member is bare spec text with a period; the F row
 # below ("o9[t]=0 && o9[t]=1.") is the empty contribution - appending F

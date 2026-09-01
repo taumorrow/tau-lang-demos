@@ -13,7 +13,9 @@
 # Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
 # build 0ac2756f.
 #
-# READING THE OUTPUT: "%N: ..." lines answer the queries; the finale
+# READING THE OUTPUT: "%N: ..." lines answer the queries - the N restarts
+# whenever a statement carries type declarations, so match answers by
+# ORDER, not by number (annotations below say "Answer:"). The finale
 # prints tuple wire lines om[k] := { res: "...", seen: "..." }.
 # ============================================================================
 
@@ -31,10 +33,10 @@ set maxsplits 1
 # kernel. So "member-wise equality" is not a convention, it is a theorem:
 
 type Point = {a: sbf, b: sbf}. n all x:Point all y:Point (x = y -> x.a = y.a)
-# %1: T - equal tuples have equal members (projection).
+# Answer: T - equal tuples have equal members (projection).
 
 type Point = {a: sbf, b: sbf}. n all x:Point all y:Point ((x.a = y.a && x.b = y.b) -> x = y)
-# %2: T - equal members make equal tuples: no hidden state in a tuple.
+# Answer: T - equal members make equal tuples: no hidden state in a tuple.
 # Structure without metaphysics.
 
 # ============================================================================
@@ -47,10 +49,10 @@ type Point = {a: sbf, b: sbf}. n all x:Point all y:Point ((x.a = y.a && x.b = y.
 # existentially. The same implication, twice:
 
 n { i1[t]=1 -> i2[t]=1 } = 0
-# %3: T - "for all inputs i1,i2: i1=1 -> i2=1" is refutable; the constant
+# Answer: T - "for all inputs i1,i2: i1=1 -> i2=1" is refutable; the constant
 #         IS 0. An i-named proposal is dead on arrival.
 n { o1[t]=1 -> o2[t]=1 } != 0
-# %4: T - the o-named twin is a live, non-zero specification. This is why
+# Answer: T - the o-named twin is a live, non-zero specification. This is why
 #         proposals in every run-based tutorial speak in o-names.
 
 # ============================================================================
@@ -62,11 +64,11 @@ n { o1[t]=1 -> o2[t]=1 } != 0
 # unsat control, so the T is not vacuous:
 
 type Move = {cmd: bv[8], note: sbf, prop: tau}. n all m:Move ((({ o1[t]=1 }:tau & m.prop) != 0) -> m.prop != 0)
-# %5: T - any proposal compatible with a live spec is itself consistent,
+# Answer: T - any proposal compatible with a live spec is itself consistent,
 #         for the WHOLE structured space of moves.
 
 type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o1[t]=1 }:tau & m.prop) != 0))
-# %6: F - no contradiction ever passes the meet test.
+# Answer: F - no contradiction ever passes the meet test.
 
 # ============================================================================
 # PART 4: THE EDGES, WITH THEIR STORIES

@@ -13,9 +13,11 @@
 # structured space - see adt_tutorial_advanced.tau, or part 11 of the
 # tau-nomic series (nomic_11_typed_world.tau) for the same story in context.
 #
-# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines; "solve"
-# prints one "member := value" line per member; the runs at the end print
-# tuple wire lines like o[k] := { a: "1", b: "0" }.
+# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - but the
+# N restarts whenever a statement carries type declarations, so match the
+# answers by ORDER, not by number (the annotations below say "Answer:").
+# "solve" prints one "member := value" line per member; the two runs print
+# tuple wire lines ({ a: ... } echoes, then om[k] := { res: ..., seen: ... }).
 # ============================================================================
 
 # EXPECTED-RESULTS: T T T T T T
@@ -31,7 +33,7 @@ set maxsplits 1
 # Declare an alias; afterwards byte and bv[8] are the same type:
 
 type byte = bv[8]. n x:byte = x:bv[8]
-# %1: T
+# Answer: T
 
 type byte = bv[8]. solve v:byte = { #x2A }:bv[8]
 # Output: v := { 42 }:bv[8]
@@ -43,7 +45,7 @@ type byte = bv[8]. solve v:byte = { #x2A }:bv[8]
 # Declare with "= { ... }" (the spelling "is { ... }" also parses):
 
 type Point = {a: sbf, b: sbf}. n ex p:Point (p.a = 1 && p.b = 0)
-# %2: T - a Point with those members exists.
+# Answer: T - a Point with those members exists.
 
 type Point = {a: sbf, b: sbf}. solve x:Point = x && x.a = 1 && x.b = 0
 # Output, one line per member (note: not declaration order):
@@ -68,23 +70,23 @@ type Point = {a: sbf, b: sbf}. solve --min x:Point = x && (x.a | x.b) = 1
 # type name is last-definition-wins.
 
 type byte = bv[8]. type Tagged = {tag: byte}. type Point = {a: sbf, b: sbf}. type Line of (Tagged) is {p: Point, q: Point}. n ex l:Line (l.tag = { #x07 }:bv[8] && l.p.a = 1)
-# %3: T - l.tag is inherited, l.p.a reaches two levels deep.
+# Answer: T - l.tag is inherited, l.p.a reaches two levels deep.
 
 # ============================================================================
 # PART 4: MIXED ALGEBRAS - sbf, bv[n] and tau in one record
 # ============================================================================
 
 type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.cmd = { #x02 }:bv[8] && m.note = 1 && m.prop != 0)
-# %4: T - one record, three algebras.
+# Answer: T - one record, three algebras.
 
 # WARNING for tau members and { } constants generally: name the streams
 # INSIDE a constant with o-names. i-names mean "for all inputs", and a
 # universally quantified implication is refutable - the constant is 0:
 
 n { i1[t]=1 -> i2[t]=1 } = 0
-# %5: T - i-named: collapses to 0 (dead on arrival).
+# Answer: T - i-named: collapses to 0 (dead on arrival).
 n { o1[t]=1 -> o2[t]=1 } != 0
-# %6: T - o-named: a live, non-zero specification.
+# Answer: T - o-named: a live, non-zero specification.
 
 # ============================================================================
 # PART 5: TUPLE STREAMS - one wire value per step

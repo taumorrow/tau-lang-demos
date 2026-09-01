@@ -81,8 +81,8 @@ type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o
 #    o[t] = o[t-1] | i[t]. The equation form composes with an o[0]-init
 #    out of the box - the engine derives the t=0 boundary clause itself
 #    (visible in the normalized spec). When you do branch, branch at
-#    FORMULA level and give every branch a lookback, the way the run
-#    tutorials' ratchets do.
+#    FORMULA level and give every branch a lookback, the way the ratchets
+#    in nomic_03 and nomic_11 do.
 #
 # 2. NAMES AND TYPES BIND ONCE, SESSION-WIDE. A stream definition never
 #    rebinds an existing name (the conflict is reported), and the type
@@ -100,7 +100,8 @@ type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o
 # ============================================================================
 #
 # The one-way flag from basic, read as a statement: seen is a MONOTONE
-# member - once 1, provably never 0 again, because | only grows. Steps:
+# member - once 1 it stays 1, because the | equation can only grow it.
+# Steps:
 #   om[0] res 0, seen 0 (boundary) - om[1] res 7, seen 0 -
 #   om[2] res 42, seen 1 (mark) - om[3] res 5, seen 1 (holds).
 

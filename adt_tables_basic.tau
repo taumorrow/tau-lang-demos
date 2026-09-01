@@ -3,10 +3,10 @@
 # Rows as tuples, tables as tuples of rows: cells, lookups, sums, updates
 # ============================================================================
 #
-# Run with:  tau -q < tables_tutorial_basic.tau
+# Run with:  tau -q < adt_tables_basic.tau
 # Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
 # build 0ac2756f. ADT basics: adt_tutorial_basic.tau. GROWING tables
-# (rows over time, tables as row-sets): tables_tutorial_advanced.tau.
+# (rows over time, tables as row-sets): adt_tables_advanced.tau.
 #
 # READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - the N
 # restarts whenever a statement carries type declarations, so match the
@@ -91,5 +91,5 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n al
 # - Lookups are positional: spell the rows out. There is no row iteration
 #   and no COUNT over a dynamic number of rows - the schema is the size.
 # - For tables that GROW - rows arriving over time, tables as sets of
-#   row-facts - see tables_tutorial_advanced.tau.
+#   row-facts - see adt_tables_advanced.tau.
 # ============================================================================

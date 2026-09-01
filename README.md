@@ -68,9 +68,9 @@ Smaller stand-alone demos, from the early days of this repository:
   layer: tuple equality as theorems, name binding in constants, guarantees
   over a structured space. Both self-checking (`nomic_run_all.sh`); need a
   2026-08-28+ build. Series part 11 tells the advanced story in context.
-- **Tables with ADTs**: `tables_tutorial_basic.tau` - fixed tables as tuples
+- **Tables with ADTs**: `adt_tables_basic.tau` - fixed tables as tuples
   of rows: cells by member path, lookups, proven totals, derived columns,
-  functional updates. `tables_tutorial_advanced.tau` - growing tables: rows
+  functional updates. `adt_tables_advanced.tau` - growing tables: rows
   as facts, a table as ONE tau value (SELECT as meet), and an append-only
   ledger over tuple streams - the lattice dual of the constitutional
   ratchet. Both self-checking; need a 2026-08-28+ build.

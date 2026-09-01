@@ -3,12 +3,12 @@
 # Rows as facts, SELECT as meet, and an append-only ledger over time
 # ============================================================================
 #
-# The ADVANCED companion to tables_tutorial_basic.tau. Fixed tables are
+# The ADVANCED companion to adt_tables_basic.tau. Fixed tables are
 # assumed; this file is about tables that GROW - and about the deepest
 # move: a whole table as ONE value of the tau algebra, queried by algebra.
 #
 # Run with (minimal cost):
-#   TAU_BA_COMPONENT_FACTORING=1 tau -q < tables_tutorial_advanced.tau
+#   TAU_BA_COMPONENT_FACTORING=1 tau -q < adt_tables_advanced.tau
 # Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
 # build 0ac2756f.
 #
@@ -31,7 +31,7 @@ set maxsplits 1
 # PART 1: SCHEMA GUARANTEES - business rules as theorems
 # ============================================================================
 #
-# (The theorem here is the one tables_tutorial_basic.tau part 3 proves;
+# (The theorem here is the one adt_tables_basic.tau part 3 proves;
 # what is NEW is the second query - the unsat CONTROL that basic omits.)
 # Over a fixed schema, a rule is not checked row by row - it is proved
 # for EVERY table at once:

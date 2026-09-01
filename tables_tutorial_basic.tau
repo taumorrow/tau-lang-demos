@@ -65,7 +65,7 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. solv
 # price of 3 - the solver fills the derived column:
 
 type Calc = {qty: bv[8], total: bv[8]}. solve c:Calc = c && c.qty = { #x0A }:bv[8] && c.total = c.qty * { #x03 }:bv[8]
-# Output: c.qty := { 10 }:bv[8], c.total := { 30 }:bv[8]
+# Output (order not guaranteed): c.total := { 30 }:bv[8], c.qty := { 10 }:bv[8]
 
 type Calc = {qty: bv[8], total: bv[8]}. n all c:Calc ((c.qty = { #x0A }:bv[8] && c.total = c.qty * { #x03 }:bv[8]) -> c.total = { #x1E }:bv[8])
 # %4: T - the derived value is forced, for every such record.

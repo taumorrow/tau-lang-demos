@@ -20,7 +20,7 @@
 # purpose: a tuple console stream reads until end-of-file.)
 # ============================================================================
 
-# EXPECTED-RESULTS: T F T T T T
+# EXPECTED-RESULTS: T F T T T T T F
 
 set charvar off
 set maxsplits 1
@@ -29,9 +29,10 @@ set maxsplits 1
 # PART 1: SCHEMA GUARANTEES - business rules as theorems
 # ============================================================================
 #
+# (The theorem here is the one tables_tutorial_basic.tau part 3 proves;
+# what is NEW is the second query - the unsat CONTROL that basic omits.)
 # Over a fixed schema, a rule is not checked row by row - it is proved
-# for EVERY table at once, with an unsat control to show the question is
-# not vacuous:
+# for EVERY table at once:
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> t.r1.qty + t.r2.qty + t.r3.qty = { #x3C }:bv[8])
 # %1: T - every such table totals 60.
@@ -45,13 +46,19 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex
 #
 # The deep move: encode a ROW as a fact (a specification fixing the
 # column streams), and a TABLE as the DISJUNCTION of its rows - one value
-# of the tau algebra. Then the relational operations become algebra:
+# of the tau algebra. The relational operations become algebra - stated
+# precisely, because two different tests hide here:
 #
-#   row in table?         (row & table) != 0
-#   row not in table?     (row & table)  = 0
-#   SELECT by key         (partial-row & table) != 0
+#   OVERLAP        (x & table) != 0     x and the table share models
+#   MEMBERSHIP     (x & table') = 0     x entails the table (x <= table)
+#   SELECT by key  (partial & table)    the meet IS the matching row set
 #
-# The two-row table used below:
+# For a FULLY specified row the two tests agree (all columns fixed, so
+# sharing a model means being a row). For a PARTIAL row they split: the
+# key {oid=2} OVERLAPS the table but is not CONTAINED in it - which is
+# exactly what makes it a SELECT and not a row. Both shown below.
+#
+# The two-row table used throughout:
 #   { oid=1, oqty=10 } | { oid=2, oqty=20 }
 
 n ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] }) != 0
@@ -60,13 +67,22 @@ n ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t
 n (({ oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })) != 0
 # %4: T - row (2,20) IS in the table: its meet with the table is not 0.
 
+n (({ oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })') = 0
+# %5: T - and row (2,20) is a MEMBER in the strict sense too: its meet
+#         with the table's complement is empty (row <= table).
+
 n (({ oid[t]:bv[8] = { #x03 }:bv[8] && oqty[t]:bv[8] = { #x1E }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })) = 0
-# %5: T - row (3,30) is NOT: the meet is empty. Negative answers are
-#         proofs too.
+# %6: T - row (3,30) is NOT in the table: even the overlap is empty.
+#         Negative answers are proofs too.
 
 n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })) != 0
-# %6: T - SELECT WHERE id=2: a PARTIAL row (only the key) meets the
+# %7: T - SELECT WHERE id=2: the PARTIAL row (only the key) overlaps the
 #         table; the meet itself IS the matching row set.
+
+n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqty[t]:bv[8] = { #x0A }:bv[8] } | { oid[t]:bv[8] = { #x02 }:bv[8] && oqty[t]:bv[8] = { #x14 }:bv[8] })') = 0
+# %8: F - but the key is NOT a member: it does not entail the table.
+#         Overlap found it; membership rightly refuses it. That is the
+#         whole difference between a query and a row.
 
 # ============================================================================
 # PART 3: THE LEDGER - an append-only table over time
@@ -82,7 +98,8 @@ n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqt
 #   sel[t] = probe[t] & tab[t-1]    SELECT against yesterday's table
 #
 # Expected wire output:
-#   ob[0]: tab F                    (empty table)
+#   ob[0]: tab F (empty table); sel F is a free witness here - nothing
+#          constrains sel[0], the engine just picks one
 #   ob[1]: tab = row(1,10)          sel F (the probe was F)
 #   ob[2]: tab = rows(1,10)|(2,20)  sel = row(1,10): the id=1 probe runs
 #                                   against tab[t-1] = row(1,10), finds it,

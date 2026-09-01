@@ -4,14 +4,12 @@
 # ============================================================================
 #
 # Run with:  tau -q < adt_tutorial_basic.tau
-# (Or via nomic_run_all.sh, which also self-checks the annotated outputs.)
 # Needs a build with ADTs (merged 2026-08-28); verified against 0.7.0-alpha,
 # build 0ac2756f. The file-stream example reads io/adt_points.in.
 #
 # This file teaches the MECHANICS. For what typed values mean for
 # self-amending systems - tuple equality as a theorem, guarantees over a
-# structured space - see adt_tutorial_advanced.tau, or part 11 of the
-# tau-nomic series (nomic_11_typed_world.tau) for the same story in context.
+# structured space - see adt_tutorial_advanced.tau.
 #
 # READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - but the
 # N restarts whenever a statement carries type declarations, so match the

@@ -113,11 +113,12 @@ q
 #   om[2] res 42, seen 1  (the mark - latch flips)
 #   om[3] res 5, seen 1   (latch holds)
 #
-# RULES OF THUMB, learned the hard way - details in nomic_11 and the
-# engine's demos/demo_4.1:
-# - Write state updates as EQUATIONS over [t-1] (o[t].x = f(o[t-1].x, ...)).
-#   A guard ternary combined with an [0]-init can normalize to unsat where
-#   the equation form is fine.
+# RULES OF THUMB - the reasoning behind them is in
+# adt_tutorial_advanced.tau (part 4); the engine's own demos/demo_4.1
+# covers the stream forms:
+# - Write state updates as EQUATIONS over [t-1] (o[t].x = f(o[t-1].x, ...)):
+#   the equation form composes with an [0]-init out of the box. When
+#   branching, branch at formula level and give every branch a lookback.
 # - A tau member on the wire is BARE spec text ending in a period:
 #   prop: "o3[t]=1 -> o4[t]=1."  - and values cannot contain double quotes.
 # - Stream names and types bind once, for the whole session - even names

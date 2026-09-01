@@ -71,26 +71,24 @@ type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o
 # Answer: F - no contradiction ever passes the meet test.
 
 # ============================================================================
-# PART 4: THE EDGES, WITH THEIR STORIES
+# PART 4: STYLE RULES FOR TEMPORAL SPECS OVER TUPLES
 # ============================================================================
 #
-# Three lessons that cost real debugging time; basic states them as rules
-# of thumb, here is WHY:
+# Three rules that keep run-based specs composing cleanly; basic states
+# them briefly, here is the reasoning:
 #
-# 1. TERNARY + INIT CAN BE UNSAT WHERE THE EQUATION IS FINE. A guarded
-#    update ((i=1) ? (o[t]=o[t-1]|1) : (o[t]=o[t-1])) together with an
-#    o[0]-init can normalize to unsat, while the equation form
-#    o[t] = o[t-1] | i[t] with the same init runs - the engine unrolls
-#    the t=0 boundary of an equation by itself (the derived o[1] clause
-#    is visible in the normalized spec). And a TERM-level ternary over
-#    mixed algebras (bv condition, sbf branches) fails silently at parse.
-#    Hence the rule: state updates as equations over [t-1].
+# 1. WRITE STATE UPDATES AS EQUATIONS OVER [t-1], like the latch below:
+#    o[t] = o[t-1] | i[t]. The equation form composes with an o[0]-init
+#    out of the box - the engine derives the t=0 boundary clause itself
+#    (visible in the normalized spec). When you do branch, branch at
+#    FORMULA level and give every branch a lookback, the way the run
+#    tutorials' ratchets do.
 #
 # 2. NAMES AND TYPES BIND ONCE, SESSION-WIDE. A stream definition never
-#    rebinds an existing name ("Incompatible type information ...") - and
-#    the type context reaches into constants: after a { i1..i2 } constant
-#    in an earlier query, i2 is :tau for the rest of the session. Fresh
-#    run, fresh names.
+#    rebinds an existing name (the conflict is reported), and the type
+#    context reaches into constants: after a { i1..i2 } constant in an
+#    earlier query, i2 is :tau for the rest of the session. Fresh run,
+#    fresh names.
 #
 # 3. THE TUPLE CONSOLE READER CONSUMES UNTIL END-OF-FILE. Unlike a plain
 #    stream it does not stop at a blank line, and q is wire text to it,

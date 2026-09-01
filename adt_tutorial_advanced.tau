@@ -5,8 +5,7 @@
 #
 # The ADVANCED companion to adt_tutorial_basic.tau: mechanics (declaring
 # types, solve, streams, wire format) are assumed - this file is about
-# what the mechanics MEAN, each claim proved on your binary. The same
-# story told inside the tau-nomic arc: nomic_11_typed_world.tau.
+# what the mechanics MEAN, each claim proved on your binary.
 #
 # Run with (minimal cost):
 #   TAU_BA_COMPONENT_FACTORING=1 tau -q < adt_tutorial_advanced.tau
@@ -81,8 +80,8 @@ type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o
 #    o[t] = o[t-1] | i[t]. The equation form composes with an o[0]-init
 #    out of the box - the engine derives the t=0 boundary clause itself
 #    (visible in the normalized spec). When you do branch, branch at
-#    FORMULA level and give every branch a lookback, the way the ratchets
-#    in nomic_03 and nomic_11 do.
+#    FORMULA level and give every branch a lookback, the way the ratchet
+#    in nomic_03_living_constitution.tau does.
 #
 # 2. NAMES AND TYPES BIND ONCE, SESSION-WIDE. A stream definition never
 #    rebinds an existing name (the conflict is reported), and the type

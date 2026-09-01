@@ -22,6 +22,8 @@
 # expected value in this file is switch-invariant.)
 # Needs a build with ADTs (merged 2026-08-28); verified against Tau
 # 0.7.0-alpha, build 0ac2756f. Earlier builds reject the type keyword.
+# New to ADTs? The mechanics (declare, solve, streams, wire format) are
+# covered hands-on in adt_tutorial.tau; this part is about what they MEAN.
 #
 # READING THE OUTPUT: as in part 01, scan for "%N: ..." result lines.
 # The run section at the end prints tuple wire lines instead:

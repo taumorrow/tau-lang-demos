@@ -30,7 +30,7 @@ fi
 strip_ansi() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g'; }
 fail=0; total=0
 
-for f in nomic_[0-9]*.tau consensus_*.tau; do
+for f in nomic_[0-9]*.tau adt_tutorial.tau consensus_*.tau; do
   total=$((total+1))
   exp_res=$(grep -m1 '^# EXPECTED-RESULTS:' "$f" | sed 's/^# EXPECTED-RESULTS: *//')
   exp_codes=$(grep -m1 '^# EXPECTED-CODES:' "$f" | sed 's/^# EXPECTED-CODES: *//')
@@ -60,7 +60,7 @@ for f in nomic_[0-9]*.tau consensus_*.tau; do
   if [ -n "$exp_tres" ]; then
     # tuple-typed run outputs: o[k] := { ..., res: "N" } - the res member
     # carries the verdict code (part 11)
-    act_tres=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE '^o\[[0-9]+\] := \{.*res: "[0-9]+"' | grep -oE '[0-9]+"$' | tr -d '"' | paste -sd, -)
+    act_tres=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE '^o[a-z0-9]*\[[0-9]+\] := \{.*res: "[0-9]+"' | grep -oE '[0-9]+"$' | tr -d '"' | paste -sd, -)
     [ "$act_tres" = "$exp_tres" ] || { ok=0; detail="$detail tuple-res: got [$act_tres] want [$exp_tres]"; }
   fi
   if [ "$ok" = 1 ]; then echo "PASS  $f"; else echo "FAIL  $f ($detail)"; fail=$((fail+1)); fi

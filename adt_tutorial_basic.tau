@@ -1,0 +1,133 @@
+# ============================================================================
+# ADT TUTORIAL (BASIC) - Abstract Data Types in Tau Language 0.7-alpha
+# Hands-on mechanics: aliases, tuples, solve, inheritance, typed streams
+# ============================================================================
+#
+# Run with:  tau -q < adt_tutorial_basic.tau
+# Needs a build with ADTs (merged 2026-08-28); verified against 0.7.0-alpha,
+# build 0ac2756f. The file-stream example reads io/adt_points.in.
+#
+# This file teaches the MECHANICS. For what typed values mean for
+# self-amending systems - tuple equality as a theorem, guarantees over a
+# structured space - see adt_tutorial_advanced.tau.
+#
+# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - but the
+# N restarts whenever a statement carries type declarations, so match the
+# answers by ORDER, not by number (the annotations below say "Answer:").
+# "solve" prints one "member := value" line per member; the two runs print
+# tuple wire lines ({ a: ... } echoes, then om[k] := { res: ..., seen: ... }).
+# ============================================================================
+
+# EXPECTED-RESULTS: T T T T T T
+# EXPECTED-TUPLE-RES: 0,7,42,5
+
+set charvar off
+set maxsplits 1
+
+# ============================================================================
+# PART 1: TYPE ALIASES - a name for a domain
+# ============================================================================
+
+# Declare an alias; afterwards byte and bv[8] are the same type:
+
+type byte = bv[8]. n x:byte = x:bv[8]
+# Answer: T
+
+type byte = bv[8]. solve v:byte = { #x2A }:bv[8]
+# Output: v := { 42 }:bv[8]
+
+# ============================================================================
+# PART 2: TUPLES - named members, reached with a dot
+# ============================================================================
+
+# Declare with "= { ... }" (the spelling "is { ... }" also parses):
+
+type Point = {a: sbf, b: sbf}. n ex p:Point (p.a = 1 && p.b = 0)
+# Answer: T - a Point with those members exists.
+
+type Point = {a: sbf, b: sbf}. solve x:Point = x && x.a = 1 && x.b = 0
+# Output, one line per member (note: not declaration order):
+#   x.b := { 0 }:sbf
+#   x.a := { 1 }:sbf
+# ("x:Point = x" fixes x's type while leaving x free for the solver.)
+
+# solve --min / --max work over tuples too, per member:
+
+type Point = {a: sbf, b: sbf}. solve --max x:Point = x && x.a & x.b = 0
+# Output: x.b := { 0 }:sbf, x.a := { 1 }:sbf
+
+type Point = {a: sbf, b: sbf}. solve --min x:Point = x && (x.a | x.b) = 1
+# Output: x.b := { 1 }:sbf, x.a := { 0 }:sbf
+
+# ============================================================================
+# PART 3: INHERITANCE AND NESTING
+# ============================================================================
+
+# "of (Parent, ...)" prepends the parents' members; members may themselves
+# be tuples, to any depth; a member path walks the chain. Re-declaring a
+# type name is last-definition-wins.
+
+type byte = bv[8]. type Tagged = {tag: byte}. type Point = {a: sbf, b: sbf}. type Line of (Tagged) is {p: Point, q: Point}. n ex l:Line (l.tag = { #x07 }:bv[8] && l.p.a = 1)
+# Answer: T - l.tag is inherited, l.p.a reaches two levels deep.
+
+# ============================================================================
+# PART 4: MIXED ALGEBRAS - sbf, bv[n] and tau in one record
+# ============================================================================
+
+type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.cmd = { #x02 }:bv[8] && m.note = 1 && m.prop != 0)
+# Answer: T - one record, three algebras.
+
+# WARNING for tau members and { } constants generally: name the streams
+# INSIDE a constant with o-names. i-names mean "for all inputs", and a
+# universally quantified implication is refutable - the constant is 0:
+
+n { i1[t]=1 -> i2[t]=1 } = 0
+# Answer: T - i-named: collapses to 0 (dead on arrival).
+n { o1[t]=1 -> o2[t]=1 } != 0
+# Answer: T - o-named: a live, non-zero specification.
+
+# ============================================================================
+# PART 5: TUPLE STREAMS - one wire value per step
+# ============================================================================
+
+# A stream can carry a whole tuple. Wire format is JSON-like and nests
+# like the type declaration. A FILE stream reads one literal per line and
+# the run ends by itself at end of file; q then answers the
+# continue-or-quit prompt:
+
+type Point = {a: sbf, b: sbf}. i:Point := in file("io/adt_points.in"). o:Point := out console. run o[t] = i[t].
+q
+
+# Output: o[0] := { a: "1", b: "0" } ... - one echoed tuple per file line.
+
+# ============================================================================
+# PART 6: A TEMPORAL RUN OVER CONSOLE STREAMS - and the rules of thumb
+# ============================================================================
+#
+# A latch: res echoes the reading, seen flips to 1 at the first set mark
+# and stays 1 (lookback om[t-1].seen). Expected steps:
+#   om[0] res 0, seen 0   (boundary step)
+#   om[1] res 7, seen 0
+#   om[2] res 42, seen 1  (the mark - latch flips)
+#   om[3] res 5, seen 1   (latch holds)
+#
+# RULES OF THUMB - the reasoning behind them is in
+# adt_tutorial_advanced.tau (part 4); the engine's own demos/demo_4.1
+# covers the stream forms:
+# - Write state updates as EQUATIONS over [t-1] (o[t].x = f(o[t-1].x, ...)):
+#   the equation form composes with an [0]-init out of the box. When
+#   branching, branch at formula level and give every branch a lookback.
+# - A tau member on the wire is BARE spec text ending in a period:
+#   prop: "o3[t]=1 -> o4[t]=1."  - and values cannot contain double quotes.
+# - Stream names and types bind once, for the whole session - even names
+#   that only appeared inside earlier { } constants. Fresh run, fresh names
+#   (that is why these streams are im/om).
+# - A tuple CONSOLE stream reads every further line as wire text (q is not
+#   an escape there), so a console run should be the LAST thing in the
+#   file - like this one. There are no sum types: members are records and
+#   aliases, a command stays a number.
+
+type In = {val: bv[8], mark: sbf}. type Out = {res: bv[8], seen: sbf}. im:In := in console. om:Out := out console. run (om[0].seen = 0) && (om[t].seen = om[t-1].seen | im[t].mark) && (om[t].res = im[t].val)
+{ val: "7", mark: "0" }
+{ val: "42", mark: "1" }
+{ val: "5", mark: "0" }

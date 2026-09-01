@@ -1,0 +1,95 @@
+# ============================================================================
+# TABLES TUTORIAL (BASIC) - fixed tables with abstract data types
+# Rows as tuples, tables as tuples of rows: cells, lookups, sums, updates
+# ============================================================================
+#
+# Run with:  tau -q < adt_tables_basic.tau
+# Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
+# build 0ac2756f. ADT basics: adt_tutorial_basic.tau. GROWING tables
+# (rows over time, tables as row-sets): adt_tables_advanced.tau.
+#
+# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - the N
+# restarts whenever a statement carries type declarations, so match the
+# answers by ORDER, not by number (annotations below say "Answer:").
+# "solve" prints one "member := value" line per cell.
+# ============================================================================
+
+# EXPECTED-RESULTS: T F T T T
+
+set charvar off
+set maxsplits 1
+
+# ============================================================================
+# PART 1: A ROW IS A TUPLE, A TABLE IS A TUPLE OF ROWS
+# ============================================================================
+#
+# Three rows, two named columns. The whole table is ONE typed value; a
+# cell is a member path like t.r2.qty:
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. solve t:Tab = t && t.r1.id = { #x01 }:bv[8] && t.r1.qty = { #x0A }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.id = { #x03 }:bv[8] && t.r3.qty = { #x1E }:bv[8]
+# Output: six cell lines, e.g. t.r2.qty := { 20 }:bv[8]
+# ("t:Tab = t" fixes t's type while leaving t free - without it, member
+# access fails with "no known ADT type in scope".)
+
+# ============================================================================
+# PART 2: LOOKUP - asking the table a question
+# ============================================================================
+#
+# There is no "for each row" - a lookup spells the rows out. Is id 2 in
+# the table below? Is id 7?
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex t:Tab (t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8] && (t.r1.id = { #x02 }:bv[8] || t.r2.id = { #x02 }:bv[8] || t.r3.id = { #x02 }:bv[8]))
+# Answer: T - id 2 is present (row 2 matches).
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex t:Tab (t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8] && (t.r1.id = { #x07 }:bv[8] || t.r2.id = { #x07 }:bv[8] || t.r3.id = { #x07 }:bv[8]))
+# Answer: F - id 7 is not: no assignment can make any row match.
+
+# ============================================================================
+# PART 3: AGGREGATION - a proven total
+# ============================================================================
+#
+# bv arithmetic works across cells. The sum is not computed and printed -
+# it is PROVED: every table with these quantities totals 60:
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> t.r1.qty + t.r2.qty + t.r3.qty = { #x3C }:bv[8])
+# Answer: T - 10 + 20 + 30 = 60, as a theorem over all such tables.
+
+# And as a solver query, computing the sum as a value:
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. solve t:Tab = t && s:bv[8] = t.r1.qty + t.r2.qty + t.r3.qty && t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8] && t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8]
+# Output includes: s := { 60 }:bv[8]
+
+# ============================================================================
+# PART 4: DERIVED COLUMNS - the spreadsheet move
+# ============================================================================
+#
+# A cell can be DEFINED by other cells. Here total is qty times a unit
+# price of 3 - the solver fills the derived column:
+
+type Calc = {qty: bv[8], total: bv[8]}. solve c:Calc = c && c.qty = { #x0A }:bv[8] && c.total = c.qty * { #x03 }:bv[8]
+# Output (order not guaranteed): c.total := { 30 }:bv[8], c.qty := { 10 }:bv[8]
+
+type Calc = {qty: bv[8], total: bv[8]}. n all c:Calc ((c.qty = { #x0A }:bv[8] && c.total = c.qty * { #x03 }:bv[8]) -> c.total = { #x1E }:bv[8])
+# Answer: T - the derived value is forced, for every such record.
+
+# ============================================================================
+# PART 5: FUNCTIONAL UPDATE - a new table that differs in one cell
+# ============================================================================
+#
+# Values never mutate. An "update" is a second table equal to the first
+# everywhere except the changed cell:
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab all u:Tab ((t.r3.qty = { #x1E }:bv[8] && u.r1 = t.r1 && u.r2 = t.r2 && u.r3.id = t.r3.id && u.r3.qty = { #x28 }:bv[8]) -> (u.r3.qty != t.r3.qty && u.r1.qty = t.r1.qty))
+# Answer: T - u is t with r3.qty set to 40: one cell moved, the rest carried.
+
+# ============================================================================
+# RULES OF THUMB
+# ============================================================================
+#
+# - Always bind the table: "t:Tab = t" (or a quantifier) before touching
+#   members.
+# - Lookups are positional: spell the rows out. There is no row iteration
+#   and no COUNT over a dynamic number of rows - the schema is the size.
+# - For tables that GROW - rows arriving over time, tables as sets of
+#   row-facts - see adt_tables_advanced.tau.
+# ============================================================================

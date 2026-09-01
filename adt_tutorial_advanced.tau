@@ -1,0 +1,110 @@
+# ============================================================================
+# ADT TUTORIAL (ADVANCED) - what typed values mean
+# Tuple equality as theorems, name binding, guarantees over a shaped space
+# ============================================================================
+#
+# The ADVANCED companion to adt_tutorial_basic.tau: mechanics (declaring
+# types, solve, streams, wire format) are assumed - this file is about
+# what the mechanics MEAN, each claim proved on your binary.
+#
+# Run with (minimal cost):
+#   TAU_BA_COMPONENT_FACTORING=1 tau -q < adt_tutorial_advanced.tau
+# Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
+# build 0ac2756f.
+#
+# READING THE OUTPUT: "%N: ..." lines answer the queries - the N restarts
+# whenever a statement carries type declarations, so match answers by
+# ORDER, not by number (annotations below say "Answer:"). The finale
+# prints tuple wire lines om[k] := { res: "...", seen: "..." }.
+# ============================================================================
+
+# EXPECTED-RESULTS: T T T T T F
+# EXPECTED-TUPLE-RES: 0,7,42,5
+
+set charvar off
+set maxsplits 1
+
+# ============================================================================
+# PART 1: A TUPLE IS EXACTLY ITS MEMBERS - provable, in both directions
+# ============================================================================
+#
+# ADTs flatten at parse time; the engine below is the untouched decidable
+# kernel. So "member-wise equality" is not a convention, it is a theorem:
+
+type Point = {a: sbf, b: sbf}. n all x:Point all y:Point (x = y -> x.a = y.a)
+# Answer: T - equal tuples have equal members (projection).
+
+type Point = {a: sbf, b: sbf}. n all x:Point all y:Point ((x.a = y.a && x.b = y.b) -> x = y)
+# Answer: T - equal members make equal tuples: no hidden state in a tuple.
+# Structure without metaphysics.
+
+# ============================================================================
+# PART 2: WHO BINDS THE NAMES INSIDE A CONSTANT
+# ============================================================================
+#
+# A tau member's value is a specification, and satisfiability of a
+# specification reads "for ALL inputs there EXIST outputs". Names inside
+# a { } constant inherit that: i-names are universally bound, o-names
+# existentially. The same implication, twice:
+
+n { i1[t]=1 -> i2[t]=1 } = 0
+# Answer: T - "for all inputs i1,i2: i1=1 -> i2=1" is refutable; the constant
+#         IS 0. An i-named proposal is dead on arrival.
+n { o1[t]=1 -> o2[t]=1 } != 0
+# Answer: T - the o-named twin is a live, non-zero specification. This is why
+#         proposals in every run-based tutorial speak in o-names.
+
+# ============================================================================
+# PART 3: GUARANTEES OVER A SHAPED SPACE
+# ============================================================================
+#
+# Quantifiers range over the whole tuple type: every command, note and
+# proposal at once. An invariant over all conceivable records - and its
+# unsat control, so the T is not vacuous:
+
+type Move = {cmd: bv[8], note: sbf, prop: tau}. n all m:Move ((({ o1[t]=1 }:tau & m.prop) != 0) -> m.prop != 0)
+# Answer: T - any proposal compatible with a live spec is itself consistent,
+#         for the WHOLE structured space of moves.
+
+type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o1[t]=1 }:tau & m.prop) != 0))
+# Answer: F - no contradiction ever passes the meet test.
+
+# ============================================================================
+# PART 4: STYLE RULES FOR TEMPORAL SPECS OVER TUPLES
+# ============================================================================
+#
+# Three rules that keep run-based specs composing cleanly; basic states
+# them briefly, here is the reasoning:
+#
+# 1. WRITE STATE UPDATES AS EQUATIONS OVER [t-1], like the latch below:
+#    o[t] = o[t-1] | i[t]. The equation form composes with an o[0]-init
+#    out of the box - the engine derives the t=0 boundary clause itself
+#    (visible in the normalized spec). When you do branch, branch at
+#    FORMULA level and give every branch a lookback, the way the ratchet
+#    in nomic_03_living_constitution.tau does.
+#
+# 2. NAMES AND TYPES BIND ONCE, SESSION-WIDE. A stream definition never
+#    rebinds an existing name (the conflict is reported), and the type
+#    context reaches into constants: after a { i1..i2 } constant in an
+#    earlier query, i2 is :tau for the rest of the session. Fresh run,
+#    fresh names.
+#
+# 3. THE TUPLE CONSOLE READER CONSUMES UNTIL END-OF-FILE. Unlike a plain
+#    stream it does not stop at a blank line, and q is wire text to it,
+#    not an escape. A console run belongs at the end of the file - as
+#    below - or behind a file stream.
+#
+# ============================================================================
+# PART 5: FINALE - the latch, meaning edition
+# ============================================================================
+#
+# The one-way flag from basic, read as a statement: seen is a MONOTONE
+# member - once 1 it stays 1, because the | equation can only grow it.
+# Steps:
+#   om[0] res 0, seen 0 (boundary) - om[1] res 7, seen 0 -
+#   om[2] res 42, seen 1 (mark) - om[3] res 5, seen 1 (holds).
+
+type In = {val: bv[8], mark: sbf}. type Out = {res: bv[8], seen: sbf}. im:In := in console. om:Out := out console. run (om[0].seen = 0) && (om[t].seen = om[t-1].seen | im[t].mark) && (om[t].res = im[t].val)
+{ val: "7", mark: "0" }
+{ val: "42", mark: "1" }
+{ val: "5", mark: "0" }

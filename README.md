@@ -61,11 +61,13 @@ Smaller stand-alone demos, from the early days of this repository:
 - **Arithmetic as logic:** `4bit_binary_adder.tau` (+ `_io`, `_sbf` variants),
   `4bit_binary_substractor.tau`, `4bit_binary_multiplier.tau`, `logic_gates.tau`,
   `binary_encoding.tau`, `bitvector_tutorial.tau`
-- **Abstract data types**: `adt_tutorial.tau` - hands-on mechanics: aliases,
-  tuples, solve (incl. --min/--max), inheritance, member paths, mixed
-  algebras (sbf/bv/tau in one record), typed streams and their wire format,
-  with rules of thumb. Self-checking (part of `nomic_run_all.sh`); needs a
-  2026-08-28+ build. The conceptual side lives in series part 11.
+- **Abstract data types**: `adt_tutorial_basic.tau` - hands-on mechanics:
+  aliases, tuples, solve (incl. --min/--max), inheritance, member paths,
+  mixed algebras (sbf/bv/tau in one record), typed streams and their wire
+  format, with rules of thumb. `adt_tutorial_advanced.tau` - the meaning
+  layer: tuple equality as theorems, name binding in constants, guarantees
+  over a structured space. Both self-checking (`nomic_run_all.sh`); need a
+  2026-08-28+ build. Series part 11 tells the advanced story in context.
 - **Self-reference:** `barber_demo_1.tau`, `barber_demo_2.tau` (Russell's barber,
   handled without paradox)
 - **Temporal behavior:** `temporal_state_machine.tau`, `temporal_stability.tau`,

@@ -1,16 +1,17 @@
 # ============================================================================
-# ADT TUTORIAL - Abstract Data Types in Tau Language 0.7-alpha
-# Aliases, tuples, inheritance, member paths, typed streams - with examples
+# ADT TUTORIAL (BASIC) - Abstract Data Types in Tau Language 0.7-alpha
+# Hands-on mechanics: aliases, tuples, solve, inheritance, typed streams
 # ============================================================================
 #
-# Run with:  tau -q < adt_tutorial.tau
+# Run with:  tau -q < adt_tutorial_basic.tau
 # (Or via nomic_run_all.sh, which also self-checks the annotated outputs.)
 # Needs a build with ADTs (merged 2026-08-28); verified against 0.7.0-alpha,
 # build 0ac2756f. The file-stream example reads io/adt_points.in.
 #
 # This file teaches the MECHANICS. For what typed values mean for
 # self-amending systems - tuple equality as a theorem, guarantees over a
-# structured space - see nomic_11_typed_world.tau in the tutorial series.
+# structured space - see adt_tutorial_advanced.tau, or part 11 of the
+# tau-nomic series (nomic_11_typed_world.tau) for the same story in context.
 #
 # READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines; "solve"
 # prints one "member := value" line per member; the runs at the end print

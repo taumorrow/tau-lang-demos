@@ -1,0 +1,189 @@
+# ============================================================================
+# ADT TUTORIAL (ADVANCED) - Abstract Data Types in Tau Language 0.7-alpha
+# Meaning and guarantees: tuple equality as theorems, shaped quantification
+# ============================================================================
+#
+# The ADVANCED companion to adt_tutorial_basic.tau: mechanics are assumed,
+# this file is about what typed values MEAN - member-wise equality proved
+# in both directions, name binding inside constants, guarantees over a
+# structured space, and a temporal finale. Overlaps deliberately with
+# series part 11 (nomic_11_typed_world.tau), which tells the same story
+# inside the tau-nomic arc.
+#
+# Run with (minimal cost):
+#   TAU_BA_COMPONENT_FACTORING=1 tau -q < adt_tutorial_advanced.tau
+# (nomic_run_all.sh sets this for you. The env var and the maxsplits option
+# below change COST only, never a verdict; every expected value in this
+# file is switch-invariant.)
+#
+# Needs a build with ADTs (merged 2026-08-28); verified against Tau
+# 0.7.0-alpha, build 0ac2756f. Earlier builds reject the type keyword.
+# The file-stream example reads io/adt_points.in from this directory.
+#
+# READING THE OUTPUT: "n ..." queries answer as numbered "%N: ..." lines;
+# "solve ..." prints one "member := value" line per flattened member (and
+# no %N line). The two run sections print tuple wire lines:
+#   o[k] := { res: "...", ... }
+# ============================================================================
+
+# EXPECTED-RESULTS: T T T T T T T T T F
+# EXPECTED-TUPLE-RES: 0,7,42,5
+
+set charvar off
+set maxsplits 1
+
+# ============================================================================
+# PART 1: TYPE ALIASES - a name for a domain
+# ============================================================================
+#
+# The simplest declaration renames an existing type. After it, byte and
+# bv[8] are the SAME type - the alias resolves before type inference, so
+# values, equations and solvers mix them freely:
+
+type byte = bv[8]. n x:byte = x:bv[8]
+# %1: T - one domain, two names.
+
+type byte = bv[8]. solve v:byte = { #x2A }:bv[8]
+# Output: v := { 42 }:bv[8] - the solver reports in the underlying type.
+
+# ============================================================================
+# PART 2: TUPLES - named members, each with its own type
+# ============================================================================
+#
+# A tuple type collects members. Declare with "= { ... }" (or the spelling
+# "is { ... }" - both parse). Members are reached with a dot:
+
+type Point = {a: sbf, b: sbf}. n ex p:Point (p.a = 1 && p.b = 0)
+# %2: T - a structured value with those members exists.
+
+type Point = {a: sbf, b: sbf}. solve x:Point = x && x.a = 1 && x.b = 0
+# Output, one line per flattened member (note: NOT declaration order):
+#   x.b := { 0 }:sbf
+#   x.a := { 1 }:sbf
+# "x:Point = x" fixes x's type while leaving x free for the solver.
+
+# ============================================================================
+# PART 3: WHAT TUPLE EQUALITY MEANS - and what the engine actually sees
+# ============================================================================
+#
+# ADTs flatten at PARSE TIME: x:Point becomes the member family x.a, x.b
+# before type inference runs. A tuple IS exactly its members - in both
+# directions, provable as theorems:
+
+type Point = {a: sbf, b: sbf}. n all x:Point all y:Point (x = y -> x.a = y.a)
+# %3: T - equal tuples have equal members (projection).
+
+type Point = {a: sbf, b: sbf}. n all x:Point all y:Point ((x.a = y.a && x.b = y.b) -> x = y)
+# %4: T - equal members make equal tuples: no hidden state in a tuple.
+#
+# Practical consequence: k members mean k underlying streams/variables.
+# Structure organizes cost, it does not shrink it.
+
+# ============================================================================
+# PART 4: INHERITANCE AND NESTING
+# ============================================================================
+#
+# "of (Parent, ...)" prepends the parents' members (declaration order),
+# then the type's own. Members may themselves be tuple-typed, to any
+# depth; a member path walks the chain:
+
+type byte = bv[8]. type Tagged = {tag: byte}. type Point = {a: sbf, b: sbf}. type Line of (Tagged) is {p: Point, q: Point}. n ex l:Line (l.tag = { #x07 }:bv[8] && l.p.a = 1)
+# %5: T - l.tag is inherited, l.p.a reaches two levels deep.
+# Extending a schema = declaring a new type over the old ones; a re-declared
+# type name is last-definition-wins.
+
+# ============================================================================
+# PART 5: MIXED ALGEBRAS - tuples may combine sbf, bv[n] and tau itself
+# ============================================================================
+#
+# Members can come from DIFFERENT Boolean algebras, including whole Tau
+# specifications as values:
+
+type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.cmd = { #x02 }:bv[8] && m.note = 1 && m.prop != 0)
+# %6: T - one record, three algebras.
+#
+# When a member is a { } constant, remember WHO BINDS THE NAMES inside:
+# i-named streams read as for-all-inputs, o-named as there-exist-outputs
+# (satisfiability is "for all inputs there exist outputs"). The same
+# implication is dead with i-names and alive with o-names:
+
+n { i1[t]=1 -> i2[t]=1 } = 0
+# %7: T - refutable for all inputs: the constant collapses to 0.
+n { o1[t]=1 -> o2[t]=1 } != 0
+# %8: T - the o-named twin is a live, non-zero specification.
+
+# ============================================================================
+# PART 6: GUARANTEES OVER A SHAPED SPACE
+# ============================================================================
+#
+# Quantifiers range over the whole tuple type - every command, note and
+# proposal at once. An invariant over all conceivable records:
+
+type Move = {cmd: bv[8], note: sbf, prop: tau}. n all m:Move ((({ o1[t]=1 }:tau & m.prop) != 0) -> m.prop != 0)
+# %9: T - any proposal compatible with a live spec is itself consistent.
+
+type Move = {cmd: bv[8], note: sbf, prop: tau}. n ex m:Move (m.prop = 0 && (({ o1[t]=1 }:tau & m.prop) != 0))
+# %10: F - the honest control: the meet test never passes a contradiction,
+# so the guarantee above is not vacuous.
+
+# ============================================================================
+# PART 7: TUPLE STREAMS - one wire value per step
+# ============================================================================
+#
+# A stream may carry a whole tuple. The wire format is JSON-like and nests
+# exactly like the type declaration: { a: "1", b: "0" }. A file stream
+# reads one wire literal per line and the run ends by itself when the
+# file is exhausted - a plain q then answers the continue-or-quit prompt:
+
+type Point = {a: sbf, b: sbf}. i:Point := in file("io/adt_points.in"). o:Point := out console. run o[t] = i[t].
+q
+
+# Output: o[1] := { a: "1", b: "0" } and so on - three steps, one tuple
+# echoed per line of the file, then the run stops on its own.
+
+# ============================================================================
+# PART 8: THE EDGES - honest limits, wire rules, endings
+# ============================================================================
+#
+# - These are PRODUCT types: records, aliases, inheritance. There are no
+#   sum types: a command member is a number, not an enum with named cases.
+# - Wire values are quoted strings; a double quote cannot appear INSIDE a
+#   value. A tau-typed member is written as BARE specification text ending
+#   in a period: prop: "o3[t]=1 -> o4[t]=1." - the same convention as a
+#   tau-valued console stream, quoted into the tuple.
+# - A tuple CONSOLE stream reads every further line as wire text (a failed
+#   parse is reported and retried; q is not an escape there). So: bound
+#   the run, feed it from a file, or - as in the finale below - let the
+#   run be the last thing in the file, ending cleanly at end-of-file.
+# - Temporal style matters: a guard ternary combined with an [0]-init can
+#   normalize to unsat where the plain EQUATION form of the same idea is
+#   fine - the engine unrolls the t=0 boundary for an equation with a
+#   lookback (you can see the derived o[1] clause in the normalized spec).
+#   Prefer "o[t].x = f(o[t-1].x, i[t].y)" over branching when you can.
+#
+# ============================================================================
+# PART 9: FINALE - a temporal run over tuple streams
+# ============================================================================
+#
+# A latch, in equation form: res echoes the reading; seen flips to 1 the
+# first time the mark member is set and STAYS 1 - a one-way flag via the
+# lookback o[t-1].seen. What the four steps will show:
+#   Step 0: res 0, seen 0  (boundary step; no input consumed yet)
+#   Step 1: res 7, seen 0  (reading echoed; no mark)
+#   Step 2: res 42, seen 1 (the mark - the latch flips)
+#   Step 3: res 5, seen 1  (the latch HOLDS: seen stays 1 without a mark)
+#
+# The streams are named im/om, and not i/o or i2/o2: PART 7 already bound
+# i and o (as Point streams), and the { i1..i2 } constants of PART 5 have
+# already typed i1/i2 as tau - the REPL's type context persists across
+# statements, even from inside constants. A stream definition never
+# rebinds an existing name or type; the conflicting line is rejected
+# ("Incompatible type information"). Fresh section, fresh names.
+#
+# (The three wire lines below are the last lines of this file on purpose:
+# see PART 8.)
+
+type In = {val: bv[8], mark: sbf}. type Out = {res: bv[8], seen: sbf}. im:In := in console. om:Out := out console. run (om[0].seen = 0) && (om[t].seen = om[t-1].seen | im[t].mark) && (om[t].res = im[t].val)
+{ val: "7", mark: "0" }
+{ val: "42", mark: "1" }
+{ val: "5", mark: "0" }

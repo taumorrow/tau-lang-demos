@@ -12,9 +12,10 @@
 # Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
 # build 0ac2756f.
 #
-# READING THE OUTPUT: "%N: ..." lines answer the queries - the N restarts
-# whenever a statement carries type declarations, so match answers by
-# ORDER, not by number (annotations below say "Answer:"). The finale
+# READING THE OUTPUT: "%N: ..." lines answer the queries - consecutive
+# IDENTICAL results share one %N slot (the REPL's memory de-duplicates
+# against the last entry), so match answers by ORDER, not by number
+# (annotations below say "Answer:"). The finale
 # prints tuple wire lines om[k] := { res: "...", seen: "..." }.
 # ============================================================================
 

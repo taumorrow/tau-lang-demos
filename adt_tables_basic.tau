@@ -8,9 +8,10 @@
 # against 0.7.0-alpha, build 02fbae29. ADT basics: adt_tutorial_basic.tau. GROWING tables
 # (rows over time, tables as row-sets): adt_tables_advanced.tau.
 #
-# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - the N
-# restarts whenever a statement carries type declarations, so match the
-# answers by ORDER, not by number (annotations below say "Answer:").
+# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines -
+# consecutive IDENTICAL results share one %N slot (the REPL's memory
+# de-duplicates against the last entry), so match the answers by ORDER,
+# not by number (annotations below say "Answer:").
 # "solve" prints one "member := value" line per cell.
 # ============================================================================
 

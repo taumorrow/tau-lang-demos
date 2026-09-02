@@ -11,9 +11,10 @@
 # self-amending systems - tuple equality as a theorem, guarantees over a
 # structured space - see adt_tutorial_advanced.tau.
 #
-# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - but the
-# N restarts whenever a statement carries type declarations, so match the
-# answers by ORDER, not by number (the annotations below say "Answer:").
+# READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - but
+# consecutive IDENTICAL results share one %N slot (the REPL's memory
+# de-duplicates against the last entry), so match the answers by ORDER,
+# not by number (the annotations below say "Answer:").
 # "solve" prints one "member := value" line per member; the two runs print
 # tuple wire lines ({ a: ... } echoes, then om[k] := { res: ..., seen: ... }).
 # ============================================================================

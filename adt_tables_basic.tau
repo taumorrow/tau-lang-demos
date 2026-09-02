@@ -4,8 +4,8 @@
 # ============================================================================
 #
 # Run with:  tau -q < adt_tables_basic.tau
-# Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
-# build 0ac2756f. ADT basics: adt_tutorial_basic.tau. GROWING tables
+# Needs a build with ADTs and the min/max builtins (2026-09-02+); verified
+# against 0.7.0-alpha, build 02fbae29. ADT basics: adt_tutorial_basic.tau. GROWING tables
 # (rows over time, tables as row-sets): adt_tables_advanced.tau.
 #
 # READING THE OUTPUT: "n ..." queries answer as "%N: ..." lines - the N
@@ -14,7 +14,7 @@
 # "solve" prints one "member := value" line per cell.
 # ============================================================================
 
-# EXPECTED-RESULTS: T F T T T
+# EXPECTED-RESULTS: T F T T T T T
 
 set charvar off
 set maxsplits 1
@@ -53,6 +53,16 @@ type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n ex
 
 type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> t.r1.qty + t.r2.qty + t.r3.qty = { #x3C }:bv[8])
 # Answer: T - 10 + 20 + 30 = 60, as a theorem over all such tables.
+
+# min/max are builtin bitvector terms (unsigned), so extremes are proved
+# the same way:
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> max(max(t.r1.qty, t.r2.qty), t.r3.qty) = { #x1E }:bv[8])
+# Answer: T - the largest quantity is 30.
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}. n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> min(min(t.r1.qty, t.r2.qty), t.r3.qty) = { #x0A }:bv[8])
+# Answer: T - the smallest is 10. MIN/MAX/SUM: all aggregation over the
+# fixed schema is a theorem, never a loop.
 
 # And as a solver query, computing the sum as a value:
 

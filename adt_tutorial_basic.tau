@@ -28,7 +28,9 @@ set maxsplits 1
 # PART 1: TYPE ALIASES - a name for a domain
 # ============================================================================
 
-# Declare an alias; afterwards byte and bv[8] are the same type:
+# Declare an alias; afterwards byte and bv[8] are the same type. (Since
+# build 02fbae29 a type declared once carries forward to later lines; this
+# file re-declares per line so it also runs on 2026-08-28 builds.)
 
 type byte = bv[8]. n x:byte = x:bv[8]
 # Answer: T

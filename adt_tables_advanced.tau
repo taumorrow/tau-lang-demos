@@ -12,9 +12,10 @@
 # Needs a build with ADT definitions and min/max (2026-09-02+); verified
 # against 0.7.0-alpha, build 02fbae29.
 #
-# READING THE OUTPUT: "%N: ..." lines answer the n queries - the N
-# restarts whenever a statement carries type declarations, so match the
-# answers by ORDER, not by number (annotations say "Answer:"). The ledger
+# READING THE OUTPUT: "%N: ..." lines answer the n queries - consecutive
+# IDENTICAL results share one %N slot (the REPL's memory de-duplicates
+# against the last entry), so match the answers by ORDER, not by number
+# (annotations say "Answer:"). The ledger
 # run at the end prints tuple wire lines ob[k] := { tab: "...", sel: "..." }
 # whose expected content is annotated at the run - the formulas themselves
 # are the results there, so this file's machine contract covers the %N

@@ -66,11 +66,12 @@ Smaller stand-alone demos, from the early days of this repository:
   their wire format. `adt_tutorial_advanced.tau` - the meaning layer: tuple
   equality as theorems, name binding in constants, guarantees over a
   structured space.
-- **Tables with ADTs** (needs a 2026-08-28+ build): `adt_tables_basic.tau` -
+- **Tables with ADTs** (needs a 2026-09-02+ build): `adt_tables_basic.tau` -
   fixed tables as tuples of rows: cells by member path, lookups, proven
-  totals, derived columns, functional updates. `adt_tables_advanced.tau` -
-  growing tables: rows as facts, a table as ONE tau value (SELECT as meet),
-  and an append-only ledger over tuple streams. All four carry annotated,
+  totals incl. min/max, derived columns, functional updates.
+  `adt_tables_advanced.tau` - growing tables: rows as facts, a table as ONE
+  tau value (SELECT as meet), named queries and bounded folds, and an
+  append-only ledger over tuple streams. All four carry annotated,
   machine-checkable expected outputs.
 - **Self-reference:** `barber_demo_1.tau`, `barber_demo_2.tau` (Russell's barber,
   handled without paradox)

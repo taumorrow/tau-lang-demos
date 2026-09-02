@@ -9,8 +9,8 @@
 #
 # Run with (minimal cost):
 #   TAU_BA_COMPONENT_FACTORING=1 tau -q < adt_tables_advanced.tau
-# Needs a build with ADTs (2026-08-28+); verified against 0.7.0-alpha,
-# build 0ac2756f.
+# Needs a build with ADT definitions and min/max (2026-09-02+); verified
+# against 0.7.0-alpha, build 02fbae29.
 #
 # READING THE OUTPUT: "%N: ..." lines answer the n queries - the N
 # restarts whenever a statement carries type declarations, so match the
@@ -22,7 +22,7 @@
 # purpose: a tuple console stream reads until end-of-file.)
 # ============================================================================
 
-# EXPECTED-RESULTS: T F T T T T T F
+# EXPECTED-RESULTS: T F T T T T T F T F T
 
 set charvar off
 set maxsplits 1
@@ -87,7 +87,32 @@ n (({ oid[t]:bv[8] = { #x02 }:bv[8] }) & ({ oid[t]:bv[8] = { #x01 }:bv[8] && oqt
 #         whole difference between a query and a row.
 
 # ============================================================================
-# PART 3: THE LEDGER - an append-only table over time
+# PART 3: NAMED QUERIES AND BOUNDED FOLDS - a relational vocabulary
+# ============================================================================
+#
+# Definitions accept whole tuples (one parameter per flattened member; every
+# parameter needs its type - unused ones via a trivial equality). So a
+# lookup is spelled out ONCE and becomes vocabulary:
+
+type Row = {id: bv[8], qty: bv[8]}. type Tab = {r1: Row, r2: Row, r3: Row}.
+hatid(a,b,c,d,e,f,k) := ((b:bv[8] = b) && (d:bv[8] = d) && (f:bv[8] = f) && (a:bv[8] = k || c:bv[8] = k || e:bv[8] = k))
+n ex t:Tab (t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8] && hatid(t, { #x02 }:bv[8]))
+# Answer: T - hatid(t, key) is the PART-2 select, now callable by name.
+n ex t:Tab (t.r1.id = { #x01 }:bv[8] && t.r2.id = { #x02 }:bv[8] && t.r3.id = { #x03 }:bv[8] && hatid(t, { #x07 }:bv[8]))
+# Answer: F - and it still refuses an absent key.
+
+# Recurrence families give BOUNDED folds - indexed partial aggregates over
+# the fixed schema (the index is a literal, not data; the schema stays the
+# size):
+
+sm[1](a):bv[8] := a
+sm[2](a,b):bv[8] := sm[1](a) + b
+sm[3](a,b,c):bv[8] := sm[2](a,b) + c
+n all t:Tab ((t.r1.qty = { #x0A }:bv[8] && t.r2.qty = { #x14 }:bv[8] && t.r3.qty = { #x1E }:bv[8]) -> sm[3](t.r1.qty, t.r2.qty, t.r3.qty) = { #x3C }:bv[8])
+# Answer: T - the fold is named once and proved wherever it is applied.
+
+# ============================================================================
+# PART 4: THE LEDGER - an append-only table over time
 # ============================================================================
 #
 # Tau's constitutional runs accumulate law by MEET (&): each adopted rule

@@ -1,0 +1,245 @@
+# ============================================================================
+# TABLES TUTORIAL (BEYOND SQL) - what a database checks, Tau proves
+# Three epochs of the table, and the one no engine could enter before
+# ============================================================================
+#
+# The third tables file, after adt_tables_basic.tau (fixed tables, SQL
+# style) and adt_tables_advanced.tau (growing tables, tables as values).
+#
+# Database history in three epochs. First we NAVIGATED: IMS segments,
+# CODASYL sets, Adabas period groups - Bachman's 1973 Turing lecture was
+# literally titled "The Programmer as Navigator". Then Codd let us
+# DECLARE, and the navigator died. This file walks both epochs on Tau
+# ground and then enters the third, which belongs to no database: tables
+# whose rules, equality, missing values and INTEGRITY OVER TIME are
+# theorems of the same algebra that stores the rows.
+#
+# Run with (minimal cost):
+#   TAU_BA_COMPONENT_FACTORING=1 tau -q < adt_tables_beyond_sql.tau
+# Needs a build with ADT definitions (2026-09-02+); verified against
+# 0.7.0-alpha, build 1c1e58ae.
+#
+# READING THE OUTPUT: "%N: ..." lines answer the n queries - consecutive
+# IDENTICAL results share one %N slot, so match the answers by ORDER, not
+# by number (annotations say "Answer:"). The one solve prints a solution
+# block, annotated in place. The closing run prints tuple wire lines
+# oc[k] := { ctab: "...", chk: "..." } whose expected content is annotated
+# at the run - the machine contract covers the %N lines. (The wire lines
+# below the run are the last lines of the file on purpose: a tuple
+# console stream reads until end-of-file.)
+# ============================================================================
+
+# EXPECTED-RESULTS: F T T F T F T T F T T F T T F T F
+
+set charvar off
+set maxsplits 1
+
+# ============================================================================
+# STAGE 1 - FIRST EPOCH: THE SHAPES WE NAVIGATED
+# ============================================================================
+
+# --- 1a. The period group (Adabas PE, Informix ROW): records IN records ---
+#
+# SQL's first normal form flattened repeating groups away; Adabas kept
+# them in the record, and Informix later readmitted them as ROW types.
+# Tau sides with the record camp: tuples nest, and a member path walks
+# straight through the levels.
+
+type Addr = {town: bv[8], zip: bv[8]}
+type Person = {name: bv[8], addr: Addr}
+type Dept = {p1: Person, p2: Person}
+
+solve a:Dept = a && a.p1.name = { #x01 }:bv[8] && a.p1.addr.town = { #x2A }:bv[8] && a.p2.name = { #x02 }:bv[8] && a.p2.addr.zip = { #x63 }:bv[8]
+# Solution: the nested record is filled through depth-3 paths
+# (a.p1.addr.town := 42, a.p2.addr.zip := 99, names 1 and 2).
+
+n ex a:Dept (a.p1.addr.town = { #x2A }:bv[8] && a.p2.addr.town = { #x2A }:bv[8] && a.p1.addr.town != a.p2.addr.town)
+# Answer: F - the control: two cells pinned to the same town cannot also
+# differ. Nested paths are real algebra, not string access.
+
+# --- 1b. The multiple-value field (Adabas MU, Pick) ---
+#
+# A contact with up to three phone numbers, IN the record. In Adabas,
+# asking "which occurrence holds this number?" meant reading the record;
+# here occupancy is something to REASON about.
+
+type Tel = {t1: bv[8], t2: bv[8], t3: bv[8]}
+type Contact = {name: bv[8], tel: Tel}
+
+n ex k:Contact (k.tel.t3 = { #x16 }:bv[8] && k.tel.t1 != { #x16 }:bv[8] && k.tel.t2 != { #x16 }:bv[8])
+# Answer: T - the number 22 can live in the LAST slot only: containment
+# is position-blind, no occurrence is privileged.
+
+n all k:Contact (((k.tel.t1 = { #x16 }:bv[8] || k.tel.t2 = { #x16 }:bv[8] || k.tel.t3 = { #x16 }:bv[8]) && k.tel.t1 != { #x16 }:bv[8] && k.tel.t2 != { #x16 }:bv[8]) -> k.tel.t3 = { #x16 }:bv[8])
+# Answer: T - occurrence resolution as a theorem: if a contact contains
+# 22 and slots 1 and 2 do not hold it, slot 3 MUST - for every contact
+# there will ever be, not for the ones on disk.
+
+n ex k:Contact (k.tel.t1 = k.tel.t2 && k.tel.t1 != k.tel.t2)
+# Answer: F - the vacuity control: a contradictory demand has no witness.
+
+# --- 1c. The set (CODASYL owner-member, IMS parent-child) ---
+#
+# Referential integrity, the pride of the relational world and the burden
+# of the navigational one, is here neither a pointer nor a constraint
+# table - it is a theorem. (And the old Adabas ISN question - what
+# identifies a row? - answers itself: a row IS its content. Identity is
+# content-addressed; there is no record number to dangle. The honest
+# flip side: tables are SETS - insert the same row twice and it is one
+# row. Where duplicates matter, a distinguishing member is part of the
+# schema, not an engine-issued serial.)
+
+type Cust = {id: bv[8]}
+type Custs = {c1: Cust, c2: Cust}
+type Ord = {oid: bv[8], cust: bv[8]}
+
+n all cs:Custs all o:Ord ((cs.c1.id = { #x01 }:bv[8] && cs.c2.id = { #x02 }:bv[8] && o.cust = { #x02 }:bv[8]) -> (o.cust = cs.c1.id || o.cust = cs.c2.id))
+# Answer: T - an order pointing at customer 2 always finds its owner.
+
+n ex cs:Custs ex o:Ord (cs.c1.id = { #x01 }:bv[8] && cs.c2.id = { #x02 }:bv[8] && o.cust = { #x07 }:bv[8] && (o.cust = cs.c1.id || o.cust = cs.c2.id))
+# Answer: F - a dangling foreign key (cust=7) is UNSATISFIABLE, not merely
+# rejected at insert time.
+
+n ex cs:Custs ex o:Ord ex o2:Ord (cs.c1.id = { #x01 }:bv[8] && cs.c2.id = { #x02 }:bv[8] && (o.cust = cs.c1.id || o.cust = cs.c2.id) && (o2.cust = cs.c1.id || o2.cust = cs.c2.id) && o.oid != o2.oid && o.cust = o2.cust)
+# Answer: T - one owner, many members: the 1:n set shape lives.
+#
+# Note what is MISSING on purpose: there are no access paths here. In
+# Adabas a field was queryable if it was a descriptor; in SQL, fast if
+# indexed. Here every member is "indexed" by logic - the difference
+# between indexed and unindexed has no meaning, and the difference
+# between consistent and inconsistent is decidable.
+
+# ============================================================================
+# STAGE 2 - SECOND EPOCH: WHAT DECLARING BOUGHT, AND WHERE IT ENDS
+# ============================================================================
+#
+# Everything above is decidable constraint logic over fixed-width records.
+# A modern solver behind CHECK constraints could do all of it - and the
+# fixed shapes cut both ways: occurrence counts are bounded (MAXOCC
+# thinking, not Informix collections), there is no COUNT over a dynamic
+# number of rows, and heterogeneous rows need separate types. If Tau
+# stopped here, it would be a tidy, decidable mini-Datalog - useful, not
+# new. And the boundary is not an implementation gap but a purchase: Tau
+# is deliberately NOT Turing-complete - expressiveness is capped exactly
+# at decidability. The third epoch is what that cap buys, and no
+# database, old or new, can follow into it.
+
+# ============================================================================
+# STAGE 3 - THIRD EPOCH: THE TABLE THAT GOVERNS ITSELF
+# ============================================================================
+
+# --- 3a. Schema migration: the engine is stricter than the logic teacher ---
+#
+# Two versions of a rule set are VALUES of the algebra; their equality is
+# a verdict. First the honest positive:
+
+n ({ o1[t]=1 && o2[t]=1 } = { o2[t]=1 && o1[t]=1 })
+# Answer: T - reordering is recognised as the same rule set.
+
+n ({ o1[t]=1 -> o2[t]=1 } = { o2[t]=1 || o1[t]=0 })
+# Answer: F - and here every SQL refactoring instinct fails: A -> B and
+# (B or not-A) are equivalent in propositional logic, but NOT here,
+# because o1[t]=0 is not the negation of o1[t]=1 - stream values live in
+# an ATOMLESS algebra, with room strictly between "pinned to 0" and
+# "pinned to 1". The disjunction version quietly DEMANDS o2 whenever o1
+# is anything but exactly 0. A migration that "simplified" the rule this
+# way changed the law - and the engine is the only reviewer that catches it.
+
+n (({ o1[t]=1 -> o2[t]=1 } & { o2[t]=1 || o1[t]=0 }) = { o2[t]=1 || o1[t]=0 })
+# Answer: T - the proof of WHICH way they differ: their meet is the
+# disjunction version, so it is STRICTLY STRONGER (a smaller element of
+# the lattice). Not just "different" - provably a tightening.
+
+# --- 3b. The missing value, without NULL ---
+#
+# SQL's NULL brought three-valued logic and its paradoxes; Adabas had
+# empty occurrences. A tau-typed cell can be genuinely UNDERDETERMINED -
+# strictly between empty and settled - and that state is itself
+# queryable. (Same atomless room between 0 and 1 that migration tripped
+# over in 3a, now working FOR you.)
+
+type Doc = {id: bv[8], pledge: tau}
+
+n ex d:Doc (d.id = { #x01 }:bv[8] && d.pledge != 0 && d.pledge != 1)
+# Answer: T - a cell that is neither absent (0) nor a settled fact (1):
+# a partially pinned commitment. "Unknown" is a degree, not a logic hole.
+
+n ex d:Doc (d.pledge = { o3[t]=1 } && d.pledge = 0)
+# Answer: F - the control: a cell cannot both carry a rule and be empty.
+
+# --- 3c. Replication you can PROVE, ordering only where it matters ---
+#
+# Distributed databases assume, or cite a paper about a datatype, that
+# their merge commutes. Here it is a theorem - and yes, the theorem below
+# is "just" the algebra's join commuting. That is the point: the proof is
+# about THE actual merge of THE actual table, issued to the same engine
+# that runs it, not about an abstraction the implementation hopefully
+# matches.
+
+n all a:tau all b:tau all tb:tau (((tb | a) | b) = ((tb | b) | a))
+# Answer: T - inserting facts commutes, for every table and every pair of
+# rows there will ever be: replicas that saw the same inserts in any
+# order agree. Eventual consistency as a theorem, not a protocol hope.
+
+n ex a:tau ex b:tau ex tb:tau (((tb & a) | b) != ((tb & b) | a))
+# Answer: T - but restrict-then-extend does NOT commute in general -
+# the shape of freezes and replacements. Order matters precisely where
+# the algebra proves it does: coordination becomes a computed need, not
+# a blanket cost.
+
+# --- 3d. Self-reference without paradox - why all of this holds ---
+#
+# The deepest reason: values of a tau column are SENTENCES of the same
+# logic that judges them, so self-reference is algebra, not semantics -
+# the liar finds no home, and rules about all future rules are one query.
+
+n ex x:tau (x = x')
+# Answer: F - "a row equal to its own negation" has no witness. In a
+# Turing-complete store this question is a loop or a crash; here it is a
+# verdict.
+
+n all x:tau ((({ o1[t]=1 && o4[t]=0 } & x) & { o1[t]=1 && o4[t]=1 }) = 0)
+# Answer: T - a guarantee over EVERY rule that could ever be added: no
+# extension x of this core can ever admit the forbidden combination. SQL
+# cannot even express this quantifier, and for a Turing-complete rule
+# engine, Rice's theorem forbids deciding it.
+
+n all x:tau ((({ o1[t]=1 } & x) & { o1[t]=1 && o4[t]=1 }) = 0)
+# Answer: F - the control: weaken the core and the guarantee honestly
+# fails - some extension does admit it. The T above is earned, not vacuous.
+
+# ============================================================================
+# 3e. THE CLOSING RUN - a table that keeps its own integrity over time
+# ============================================================================
+#
+# adt_tables_advanced.tau ends with the append-only ledger; this file
+# ends with its integrity twin. One structured input per step
+# ({cust, fk}), one structured output ({ctab, chk}), equation form:
+#   ctab[t] = ctab[t-1] | cust[t]   the owner ledger grows by join
+#   chk[t]  = fk[t] & ctab[t-1]     the FK probe meets YESTERDAY's table
+# chk is a visible INTEGRITY COLUMN: F means dangling, a fact means "this
+# is your owner". No trigger, no constraint table - the guard is one more
+# equation living next to the data it guards.
+#
+# Expected wire output:
+#   oc[0]: ctab F (empty ledger); chk F
+#   oc[1]: ctab = customer 1 - but chk F: the probe for customer 1 ran
+#          against ctab[t-1], the EMPTY table. That is a CHOICE, one
+#          equation apart: guarding against ctab[t] would let a step
+#          vouch for its own insert (it runs - try it). Meeting
+#          YESTERDAY's table is the stricter discipline, and it mirrors
+#          how self-amendment stays paradox-free (3d, one floor up):
+#          today judges today by what was law until yesterday.
+#   oc[2]: ctab unchanged (appending F is a no-op); chk = customer 1 -
+#          the owner exists since yesterday, and the meet IS the witness.
+#   oc[3]: ctab = both customers (printed order may differ); chk F - the
+#          probe for customer 7 finds no owner: a dangling FK, visible as
+#          a VALUE, at the step it happens.
+#
+# On the wire a tau member is bare spec text with a period; the F entry
+# ("o9[t]=0 && o9[t]=1.") is the empty contribution.
+
+type Ins = {cust: tau, fk: tau}. type Reg = {ctab: tau, chk: tau}. ic:Ins := in console. oc:Reg := out console. run (oc[0].ctab = 0) && (oc[t].ctab = oc[t-1].ctab | ic[t].cust) && (oc[t].chk = ic[t].fk & oc[t-1].ctab)
+{ cust: "ocid[t]:bv[8] = { #x01 }:bv[8].", fk: "ocid[t]:bv[8] = { #x01 }:bv[8]." }
+{ cust: "o9[t]=0 && o9[t]=1.", fk: "ocid[t]:bv[8] = { #x01 }:bv[8]." }
+{ cust: "ocid[t]:bv[8] = { #x02 }:bv[8].", fk: "ocid[t]:bv[8] = { #x07 }:bv[8]." }

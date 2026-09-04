@@ -29,7 +29,7 @@
 # console stream reads until end-of-file.)
 # ============================================================================
 
-# EXPECTED-RESULTS: F T T F T F T T F T T F T T F T F
+# EXPECTED-RESULTS: F T T F T F T T F T T T F T T F T F
 
 set charvar off
 set maxsplits 1
@@ -149,6 +149,13 @@ n (({ o1[t]=1 -> o2[t]=1 } & { o2[t]=1 || o1[t]=0 }) = { o2[t]=1 || o1[t]=0 })
 # Answer: T - the proof of WHICH way they differ: their meet is the
 # disjunction version, so it is STRICTLY STRONGER (a smaller element of
 # the lattice). Not just "different" - provably a tightening.
+
+n ({ o1[t]=1 -> o2[t]=1 } = { o2[t]=1 || o1[t]!=1 })
+# Answer: T - and the rewriting that DOES hold: with the complement
+# ("not equal to 1") in place of the other literal ("equal to 0") the
+# disjunction IS the implication. Refactoring is safe exactly when it
+# respects the room between 0 and 1 - which is the whole lesson in one
+# line.
 
 # --- 3b. The missing value, without NULL ---
 #

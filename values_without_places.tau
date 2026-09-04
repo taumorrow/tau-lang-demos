@@ -1,0 +1,316 @@
+# ============================================================================
+# VALUES TUTORIAL (WITHOUT PLACES) - identity is content, change is a pair
+# ============================================================================
+#
+# A store keeps a value at a PLACE - an address, a row number, a cell -
+# and lets you come back to the place. Identity hangs on the place:
+# "update" means same place, new content; a duplicate is one content at
+# two places; NULL is a content that means "no content".
+#
+# In this algebra a value has no place. It is identified by what it says,
+# and that identity is decided by the engine. Storage does not vanish -
+# bytes are still written, hashed and signed - but it moves OUTSIDE the
+# algebra, to the provenance layer (part 1c is about exactly that seam).
+# Inside there are only values and the relations between them. This file
+# is about what that buys: identity becomes a verdict, an update becomes
+# a pair with a provable type, a duplicate becomes impossible, "history"
+# becomes a question the algebra can answer, and a missing value becomes
+# a degree instead of a hole.
+#
+# The notation is small. A stream is a named time series (o1, o2, ...);
+# `o1[t]=1` is the sentence "stream o1 is 1 at every step". Braces turn
+# a sentence into a VALUE: `{ o1[t]=1 }` is that sentence taken as an
+# element of the algebra, so it can be met (&), joined (|), complemented
+# ('), compared (=) and quantified over (all x:tau, ex x:tau). Every
+# query below is one such sentence about values, answered T or F.
+#
+# Two neighbours got half of this each: event sourcing keeps the
+# append-only half (state is derived, history is the truth), git keeps
+# the content-addressed half (a thing is named by what it is). Neither
+# can DECIDE that two different histories are the same value, or that
+# a change is a tightening - here that is one query. Five parts: what a
+# value is (0), identity is a verdict - values, not bytes (1), change is
+# a pair with a type, and values
+# remember their path exactly where order matters (2), counting is a
+# sentence exactly when the roster is one (3), and the difference between
+# two rule sets is itself a value - and a lossless one (4).
+#
+# Run with (minimal cost):
+#   TAU_BA_COMPONENT_FACTORING=1 tau -q < values_without_places.tau
+# Needs a build with ADT definitions (2026-09-02+); verified against
+# 0.7.0-alpha, build 1c1e58ae.
+#
+# READING THE OUTPUT: "%N: ..." lines answer the n queries - consecutive
+# IDENTICAL results share one %N slot, so match the answers by ORDER, not
+# by number (annotations say "Answer:"). The closing run prints tuple wire
+# lines oc[k] := { keeps: "...", gives_up: "..." } whose expected content
+# is annotated at the run - the machine contract covers the %N lines. (The
+# wire lines below the run are the last lines of the file on purpose: a
+# tuple console stream reads until end-of-file.)
+# ============================================================================
+
+# EXPECTED-RESULTS: T T F T T F T F T F T F T T F T F T T
+
+set charvar off
+set maxsplits 1
+
+# ============================================================================
+# PART 0: WHAT A VALUE IS - the floor, the ceiling, and the room between
+# ============================================================================
+#
+# A value here is a SENTENCE about streams - "o1 is 1", "o1 implies o2",
+# a whole rule set. The algebra orders these sentences: a value that says
+# MORE lies LOWER (it pins the streams tighter). At the bottom sits 0, the
+# contradiction - one value for every impossible law. At the top sits 1,
+# the sentence that says nothing - one value for the empty law. A freshly
+# named stream carries exactly that: no sentence yet, the value 1, total
+# freedom; meaning arrives only by legislation, one sentence at a time.
+# And between the two ends there is room - this algebra is atomless, so
+# between "pinned" and "free" there is always something strictly in
+# between.
+
+n ex x:tau (x != 0 && x != 1)
+# Answer: T - values strictly between the floor and the ceiling exist.
+# That room is where partial commitments, undecided cells and discretion
+# live; a two-valued store has no such place.
+
+n (({ o1[t]=1 } & { o1[t]=0 }) = 0)
+# Answer: T - two sentences that cannot both hold meet in THE impossible
+# value. There is one floor, and every contradiction is it.
+
+n (({ o1[t]=1 } & { o1[t]=1 }) = 0)
+# Answer: F - the control: a sentence with itself is not a contradiction.
+# The floor is reached by conflict, not by repetition.
+
+n (({ o1[t]=1 } | { o1[t]=1 }') = 1)
+# Answer: T - a sentence joined with its complement says nothing at all:
+# that is the ceiling, the empty law, the value a stream has before any
+# rule touches it.
+#
+# One warning that other series taught: 0 and 1 mean OPPOSITE things
+# depending on which way you accumulate. Law accumulates by MEET (each
+# rule constrains): 1 is "no law yet", 0 is "contradiction". A table
+# accumulates by JOIN (each row extends): 0 is "empty", 1 is "everything".
+# Same lattice, read from both ends. And the rule for what becomes a value
+# at all: a sentence about streams. A fact about the world (who a person
+# is, what a word means) or a fact about the set of sentences (how many)
+# never does - that is the seam the whole file keeps returning to.
+
+# ============================================================================
+# PART 1: IDENTITY IS A VERDICT - no address, no serial, no duplicate
+# ============================================================================
+#
+# The algebra these values live in has had a name since the 1930s: the
+# Lindenbaum-Tarski algebra - sentences taken modulo provable
+# equivalence. "Identity is a verdict" is not a slogan about this engine;
+# it is that algebra's definition. Two sentences that prove each other are
+# one element by construction, and the engine decides the construction.
+
+# --- 1a. What a logician derives, the algebra identifies ---
+#
+# In a store, "A -> B" and "A" are two rows; "A and B" is a third, and
+# some program has to derive it. Here they are not three things:
+
+n (({ o1[t]=1 -> o2[t]=1 } & { o1[t]=1 }) = { o1[t]=1 && o2[t]=1 })
+# Answer: T - the rule "1 implies 2" together with the fact "1" IS the
+# value "1 and 2". Modus ponens is not an inference step here; it is an
+# identity of values. Nothing was derived and stored - there was never a
+# second value.
+
+n (({ o1[t]=1 -> o2[t]=1 } & { o2[t]=1 }) = { o1[t]=1 && o2[t]=1 })
+# Answer: F - and the fallacy every logic course warns about (affirming
+# the consequent: from "1 implies 2" and "2", conclude "1") is simply NOT
+# an identity. The control is a classical mistake, and the verdict
+# declines it.
+
+# --- 1b. Leibniz, decided: indiscernible means identical ---
+#
+# Without addresses, what makes two values the same? Only their
+# relations. Yes, the theorem below is antisymmetry of the order - the
+# point is that it is the ONLY identity criterion there is. There is no
+# address to fall back on, so this axiom carries the whole weight that a
+# row number carries elsewhere:
+
+n all a:tau all b:tau (((a & b') = 0 && (b & a') = 0) -> a = b)
+# Answer: T - two values that entail each other ARE one value, for every
+# pair there will ever be. (Corollary you can feel: inserting a row that
+# is already present changes nothing - tables are sets because values have
+# no places, not because someone deduplicated.)
+
+n ex a:tau ex b:tau ((a & b') = 0 && (b & a') = 0 && a != b)
+# Answer: F - the control: mutual containment with distinctness has no
+# witness. The Adabas ISN and the SQL rowid answer a question that does
+# not arise here.
+
+# --- 1c. Two identities - bytes and values - and why you need both ---
+#
+# A journal of rule changes still has to be tamper-evident, and for that
+# you hash BYTES (canonical serialisation, a hash chain, signatures): a
+# byte is a place after all, and a chain of hashes guards places. But
+# bytes are the wrong identity for the LAW. Any two builds, printers or
+# serialisers may emit the same accumulated law with its clauses in a
+# different order; a byte comparison calls that a change, a value
+# comparison - the only identity that matters for what the law MEANS -
+# calls it the same law. The two must not be confused, and both are
+# needed: guard the bytes for provenance; trust the values for meaning.
+
+n ({ o1[t]=1 && o2[t]=1 && o3[t]=0 } = { o3[t]=0 && o1[t]=1 && o2[t]=1 })
+# Answer: T - three clauses, permuted: a different byte string, the same
+# value. Provenance would call this a change; meaning does not.
+
+n ({ o1[t]=1 && o2[t]=1 && o3[t]=0 } = { o3[t]=0 && o1[t]=1 && o2[t]=0 })
+# Answer: F - and one flipped clause is a different value, however
+# similar the bytes look. The verdict tracks meaning, not spelling.
+
+# ============================================================================
+# PART 2: CHANGE IS A PAIR WITH A TYPE - and values remember their path
+# ============================================================================
+#
+# A value cannot change - it has no place to change in. What changes is
+# which value stands at a stream position, so every change is a PAIR
+# (old, new), and a pair of values has a decidable relation: the change
+# has a TYPE, and the type is a verdict, not a diff someone eyeballed.
+
+n (({ o1[t]=1 && o2[t]=1 } & { o1[t]=1 }') = 0)
+# Answer: T - the new rule set lies within the old one: this change is a
+# TIGHTENING (everything the old forbade stays forbidden). Read as
+# governance: this is the shape a change must have wherever some core of
+# the rules is meant to be irrevocable. And read as law: "lies within" is the order
+# that Kelsen's hierarchy of norms calls validity - a bylaw is valid when
+# it lies within its constitution. The Stufenbau is this lattice order,
+# read as law.
+
+n (({ o1[t]=1 } & { o1[t]=1 && o2[t]=1 }') = 0)
+# Answer: F - the reverse pair is NOT a tightening: going from the
+# two-clause set to the one-clause set allows what was forbidden. Same
+# two values, opposite order - the type flips, and the verdict knows.
+
+n ex a:tau ex b:tau ((a & b') != 0 && (b & a') != 0)
+# Answer: T - and a third type exists: two rule sets that each allow
+# something the other forbids. Incomparable changes are real, and they
+# are the ones that need a decision rather than a proof.
+
+# --- 2d. Values remember their path - exactly where order matters ---
+#
+# "No places" invites a wrong conclusion: that only the final
+# value counts and history is gone. Not so. Whether a value carries its
+# history depends on whether the change rule commutes - and that, too, is
+# decided. Two ways of change: a MEET (adopt a rule into the set) and a
+# REPLACE (start over from a protected core plus a new rule).
+
+n ((({ o3[t]=0 } & { o1[t]=1 }) & { o2[t]=1 }) = (({ o3[t]=0 } & { o2[t]=1 }) & { o1[t]=1 }))
+# Answer: T - two histories of adoptions in different order end in ONE
+# value: meets commute, so the value forgets the order - two replicas
+# that adopted the same rules in any order agree, and the equality is
+# decided, not assumed.
+
+n (({ o3[t]=0 } & { o1[t]=1 }) = (({ o3[t]=0 } & { o1[t]=1 }) & { o2[t]=1 }))
+# Answer: F - but adopt-then-replace and replace-then-adopt do NOT end in
+# the same value. Read the two sides as the two histories: on the left,
+# adopt q and then REPLACE with p - a replace restarts from the core, so
+# its result is core & p and carries no trace of q; on the right, replace
+# with p and then adopt q - core & p & q. A replace from the core forgets
+# what was adopted before it. A meet remembers, a replace forgets - and which operations
+# are which is not a design note, it is decided per pair. Values carry
+# their path exactly where the algebra proves order matters.
+
+# ============================================================================
+# PART 3: COUNTING IS A SENTENCE - exactly when the roster is one
+# ============================================================================
+#
+# A Boolean algebra has no notion of "how many". So how did the
+# constitution examples count a quorum? Because over a FIXED roster the
+# members are named streams, and a sum over named streams is a sentence
+# about streams - not a fact about a set. Three voters, two needed:
+
+type Votes = {a: bv[8], b: bv[8], c: bv[8]}
+
+n ex v:Votes (v.a <= { #x01 }:bv[8] && v.b <= { #x01 }:bv[8] && v.c <= { #x01 }:bv[8] && v.a + v.b + v.c >= { #x02 }:bv[8])
+# Answer: T - a 2-of-3 quorum is reachable: counting lives INSIDE the
+# algebra as bitvector arithmetic over three named members.
+
+n ex v:Votes (v.a <= { #x01 }:bv[8] && v.b <= { #x01 }:bv[8] && v.c <= { #x01 }:bv[8] && v.a + v.b + v.c >= { #x04 }:bv[8])
+# Answer: F - four of three is unsatisfiable, as it should be. The
+# arithmetic is exact because the roster is.
+#
+# And the honest seam, stated once: over an OPEN population - voters that
+# keep arriving - "how many" is not a sentence about streams but a fact
+# about the set of sentences. That half belongs to a database (which
+# counts) while the algebra judges. Any large system splits along this
+# seam: judge in the algebra, count outside.
+
+# ============================================================================
+# PART 4: THE DIFFERENCE BETWEEN TWO RULE SETS IS A VALUE - a lossless one
+# ============================================================================
+#
+# If a change is a pair (old, new), then "what the change gave up" is
+# old & new' - a value like any other. First the theorem that makes it
+# more than a diff: for a tightening, yesterday is REBUILT from today plus
+# what was given up. Nothing is lost, because the loss is a value.
+
+n all a:tau all b:tau (((b & a') = 0) -> ((b | (a & b')) = a))
+# Answer: T - for every tightening old -> new: new joined with what it
+# gave up is old again, exactly. Yes, as algebra this is "b together with
+# a-minus-b is a" - the point is what it is applied to: yesterday's LAW
+# is recoverable from today's law plus one value, with no log, for every
+# pair, not sampled.
+
+n ex a:tau ex b:tau ((b | (a & b')) != a)
+# Answer: T - the control that keeps the theorem honest: without the
+# tightening condition, reconstruction can fail (a loosening gave nothing
+# up, and joining nothing does not bring the old clauses back). The T
+# above is earned by its condition, not free.
+
+# ============================================================================
+# WHERE THIS LEADS
+# ============================================================================
+#
+# Every database is a machine for remembering WHERE things are. This
+# algebra cannot remember where anything is, because there is no where -
+# and so it is forced to remember what things ARE, and to prove what
+# became of them. The practical half follows: a cached derived value - a
+# snapshot of accumulated rules kept as if it were the truth - is a place
+# holding a content again, and it is the one kind of thing this algebra
+# cannot vouch for; the honest move is to re-derive it from the history
+# and let the engine judge. The rule reaches all the way up: when the
+# engine itself changes version, the old reading and the new reading of
+# the same rules are compared as values before either is trusted. Even a
+# change of the judge is a pair with a verdict. Values with a verdict
+# behind them need no rescue; a stored value without one is exactly what
+# this file has no room for.
+#
+# A store remembers where things are. This algebra remembers what things
+# are - and proves what became of them.
+
+# --- The closing run ---
+#
+# One structured input per step ({old, new}), one structured output
+# ({keeps, gives_up}), equation form:
+#   keeps[t]    = (new[t] & old[t]')'    T exactly when new forbids everything
+#                                        old forbade - the tightening test
+#   gives_up[t] = old[t] & new[t]'       the freedom the change takes away
+# No diff tool, no change log: the relation between yesterday's law and
+# today's is computed as a value, and when it is not simply T or F the
+# printed formula IS the answer - it names exactly what changed.
+#
+# Expected wire output:
+#   oc[0]: old = {o1=1}, new = {o1=1 && o2=1}. keeps T (a tightening);
+#          gives_up = a formula - the models that the old set allowed and
+#          the new one no longer does (o1 pinned to 1, o2 no longer pinned
+#          to 1 at every step). Read it as
+#          "this is the freedom you just gave up", spelled out - and by
+#          the theorem above, old = new | gives_up.
+#   oc[1]: the reverse pair. keeps = a formula, NOT T - something once
+#          forbidden is now allowed, and the value names it; gives_up F -
+#          nothing was taken away.
+#   oc[2]: the same two clauses in a different order. keeps T, gives_up F:
+#          reordering is not a change, because there was never a place
+#          whose content moved - only a value, and it is the same value.
+#
+# (Printed formulas are normal forms and may differ in order between
+# builds; their T/F status is the contract.)
+
+type Step = {old: tau, new: tau}. type Rel = {keeps: tau, gives_up: tau}. ic:Step := in console. oc:Rel := out console. run (oc[t].keeps = (ic[t].new & ic[t].old')') && (oc[t].gives_up = ic[t].old & ic[t].new')
+{ old: "o1[t]=1.", new: "o1[t]=1 && o2[t]=1." }
+{ old: "o1[t]=1 && o2[t]=1.", new: "o1[t]=1." }
+{ old: "o1[t]=1 && o2[t]=1.", new: "o2[t]=1 && o1[t]=1." }

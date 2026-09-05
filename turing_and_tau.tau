@@ -1,0 +1,222 @@
+# ============================================================================
+# TURING AND TAU - seeing that something cannot be satisfied, and WHY
+# ============================================================================
+#
+# A program is run. It halts or it does not; a test passes or it fails. What
+# a failing test tells you is: THIS input, THIS run, went wrong. What it can
+# never tell you is that NO input, NO run could ever succeed - and since Rice
+# (1953) that is not a weakness of your test suite, it is a theorem: no
+# nontrivial property of a Turing-complete program is decidable. So in the
+# Turing world "unsatisfiable" is not a verdict you can obtain; you observe
+# failures one at a time, and you repair by guessing where the fault lives.
+#
+# Tau trades Turing completeness for decidability. A specification is a
+# VALUE in an atomless Boolean algebra, and two questions have exact answers:
+#   sat   S     is there ANY run that satisfies S?        (F = a proof of "no run")
+#   valid S     does S hold on EVERY run?                 (T = a theorem)
+# And when the answer is F, the engine has done the work of finding out WHAT
+# clashes: the normalized remainder it prints along the way names the values
+# a rule set FORCES, and the sub-questions you can pose isolate the one
+# clause that closes the last door. That is the difference this file is
+# about: a verdict with a reason, instead of a failure with a stack trace -
+# and a repair aimed at the reason, instead of a repair by trial.
+#
+# Six parts: two questions Turing cannot ask (0), unsatisfiability as a proof
+# and its control (1), the remainder as the WHY (2), finding the culprit by
+# asking smaller questions (3), a repair that is targeted, then re-proved
+# against the intent (4), and the case that motivated this file: a rule
+# about YESTERDAY that could never bite, until the reason was named (5).
+#
+# Run with (minimal cost):
+#   tau -q < turing_and_tau.tau
+# Verified against 0.7.0-alpha, build 1c1e58ae (2026-09-02 main).
+#
+# READING THE OUTPUT: "%N: ..." lines answer the sat/valid queries with T or
+# F - consecutive IDENTICAL results share one %N slot (the REPL's memory
+# de-duplicates against the last entry), so match the answers by ORDER, not
+# by number (annotations say "Answer:"). Each `sat always` query ALSO prints
+# a line "Temporal normalization ... yielding the result: <formula>" - that
+# formula is the REMAINDER, the part of the specification the engine could
+# not settle; it is the "why" this file keeps pointing at. Remainders are
+# normal forms and may differ in spelling between builds; the T/F lines are
+# the machine contract.
+# ============================================================================
+
+# EXPECTED-RESULTS: T F F T T F F T F T T F T F F F T T
+
+set charvar off
+
+# ============================================================================
+# PART 0: TWO QUESTIONS A PROGRAM CANNOT ANSWER ABOUT ITSELF
+# ============================================================================
+#
+# Streams are named time series (o1, o2, ...); `o1[t]=1` says "o1 holds at
+# every step"; `->` is implication, `&&` conjunction. A rule set is a
+# sentence; `sat always` asks whether any run obeys it, `valid always`
+# whether every run does. Both are decided, not tested.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1))
+# Answer: T - a chain of two implications has runs (all zeros is one). A
+# program would need an input to show you one run; the engine states that
+# runs EXIST, for the whole (infinite) space of inputs at once.
+
+valid always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1))
+# Answer: F - and the same two rules are not a law of nature: some run
+# violates them (o1=1, o2=0). "Not valid" is a proof that a counterexample
+# exists - it is not the report of one failing test.
+
+# ============================================================================
+# PART 1: UNSATISFIABLE IS A PROOF, NOT A FAILURE
+# ============================================================================
+#
+# Add a fact that contradicts the chain. The verdict is about the WHOLE set:
+# there is no run at all, for any input, ever.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o1[t]=1 && o3[t]=0)
+# Answer: F - no run satisfies "o1 forces o3 through o2, and o1 holds, and
+# o3 does not". A test suite could only show you that its inputs fail; this
+# is the statement that success is impossible.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o1[t]=1)
+# Answer: T - the control: drop the clashing fact and runs exist again. Two
+# queries, and the fault is bracketed between them - without running a
+# single input.
+
+# ============================================================================
+# PART 2: THE REMAINDER IS THE WHY
+# ============================================================================
+#
+# Look at the "yielding the result:" line the engine prints for the control
+# query above. It reads
+#   o1[t]:tau' = 0 && o2[t]:tau' = 0 && o3[t]:tau' = 0
+# The apostrophe is Boolean complement, so `x' = 0` means "x is 1": the
+# rule set FORCES o1, o2 and o3 to hold. The engine did not enumerate runs;
+# it normalized the sentence, and the normal form says which values are no
+# longer free. Reading that line is reading the reason - and reading it
+# BEFORE adding the fact tells you in advance that o3=0 cannot be added.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o3[t]=0)
+# Answer: T - pin the OTHER end instead: with o3=0 the remainder names the
+# escape: o3 = 0 && o1' != 0 && o2' != 0, i.e. "o1 and o2 must not be 1" -
+# the only way out is that o1 never holds. (Note the exact wording: "not 1",
+# not "0" - in an atomless algebra there is room between the two, and the
+# engine says precisely what it knows, no more.) It tells you not just that
+# a run exists, but what shape it must have.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o3[t]=0 && o2[t]=1)
+# Answer: F - and closing that escape (o2 must hold) closes the last door.
+# Compare with part 1: two different facts kill the same chain, and in each
+# case the remainder of the query WITHOUT the fatal fact named what the fact
+# would have to contradict.
+
+# ============================================================================
+# PART 3: THE CULPRIT - ASK SMALLER QUESTIONS
+# ============================================================================
+#
+# When a big rule set is unsatisfiable, the engine can also tell you WHICH
+# clause is load-bearing: drop clauses one at a time and ask again. A clause
+# whose removal turns F into T is a culprit; one whose removal changes
+# nothing is innocent. Here the innocent bystander is o4.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && (o4[t]=1 -> o5[t]=1) && o1[t]=1 && o3[t]=0)
+# Answer: F - four rules, one fact, no run.
+
+sat always ((o2[t]=1 -> o3[t]=1) && (o4[t]=1 -> o5[t]=1) && o1[t]=1 && o3[t]=0)
+# Answer: T - without the first link (o1 -> o2) the set is satisfiable: that
+# link is a culprit.
+
+sat always ((o1[t]=1 -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o1[t]=1 && o3[t]=0)
+# Answer: F - without the o4 rule it is still unsatisfiable: o4 -> o5 is
+# innocent. Three questions, no debugger, and the fault is localized to a
+# clause. (A tau-nomic institution does exactly this when it explains a
+# rejected proposal - "these two clauses conflict" - see part 08 of the
+# series.)
+
+# ============================================================================
+# PART 4: A TARGETED REPAIR - AND ITS PROOF
+# ============================================================================
+#
+# Knowing the culprit, repair it and nothing else. Three repairs are on the
+# table: drop the fact (not a repair, a surrender), drop the rule (too much),
+# or WEAKEN the rule with a condition so that the case at hand is an
+# exception. Every candidate is one query; the one that is both satisfiable
+# AND still enforces the original intent elsewhere is the repair.
+
+sat always (((o1[t]=1 && o6[t]=0) -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o1[t]=1 && o3[t]=0)
+# Answer: T - "o1 forces o2, unless o6" (o6 marks the exception): with the
+# exception available, the contradictory fact fits. The remainder shows
+# o6 != 0 && o2' != 0 - the run must take the exception, and o2 must not be
+# 1. The repair is visible in the reason, not only in the verdict.
+
+valid always ((((o1[t]=1 && o6[t]=0) -> o2[t]=1) && (o2[t]=1 -> o3[t]=1) && o6[t]=0) -> (o1[t]=1 -> o3[t]=1))
+# Answer: T - and the repaired rule still does its old job whenever the
+# exception is NOT taken: outside o6, o1 still forces o3, on every run. This
+# is the step Turing cannot offer: the repair is not "the failing test now
+# passes", it is a theorem about all the runs you did not test.
+
+valid always ((((o1[t]=1 && o6[t]=0) -> o2[t]=1) && (o2[t]=1 -> o3[t]=1)) -> (o1[t]=1 -> o3[t]=1))
+# Answer: F - the honest control: WITHOUT restricting to the non-exception
+# case, the old guarantee no longer holds for every run (the exceptional
+# runs are exactly the ones where it fails). A repair has a price, and the
+# price is a decided sentence, not a hunch.
+
+# ============================================================================
+# PART 5: THE RULE ABOUT YESTERDAY - a reason nobody would have tested for
+# ============================================================================
+#
+# The case that motivated this file. `o12[t-1]` is "o12 one step ago". Write
+# the rule "if o12 held yesterday, o13 is forbidden today", state the fact
+# "o12 does not hold today", and ask whether o13 is allowed today.
+
+sat always ((o12[t-1]=1 -> o13[t]=0) && o12[t]=0 && o13[t]=1)
+# Answer: T - allowed. Now READ the remainder line: it ends in
+# o12[t-1]:tau' != 0, i.e. "o12 one step ago is not 1". The engine is telling you
+# that yesterday is FREE - nothing in the sentence pins it, so a run simply
+# chooses a yesterday in which o12 did not hold, and the rule never bites.
+# In the Turing world this rule would just run; you would write a test with
+# a history, it would pass or fail, and no failure would ever say "your rule
+# has no past".
+
+sat always ((o12[t-1]=1 -> o13[t]=0) && o12[t]=1 && o13[t]=1)
+# Answer: F - and with "o12 holds today" the rule DOES bite - because under
+# `always` a fact about today is a fact about every step, yesterday
+# included. The rule reads the present as if it were the past. Two verdicts,
+# and the diagnosis is complete: the past has no value of its own.
+
+sat always (o12[t]=0 && o12[t-1]=1)
+# Answer: F - the proof that you cannot fix this by adding a fact: "today 0,
+# yesterday 1" is unsatisfiable under `always`, for the same reason.
+
+# The targeted repair, aimed at exactly what the remainder named: give the
+# past a stream of ITS OWN. Read `o12[t-1]` as a separate stream (call it
+# o9012) and pin THAT to what actually happened yesterday. Now the rule has
+# a past, today keeps its own value, and the two verdicts come out the way a
+# human means them:
+
+sat always ((o9012[t]=1 -> o13[t]=0) && o12[t]=0 && o9012[t]=1 && o13[t]=1)
+# Answer: F - yesterday o12 held (o9012=1), today it does not (o12=0), and
+# o13 is now forbidden: the rule finally bites on the past, not the present.
+
+sat always ((o9012[t]=1 -> o13[t]=0) && o12[t]=0 && o9012[t]=0 && o13[t]=1)
+# Answer: T - yesterday it did not hold, so today is free. Same rule, same
+# today, different yesterday: the verdict follows the past, as it should.
+
+sat always ((o9012[t]=1 -> o13[t]=0) && o12[t]=0 && o13[t]=1)
+# Answer: T - and without a pinned yesterday the past is free again - which
+# is now an honest "unknown", not a silent "same as today".
+
+# ============================================================================
+# WHERE THIS LEADS
+# ============================================================================
+#
+# Every step above was a question with a decided answer. Unsatisfiable was a
+# theorem, the remainder was the reason, smaller questions found the culprit,
+# the repair was aimed at it, and a validity check proved the repair kept
+# the original intent everywhere else. None of these is available for a
+# program: you can run it, test it, and read its trace, but you cannot ask
+# it whether ANY run exists, or WHY none does. That is not a tooling gap; it
+# is Rice's theorem. Tau pays for these questions with Turing completeness -
+# and the tau-nomic series (parts 01-11) is what you can build once you have
+# them: a constitution whose every amendment is admitted or refused by a
+# proof, with the reason attached.
+q

@@ -75,6 +75,12 @@ Smaller stand-alone demos, from the early days of this repository:
   queries and bounded folds, and an append-only ledger over tuple streams -
   the lattice dual of the constitutional ratchet. Both self-checking; need
   a 2026-09-02+ build.
+- **Turing and Tau**: `turing_and_tau.tau` - seeing that something cannot be
+  satisfied, and WHY: unsatisfiability as a proof, the normalized remainder
+  as the reason, the culprit found by asking smaller questions, a targeted
+  repair re-proved against the original intent, and the rule about
+  yesterday that could never bite until its reason was named. Self-checking;
+  no ADTs needed.
 - **Self-reference:** `barber_demo_1.tau`, `barber_demo_2.tau` (Russell's barber,
   handled without paradox)
 - **Temporal behavior:** `temporal_state_machine.tau`, `temporal_stability.tau`,

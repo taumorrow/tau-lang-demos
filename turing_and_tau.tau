@@ -30,13 +30,17 @@
 # a failure with a trace, and a repair aimed at the reason instead of a
 # repair by trial.
 #
-# Eight parts. What a test is, in Tau's own terms (0). Unsatisfiable as a
+# Ten parts. What a test is, in Tau's own terms (0). Unsatisfiable as a
 # theorem, with its control (1). The remainder as the reason (2). Valid as a
 # theorem, and its proof as a refused sat (3). The witness the engine hands
 # you (4). The culprit, found by asking smaller questions (5). A targeted
-# repair, then re-proved against the original intent (6). And the finale: a
-# rule about YESTERDAY that could never bite - until the remainder named the
-# freedom, and one aimed change made it real (7).
+# repair, then re-proved against the original intent (6). A rule about
+# YESTERDAY that could never bite in a question - until the remainder named
+# the freedom, and one aimed change made it real (7). Then the living
+# counterpart of a test: a RUN, which is the witness over time, and which
+# refuses to start where a program would crash later (8). And the finale:
+# the same yesterday-rule, alive - in a run the past is real, and the
+# verdict follows it step by step (9).
 #
 # Run with (minimal cost):
 #   tau -q < turing_and_tau.tau
@@ -51,10 +55,15 @@
 # Boolean complement: `o1[t]:tau' = 0` means "o1 is 1", `o1[t]:tau' != 0`
 # means "o1 is not 1". Remainders are normal forms and may differ in
 # spelling between builds; the T/F lines are the machine contract. The two
-# `solve` queries print one `name := value` line per variable instead.
+# `solve` queries print one `name := value` line per variable instead, and
+# the two runs at the end print one `oN[k] := value` line per output and
+# step - those values are the second half of the contract (EXPECTED-OUT).
+# The console run reads every line after it as input, so it is the last
+# thing in the file.
 # ============================================================================
 
 # EXPECTED-RESULTS: T F T F T T T F T F F T F T F T T F T F F F T T
+# EXPECTED-OUT: 1 1 1 0 0 1 1 0
 
 set charvar off
 
@@ -264,19 +273,75 @@ sat always ((o9012[t]=1 -> o13[t]=0) && o12[t]=0 && o13[t]=1)
 # was.
 
 # ============================================================================
+# PART 8: THE LIVING COUNTERPART - a run is the witness over time
+# ============================================================================
+#
+# A test runs a program once. Tau can RUN a specification: outputs are chosen
+# step by step so that the sentence holds at every step - the witness of
+# part 4, now over time and printed live. Declare the three streams as
+# console outputs and run the chain with o21 pinned:
+
+o21:sbf := out console. o22:sbf := out console. o23:sbf := out console. run (o21[t]=1 -> o22[t]=1) && (o22[t]=1 -> o23[t]=1) && o21[t]=1
+q
+# Output: o21[0] := 1, o22[0] := 1, o23[0] := 1 - step 0 of a run that would
+# go on forever; the `q` on the "continue?" prompt stops it. Nothing was
+# invented: the values are the forced ones from the remainder of part 2,
+# now produced by the machine that executes the sentence.
+
+# And the run that a program would crash IN, Tau refuses to START:
+
+o31:sbf := out console. run o31[t]=1 && o31[t]=0
+# Output: (Error) Tau specification is unsat - before step 0. A program with
+# a contradiction runs until it reaches it, possibly never in your tests;
+# here the contradiction is a theorem, so there is no first step to take.
+# The session goes on - the refusal is an answer, not a crash.
+
+# ============================================================================
+# PART 9: YESTERDAY, ALIVE - in a run the past is real
+# ============================================================================
+#
+# Part 7 showed that in a QUESTION the rule "if yesterday, then not today"
+# had no past, and how to give it one. In a RUN the past is real by
+# construction: step t-1 has happened, and its value is on record. Feed the
+# rule an input stream (i42) and watch the output (o43) follow yesterday's
+# input, not today's. (Fresh names: a session binds a name and its type
+# once, and o12/o13 are already the tau-typed streams of part 7.)
+# The rule is completed with its mirror ("if not yesterday, then today") so
+# that every step has a forced value and the witness is readable.
+#
+# Input per step: 1 0 0 1 1. Expected output:
+#   o43[0] := 0   step 0 has no yesterday: the engine picks a value (here 0)
+#   o43[1] := 0   yesterday's input was 1  -> forbidden today
+#   o43[2] := 1   yesterday's input was 0  -> free today
+#   o43[3] := 1   yesterday 0              -> free
+#   o43[4] := 0   yesterday 1              -> forbidden
+# The verdict follows the PAST, one step behind the input - exactly the
+# behaviour the question in part 7 could not express until yesterday got a
+# stream of its own. The run gives it that stream for free: the input a step
+# ago IS a value, and the sentence reads it. The run reads every following
+# line as input and ends at end of file - which is why it is the last thing
+# in this file, and why the closing words come first.
+#
+# ============================================================================
 # WHERE THIS LEADS
 # ============================================================================
 #
 # Every step above was a question with a decided answer, and every answer
 # carried its reason. Unsatisfiable was a theorem. The remainder was the
 # reason. A theorem was a refused satisfiability. The engine handed over the
-# witness. Smaller questions found the culprit. The repair was aimed at it -
-# and a validity check proved the repair kept the original intent everywhere
-# else, and priced what it gave up. None of these is available for a
-# program: you can run it, test it and read its trace, but you cannot ask it
-# whether ANY run exists, whether ALL do, or WHY not. That is Rice's theorem,
-# not a missing feature. Tau pays for these questions with Turing
-# completeness - and what it buys is a specification you can interrogate:
-# every change to it is admitted or refused by a proof, with the reason
-# attached.
-q
+# witness, then ran it over time. Smaller questions found the culprit. The
+# repair was aimed at it - and a validity check proved the repair kept the
+# original intent everywhere else, and priced what it gave up. A run that
+# could not exist did not start. None of these is available for a program:
+# you can run it, test it and read its trace, but you cannot ask it whether
+# ANY run exists, whether ALL do, or WHY not. That is Rice's theorem, not a
+# missing feature. Tau pays for these questions with Turing completeness -
+# and what it buys is a specification you can interrogate: every change to
+# it is admitted or refused by a proof, with the reason attached.
+
+i42:sbf := in console. o43:sbf := out console. run (i42[t-1]=1 -> o43[t]=0) && (i42[t-1]=0 -> o43[t]=1)
+1
+0
+0
+1
+1

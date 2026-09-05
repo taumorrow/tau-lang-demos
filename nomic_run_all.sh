@@ -7,6 +7,8 @@
 #   # EXPECTED-CODES:   0,9,8,...   (o0res verdict codes, run-based parts)
 #   # EXPECTED-TF:      F F T ...   (T/F values of all oN[k] output lines,
 #                                    in order - u-stream sessions, part 10)
+#   # EXPECTED-OUT:     1 1 0 ...   (values of every oN[k] := line of every
+#                                    run in the file, in order; 0/1 or T/F)
 # This script runs every file against those contracts and reports PASS/FAIL.
 #
 #   TAU_BIN=/path/to/tau ./nomic_run_all.sh      (default: `tau` on PATH)
@@ -36,7 +38,8 @@ for f in nomic_[0-9]*.tau adt_tutorial_*.tau adt_tables_*.tau values_*.tau turin
   exp_codes=$(grep -m1 '^# EXPECTED-CODES:' "$f" | sed 's/^# EXPECTED-CODES: *//')
   exp_tf=$(grep -m1 '^# EXPECTED-TF:' "$f" | sed 's/^# EXPECTED-TF: *//')
   exp_tres=$(grep -m1 '^# EXPECTED-TUPLE-RES:' "$f" | sed 's/^# EXPECTED-TUPLE-RES: *//')
-  if [ -z "$exp_res" ] && [ -z "$exp_codes" ] && [ -z "$exp_tf" ] && [ -z "$exp_tres" ]; then
+  exp_out=$(grep -m1 '^# EXPECTED-OUT:' "$f" | sed 's/^# EXPECTED-OUT: *//')
+  if [ -z "$exp_res" ] && [ -z "$exp_codes" ] && [ -z "$exp_tf" ] && [ -z "$exp_tres" ] && [ -z "$exp_out" ]; then
     echo "SKIP  $f (no contract)"; continue
   fi
   if LC_ALL=C grep -qP '[^\x00-\x7F]' "$f"; then
@@ -52,6 +55,10 @@ for f in nomic_[0-9]*.tau adt_tutorial_*.tau adt_tables_*.tau values_*.tau turin
   if [ -n "$exp_codes" ]; then
     act_codes=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE 'o0res\[[0-9]+\] *:= *[0-9]+' | grep -oE '[0-9]+$' | paste -sd, -)
     [ "$act_codes" = "$exp_codes" ] || { ok=0; detail="$detail codes: got [$act_codes] want [$exp_codes]"; }
+  fi
+  if [ -n "$exp_out" ]; then
+    act_out=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE '^o[0-9]+\[[0-9]+\] := [01TF]' | grep -oE '[01TF]$' | paste -sd' ' -)
+    [ "$act_out" = "$exp_out" ] || { ok=0; detail="$detail out: got [$act_out] want [$exp_out]"; }
   fi
   if [ -n "$exp_tf" ]; then
     act_tf=$(printf '%s\n' "$out" | grep -v '^tau> ' | grep -oE 'o[0-9]+\[[0-9]+\] := [TF]' | grep -oE '[TF]$' | paste -sd' ' -)

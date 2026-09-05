@@ -75,7 +75,8 @@ Smaller stand-alone demos, from the early days of this repository:
   queries and bounded folds, and an append-only ledger over tuple streams -
   the lattice dual of the constitutional ratchet. Both self-checking; need
   a 2026-09-02+ build.
-- **Turing and Tau**: `turing_and_tau.tau` - a verdict with a reason. A test
+- **Software Testing Done Right** (Turing and Tau): `testing_done_right.tau` -
+  a verdict with a reason. A test
   is a pinned question; unsatisfiable is a theorem; the normalized remainder
   is the reason; valid is a refused sat; `solve` hands you the witness;
   smaller questions find the culprit; a repair is aimed at it and re-proved

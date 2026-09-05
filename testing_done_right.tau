@@ -1,7 +1,7 @@
 # ============================================================================
-# TURING AND TAU - a verdict with a reason
-# Seeing that something cannot be satisfied, seeing WHY, and repairing exactly
-# there - questions a program can never answer about itself
+# SOFTWARE TESTING DONE RIGHT - a verdict with a reason
+# Turing and Tau: seeing that something cannot be satisfied, seeing WHY, and
+# repairing exactly there - the questions a test can never ask
 # ============================================================================
 #
 # In the world of programs there are two things you can do with a rule set:
@@ -43,7 +43,7 @@
 # verdict follows it step by step (9).
 #
 # Run with (minimal cost):
-#   tau -q < turing_and_tau.tau
+#   tau -q < testing_done_right.tau
 # Verified against 0.7.0-alpha, build 1c1e58ae (2026-09-02 main).
 #
 # READING THE OUTPUT: "%N: ..." lines answer the sat/valid queries with T or

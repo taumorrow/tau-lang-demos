@@ -6,7 +6,7 @@
 #   # EXPECTED-RESULTS: T F ...     (values of the %N result lines, in order)
 #   # EXPECTED-CODES:   0,9,8,...   (o0res verdict codes, run-based parts)
 #   # EXPECTED-TF:      F F T ...   (T/F values of all oN[k] output lines,
-#                                    in order - u-stream sessions, part 10)
+#                                    in order - u-stream sessions, parts 10/10b)
 #   # EXPECTED-OUT:     1 1 0 ...   (values of every oN[k] := line of every
 #                                    run in the file, in order; 0/1 or T/F)
 # This script runs every file against those contracts and reports PASS/FAIL.

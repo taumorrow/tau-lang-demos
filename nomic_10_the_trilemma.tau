@@ -33,11 +33,15 @@
 #   1. THE PREDICTIONS - ten one-off queries (seven theorems, three
 #      controls) that pin down what ANY amendment rule on one level
 #      can and cannot do.
-#   2. THE EXPERIMENT - one continuous 13-step constitutional history
+#   2. THE EXPERIMENT - one continuous 12-step constitutional history
 #      that runs through every regime and confirms each prediction live:
 #      open channel, guarded channel, a two-step coup, the fall and
-#      restoration of a core, self-binding via `this`, and a fortress
-#      that pays for its walls with eternity.
+#      restoration of a core, self-binding via `this`, and the silence
+#      that follows it.
+# A companion file, nomic_10b_the_fortress_at_founding.tau, runs the one
+# regime this history cannot reach from the inside: a constitution BORN
+# under the self-referential guard. Read them as one experiment in two
+# halves; the pair is what closes the argument.
 #
 # The destination is a TRILEMMA: no system on ONE level ever gets all
 # three of (i) content revisable by replacement, (ii) a closed rule of
@@ -50,16 +54,17 @@
 #                        proposal was made - the input F means "none")
 #   u[k] := always ...   the proposal was ADOPTED; the line shows it
 #   Updated specification: ...   the new living law after an adoption
-#   o10/o26/o28[k] := T/F        the streams the rights speak about
+#   o10/o26[k] := T/F    the streams the rights speak about
 # An adoption at step k takes visible effect at step k+1.
 #
 # Run me:  tau -q < nomic_10_the_trilemma.tau
-# Verified against: Tau 0.7.0-alpha, build 240788e (alpha syntax may drift).
+# Verified against: Tau 0.7.0-alpha, builds 1b4b87a9 and 3a664f14 - every
+# line below produces the same verdict on both (alpha syntax may drift).
 # (Output reading and notation: see nomic_00_read_me_first.tau.)
 # ============================================================================
 
 # EXPECTED-RESULTS: T T T T T T T F F F
-# EXPECTED-TF: F F T F T F T F T T T F T F T F T F T F T F T F T T
+# EXPECTED-TF: F F T F T F T F T T T F T F T F T F T F T F T
 
 set charvar off
 
@@ -151,7 +156,7 @@ normalize (all P:tau all C:tau all R:tau ((((P & C) & R)) = (P & C))).
 # that must never be lawful). i1 carries one proposal per step; the
 # input F means "no proposal".
 #
-# THE THIRTEEN STEPS (each annotated with its expected outcome):
+# THE TWELVE STEPS (each annotated with its expected outcome):
 #
 # step 0   PROPOSAL: o26[t] = 1        an ordinary right
 #          -> ADOPTED (u shows it). The open regime legislates fine.
@@ -189,8 +194,17 @@ normalize (all P:tau all C:tau all R:tau ((((P & C) & R)) = (P & C))).
 # step 6   PROPOSAL: u[t] = i1[t] & this[t]
 #          SELF-BINDING. Install the self-referential guard: proposals
 #          are now met with the WHOLE living law, including this very
-#          rule. -> ADOPTED (the last amendment this machine will ever
-#          accept that touches its rule of change).
+#          rule. -> ADOPTED - and it is the LAST amendment this machine
+#          ever accepts. Read the updated specification printed at this
+#          step, because everything after it follows from what you see
+#          there:
+#            (always o10 = 0) &&
+#            ( (always u = i1 && this i1 = i1) || (always this i1 = u) )
+#          The revision MERGED the channels instead of replacing one by
+#          the other: the old open channel survives, as a disjunct, INSIDE
+#          the law that `this` now hands to every future proposal. A rule
+#          of change that arrives THROUGH the channel cannot shed the
+#          channel it arrived through.
 #
 # step 7   PROPOSAL: o10[t] = 1        -> u := F. Rejected (P1).
 # step 8   PROPOSAL: u[t] = i1[t]      the exact move that won step 3
@@ -203,11 +217,13 @@ normalize (all P:tau all C:tau all R:tau ((((P & C) & R)) = (P & C))).
 #          rule everything already in force is eternal - including what
 #          you will one day wish away.
 #
-# step 11  PROPOSAL: o28[t] = 1        one more ordinary right
-#          -> ADOPTED. The fortress is alive - it still legislates,
-#          monotonically, forever. From step 12: o28 := T.
-#
-# step 12  no proposal (F) - the stable final state: o10=F, o26=T, o28=T.
+# step 11  no proposal (F) - the stable final state: o10=F, o26=T, and a
+#          channel that has stopped answering. Four proposals in a row
+#          (steps 7-10) met the same silence: the hostile one, the coup
+#          that had already won once, the seal, and the harmless repeal.
+#          The fortress holds. What it can still BUILD is the question
+#          this history cannot settle from the inside - see the note
+#          below, and the companion file.
 #
 # ============================================================================
 # 3. THE TRILEMMA, ASSEMBLED (read this, then watch the history below)
@@ -218,9 +234,29 @@ normalize (all P:tau all C:tau all R:tau ((((P & C) & R)) = (P & C))).
 #   steps 0-5   OPEN meta-rule:    content replaceable - INCLUDING the
 #               core (step 4) and the rule itself (step 3). Nothing is
 #               entrenchable; nothing is even durably lost (step 5).
-#   steps 6-12  CLOSED meta-rule:  the rule admits only itself (P2-P5),
-#               and exactly then the content freezes into monotone
-#               growth (P6-P7). No coup - and no repeal, ever.
+#   steps 6-11  CLOSED meta-rule:  the rule admits only itself (P2-P5),
+#               and exactly then the content stops being replaceable
+#               (P6-P7). No coup, no seal - and no repeal, ever.
+#
+# One thing this history deliberately does NOT claim. A closed rule of
+# change is supposed to leave monotone GROWTH open: refinement passes,
+# replacement does not (P6/P7). You cannot read that off the steps above,
+# because this machine did not enter the closed regime at its founding -
+# it AMENDED ITSELF into it, and the merged law of step 6 still carries
+# the old channel as a disjunct. What such a merged law still admits is
+# a property of the merge, not of the trilemma, and it is the one thing
+# in this file that has moved between engine builds. So the series
+# demonstrates monotone growth where it is stable: in
+# nomic_10b_the_fortress_at_founding.tau, on a constitution that is BORN
+# with u = i1 & this. Two files, two fates, one lesson - HOW a closed
+# rule of change is acquired is not a detail:
+#
+#   born closed   (10b) -> ordinary rights still pass; coup, seal and
+#                          repeal die. The fortress is alive and monotone.
+#   closed by amendment  -> the open channel it used to get there stays
+#                  (10)    inside the law it now hands to every proposal.
+#
+# Neither file gets all three corners. That is the point.
 #
 # That is the trilemma. On one level you may have (i) content revisable
 # by replacement, or (ii) a closed rule of change - never both, and
@@ -263,5 +299,4 @@ o10[t] = 1
 u[t] = i1[t]
 u[t] = 0
 o26[t] = 0
-o28[t] = 1
 F

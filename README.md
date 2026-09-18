@@ -24,6 +24,7 @@ binary.
 | 08 | `nomic_08_the_edges.tau` | What honestly stays outside: translation, enforcement, identity, choice |
 | 09 | `nomic_09_the_full_palette.tau` | Appendix: scoped, quantitative and temporal rights; a guarantee over all future amendments |
 | 10 | `nomic_10_the_trilemma.tau` | Appendix II: who amends the amendment rule? |
+| 10b | `nomic_10b_the_fortress_at_founding.tau` | Appendix II, second half: the same guard, born instead of adopted - and why that changes everything |
 | 11 | `nomic_11_typed_world.tau` | Appendix III: a typed world - ADTs, structured moves, the ratchet over tuple streams (needs a 2026-08-28+ build) |
 
 Read them in order — each part builds on the last. Three parts replay entire

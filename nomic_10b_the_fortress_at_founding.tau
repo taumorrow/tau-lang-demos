@@ -1,0 +1,122 @@
+# ============================================================================
+# TAU-NOMIC TUTORIAL 10b (APPENDIX II, SECOND HALF) - THE FORTRESS AT FOUNDING
+# The one regime part 10 cannot reach from the inside: a constitution
+# BORN under the self-referential guard
+# ============================================================================
+#
+# Part 10 ran a single machine through every regime a one-level system
+# can be in, and ended in silence: after the machine AMENDED ITSELF into
+# a closed rule of change, no proposal was ever adopted again. That
+# history could not settle one question, and said so - a closed rule of
+# change is supposed to leave monotone GROWTH open (P6/P7: whatever
+# passes entails the constitution that adopted it, and nothing already
+# in force is ever repealed). Growth is not the same as paralysis, and
+# part 10's machine could not tell them apart, because the merged law of
+# its step 6 still carried the old open channel as a disjunct.
+#
+# This file removes that confound in the only way available: it does not
+# amend its way into the closed regime - it STARTS there.
+#
+#     run  u[t] = i1[t] & this[t]  &&  o10[t] = 0
+#
+# One line, and the fortress exists from step 0: every proposal is met
+# with the WHOLE living law, including the guard itself. Nothing arrived
+# through a channel, so no channel survives inside the law. What this
+# machine does with the next six proposals is the trilemma's second horn,
+# in full, with nothing left to attribute to the way it got here.
+#
+# HOW TO READ THE SESSION OUTPUT
+#   u[k] := F            the proposal of step k was REJECTED (or no
+#                        proposal was made - the input F means "none")
+#   u[k] := always ...   the proposal was ADOPTED; the line shows it
+#   Updated specification: ...   the new living law after an adoption
+#   o10/o26/o28[k] := T/F        the streams the rights speak about
+# An adoption at step k takes visible effect at step k+1.
+#
+# THE SEVEN STEPS
+#
+# step 0   PROPOSAL: o26[t] = 1        an ordinary right
+#          -> ADOPTED. The closed regime LEGISLATES. Look at the u value:
+#          it carries the whole constitution forward, guard clause and
+#          all - the rule re-imposes itself on everything it accepts.
+#          From step 1: o26 := T.
+#
+# step 1   PROPOSAL: o28[t] = 1        a second ordinary right
+#          -> ADOPTED. Not a one-off: growth is the steady state here.
+#          From step 2: o28 := T. This is P6 running - the adopted law
+#          entails the law that adopted it.
+#
+# step 2   PROPOSAL: o10[t] = 1        the attack on the dignity core
+#          -> u := F. Rejected (P1: the proposal would have to agree
+#          with the law it is met with, and it contradicts it).
+#
+# step 3   PROPOSAL: u[t] = i1[t]      THE COUP that won in part 10's
+#          open regime: do not attack the core, attack the RULE.
+#          -> u := F. Rejected (P3: a raw channel coexists with the
+#          guard only against an EMPTY constitution). The move that
+#          brought down a core two steps later in part 10 does not
+#          survive proposal time here.
+#
+# step 4   PROPOSAL: u[t] = 0          freeze the constitution forever
+#          -> u := F. Rejected (P4: only against a CONTRADICTORY one).
+#          Amendability is itself entrenched - the one-way door that
+#          part 10's open regime walked through does not exist here.
+#
+# step 5   PROPOSAL: o26[t] = 0        repeal the harmless right of
+#          step 0 -> u := F. Rejected. THE PRICE (P7): every right once
+#          entailed stays entailed under every future amendment. The
+#          fortress cannot take back a single thing it ever granted -
+#          including, one day, a mistake.
+#
+# step 6   no proposal (F) - the stable final state: o10=F, o26=T, o28=T.
+#
+# ============================================================================
+# WHAT THE PAIR PROVES
+# ============================================================================
+#
+# Read 10 and 10b as one experiment. Same guard, same theorems, two
+# constitutions - and the difference between them is not what the law
+# SAYS but how the rule of change was acquired:
+#
+#   born closed (this file)   growth yes, repeal no, coup no, seal no.
+#                             The second horn of the trilemma, alive:
+#                             a closed rule of change buys you monotone
+#                             content, and charges you eternity for it.
+#   closed by amendment (10)  the open channel it used to get there
+#                             stays inside the law it now hands to every
+#                             proposal. The merge is printed on screen at
+#                             part 10's step 6; read it there.
+#
+# Neither machine gets all three of (i) content revisable by replacement,
+# (ii) a closed rule of change, (iii) everything on one level. That is
+# the trilemma, and no guard is cleverer than P1-P7 allow - part 10
+# proves that over ALL constitutions and ALL proposals, not just these.
+#
+# Which is why tau-nomic is built on two levels: the rule of change lives
+# in a fixed specification (there is no u to capture), and the law lives
+# as STATE, where part 5's ratchet can still fall and part 6's eternity
+# clause can still hold. That corner is the only one where a core is
+# unbreakable AND a mistake is repealable. The u stream keeps its own
+# office - the only road to executable unforeseen law - behind the
+# judgment-free gate of part 8.
+#
+# Run me:  tau -q < nomic_10b_the_fortress_at_founding.tau
+# Verified against: Tau 0.7.0-alpha, builds 1b4b87a9 and 3a664f14 - every
+# line below produces the same verdict on both (alpha syntax may drift).
+# (Output reading and notation: see nomic_00_read_me_first.tau.)
+# ============================================================================
+
+# EXPECTED-TF: F F T F T T F T T F T T F T T F T T
+
+set charvar off
+
+i1 : tau := in console
+
+run u[t] = i1[t] & this[t] && o10[t] = 0
+o26[t] = 1
+o28[t] = 1
+o10[t] = 1
+u[t] = i1[t]
+u[t] = 0
+o26[t] = 0
+F

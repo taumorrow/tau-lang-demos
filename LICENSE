@@ -1,292 +1,352 @@
-MIT License with Commercial Restriction for Provably Fair Gaming
-==================================================================
-
-Copyright (c) 2025-2026 Taumorrow (taumorrow@gmail.com; earlier releases as 'l0g1x')
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, subject to the following conditions:
-
-================================================================================
-THIRD-PARTY IP: TAU LANGUAGE
-================================================================================
-
-IMPORTANT: Tau Language and all related intellectual property rights belong
-exclusively to IDNI AG (https://idni.org).
-
-This license covers ONLY the licensor's original innovations in provably fair
-multiplayer gaming mechanics. It does NOT grant any rights to Tau Language itself.
+# Taumorrow Demos License v3.0
+## Noncommercial - Research-Free - Tau-Net-Friendly
+
+Copyright (c) 2025-2026 Taumorrow (taumorrow@gmail.com). Earlier releases of this repository appeared under the name "l0g1x";
+"Taumorrow" and "l0g1x" name the same author.
+
+--------------------------------------------------------------------------------
+## 0. What this text is, in plain words
+--------------------------------------------------------------------------------
+
+This license covers the files in this repository (the "Materials"). It says what you may do with those files.
+
+It is written by the author of the Materials to be read by engineers. Four things are stated up front so that nobody has to
+infer them:
+
+1. Tau Language is not the author's. Tau Language, its engine, its syntax and semantics and the logic it implements are the
+   work of Ohad Asor and are developed and owned by IDNI AG. Nothing here grants any right to Tau Language (section 2).
+2. A license governs files. This license governs the use of the Materials by those who take them under it. It is not a
+   patent, it is not a patent license, and it does not claim to be either (section 9).
+3. This license describes a method. It does not assert that any deployed system has been shown to be fair, and it does not
+   assert that the Materials contain a complete implementation of the method (section 4).
+4. This license covers the Materials in this repository. A paper by the author that describes the method is a separate work
+   under its own license (Creative Commons BY-NC-ND 4.0); that license concerns the text of the paper, and this one concerns
+   the files here.
+
+--------------------------------------------------------------------------------
+## 1. Definitions
+--------------------------------------------------------------------------------
+
+"Materials" means every file in this repository at the release that carries this license text, including specification files
+(`.tau`), runner scripts, expected-result contracts, input samples, and documentation, with the one exception named at the
+end of this section.
+
+"Method Materials" means those Materials that express the Method or a part of it: `casino.tau`, `temporal_state_machine.tau`,
+and every file added to this repository that states in its header that it belongs to the Method Materials.
+
+"Tutorial Materials" means the Tau-Nomic Tutorial Series and the other teaching files: every file whose name begins with
+`nomic_`, and `consensus_decomposed.tau`, `nomic_run_all.sh`, `adt_tutorial_basic.tau`, `adt_tutorial_advanced.tau`,
+`adt_tables_basic.tau`, `adt_tables_advanced.tau`, `adt_tables_beyond_sql.tau`, `testing_done_right.tau`,
+`values_without_places.tau`, `adaptive_memory_management.tau`, together with their expected-result contracts — and every
+file in this repository that is neither listed as Classic Material nor marked as Method Material (the default).
+
+"Classic Materials" means exactly these files: `4bit_binary_adder.tau`, `4bit_binary_adder_io.tau`,
+`4bit_binary_adder_sbf.tau`, `4bit_binary_substractor.tau`, `4bit_binary_multiplier.tau`, `logic_gates.tau`,
+`binary_encoding.tau`, `bitvector_tutorial.tau`, `barber_demo_1.tau`, `barber_demo_2.tau`, `temporal_stability.tau`,
+`temporal_meta_prediction.tau`, `delayed_signal.tau`, `feedback_loop.tau`, and the files under `io/`.
+
+"The Method" has the meaning given in section 3.
 
-Use of Tau Language is subject to IDNI's own license terms:
-https://github.com/IDNI/tau-lang/blob/main/LICENSE
-
-The licensor claims NO ownership over:
-- Tau Language compiler, interpreter, or runtime
-- Tau Language syntax, semantics, or specifications
-- IDNI's formal logic systems (NSO, GSSOTC, etc.)
-- Any IDNI intellectual property
-
-This software uses Tau Language under IDNI's license. All rights to Tau Language
-remain with IDNI AG.
-
-================================================================================
-RESTRICTION: PROVABLY FAIR MULTIPLAYER GAMING
-================================================================================
-
-COMMERCIAL USE OF THE FOLLOWING IS PROHIBITED without explicit written license:
-
-"Provably Fair Multiplayer Gaming Technology" means the SPECIFIC ARCHITECTURAL
-COMBINATION of the following innovations:
-
-1. TEMPORAL STATE MACHINE FOR GAMING RNG
-   Integration of multi-party cryptographic commitments with Tau Language temporal
-   state carryover, specifically:
-
-   lfsr[t] = next[t-1] + seed[t]  // Temporal carryover from previous state
-   next[t] = xorshift(lfsr[t])    // PRNG transformation
-   dice[t] = (next[t] % 6) + 1    // Deterministic mapping
-
-   Creating history-dependent randomness where identical commitment values at
-   different timesteps produce different outcomes, preventing pattern exploitation.
-
-2. INTERACTIVE MODE ARCHITECTURE FOR REAL-TIME FORMAL VERIFICATION
-   Use of Tau Language's `run always` interactive mode with persistent subprocess
-   architecture for stream-based validation in gaming, enabling:
-   - State preservation between validation steps
-   - Batch processing of multiple players simultaneously
-   - Practical real-time performance through architectural optimization
-
-3. MICROSERVICES ARCHITECTURE FOR TAU-BASED GAMING
-   Decomposition of Tau-based game validation into independent microservices
-   each running persistent Tau subprocesses, enabling parallel initialization and scalable deployment.
-
-4. SIMULTANEOUS COMMITMENT-BASED GAMEPLAY WITH TAU VALIDATION
-   4-phase game loop (Commit → Reveal → Validate → Execute) where:
-   - All players submit cryptographic commitments simultaneously
-   - Fair dice generation via XOR of all commitments
-   - Tau Language validates all moves through decidable temporal logic
-   - All actions execute simultaneously with mathematical proof of fairness
-
-5. FAIR COLLISION RESOLUTION VIA TEMPORAL LOGIC
-   "Who moves survives" collision detection and resolution expressed as
-   Tau Language temporal constraints, providing provably fair multi-player
-   interaction without priority-based or first-come-first-served systems.
-
-EXPLICITLY EXCLUDED FROM THIS LICENSE (Prior Art / Third-Party IP):
-
-✗ XOR-based cryptographic commitments alone (standard cryptography, 40+ years old)
-✗ Tau Language itself and all IDNI intellectual property (separate license)
-✗ Generic constraint solving techniques (prior art)
-✗ Post-hoc cryptographic verification systems (e.g., Bitcoin casino-style)
-✗ Basic commitment schemes (prior art)
-✗ SAT/SMT solving in general (prior art)
-
-WHAT IS ACTUALLY PROTECTED:
-
-✓ The specific combination and integration of techniques listed above
-✓ The architectural patterns for Tau-based gaming
-✓ The temporal state machine design for gaming RNG
-✓ The interactive runner mode discoveries and implementation patterns
-✓ The microservices architecture for formal verification gaming
-✓ The specific Tau Language formulas and specifications developed
-✓ The  multi phase simultaneous gameplay validation loop
-
-PROHIBITED COMMERCIAL USES (without license):
-
-- Operating online casinos, gambling platforms, or betting services using
-  the protected technology combination
-- Providing provably fair gaming as a commercial service using this architecture
-- Integration of the protected technology into commercial gaming products
-- White-label gaming solutions using the protected architectural innovations
-- Any revenue-generating deployment of the specific technological combination
-
-This restriction applies ONLY to the specific "Provably Fair Multiplayer Gaming
-Technology" as defined above. All other uses remain unrestricted under MIT terms.
-
-================================================================================
-EXCEPTION: TAU NET ECOSYSTEM
-================================================================================
-
-The above restriction does NOT apply to deployments on Tau Net blockchain.
-
-YOU MAY use this technology commercially on Tau Net IF:
-
-1. Application executes on Tau Net blockchain infrastructure
-2. Core game logic uses Tau Language for verification
-3. Attribution is maintained: "Powered by l0g1x provably fair gaming tech"
-4. Source code modifications remain open source
-
-================================================================================
-TAU-NOMIC TUTORIAL SERIES (added in v2.0)
-================================================================================
-
-The files nomic_00_read_me_first.tau through nomic_10_the_trilemma.tau,
-consensus_decomposed.tau, nomic_run_all.sh and their EXPECTED contracts
-(the "Tau-Nomic Tutorial Series") are NOT covered by the unrestricted MIT
-grant below. From v2.0 they are licensed as follows:
+"Commercial Use" means any use that is primarily intended for, or directed toward, commercial advantage or monetary
+compensation. It includes operating a service for which users or third parties pay in any form (stakes, fees, subscriptions,
+advertising, tokens), including a free tier of such a service; integrating the Materials into a product that is sold or
+licensed; and providing the Materials or works derived from them to others for payment. Research, evaluation and
+verification are not Commercial Use, also when carried out inside a company, as long as no product or service offered to
+others is built on them.
 
-FREE, with attribution ("Tau-Nomic Tutorial Series by Taumorrow"):
-- research, education, academic publication, peer review, and independent
-  verification (running the suite, reproducing the results);
-- personal, noncommercial study and modification;
-- use within the Tau-Net ecosystem, including commercial use in that
-  context;
-- use by IDNI AG in Tau Language / Tau-Net development, including as test
-  or regression material, with attribution.
-
-RESTRICTED: any other commercial use (paid courses or trainings built on
-the series, commercial republication, integration into commercial products
-outside Tau-Net) requires a written license: taumorrow@gmail.com.
-
-Releases before v2.0 of this repository remain under their original terms
-(see LICENSE MODIFICATION below).
-
-================================================================================
-NON-RESTRICTED USES
-================================================================================
+"Tau-Net Ecosystem" means software, networks and services that run on, or are developed for, the network that IDNI AG
+develops under the name Tau Net.
+
+Not part of the Materials: the archive `tdr-0.5-windows-TAUMORROW.zip`. It is an earlier program that is no longer
+maintained; it remains under the terms it was released with, and this license says nothing further about it.
+
+--------------------------------------------------------------------------------
+## 2. Third-party rights and other works
+--------------------------------------------------------------------------------
+
+**Tau Language.** Tau Language and its logics are the work of Ohad Asor and are developed and owned by IDNI AG
+(https://idni.org). That a specification over a rich domain of values can be decided, and executed as it stands, is his
+result; the Method lives entirely inside it.
+
+The author of the Materials claims no ownership of, and this license grants no right to:
+
+- the Tau Language engine, parser, interpreter or runtime;
+- Tau Language syntax, semantics or specifications;
+- the logics and decision procedures of Ohad Asor and IDNI AG;
+- any patent, trademark or other right of IDNI AG.
 
-The following uses are NOT restricted and remain under standard MIT license:
-
-✓ Educational and research purposes
-✓ Personal non-commercial projects
-✓ Other demos and applications in this repository (non-gaming, excluding the Tau-Nomic Tutorial Series - see its own section)
-✓ Software development tools and utilities
-✓ Academic publications and studies
-✓ Open source contributions to this project
-✓ Use of XOR commitments alone (prior art)
-✓ Use of Tau Language for other purposes (subject to IDNI license)
-✓ Generic constraint solving applications
-
-Use for learning Tau Language, constraint programming, formal verification,
-or any other non-gaming application is fully permitted.
-
-================================================================================
-COMMERCIAL LICENSE
-================================================================================
-
-For commercial use of provably fair multiplayer gaming outside Tau Net:
-
-Contact: taumorrow@gmail.com
-Subject: "License"
-
-================================================================================
-PATENT NOTICE
-================================================================================
-
-The licensor reserves all patent rights to the SPECIFIC ARCHITECTURAL COMBINATION
-of provably fair multiplayer gaming innovations described above.
-
-CLARIFICATION - PATENT CLAIMS:
-
-The licensor claims patent rights ONLY to:
-✓ The specific temporal state machine design for gaming RNG
-✓ The interactive mode architecture for real-time Tau validation
-✓ The microservices pattern for Tau-based gaming
-✓ The combination and integration of these techniques
-
-The licensor does NOT claim patent rights to:
-✗ XOR-based commitments (prior art)
-✗ Tau Language or IDNI technologies (third-party IP)
-✗ Generic constraint solving (prior art)
-✗ Commitment schemes in general (prior art)
-✗ Formal verification methods in general (prior art)
-
-These specific architectural innovations may be subject to patent protection.
-The licensor reserves the right to file patent applications for these innovations.
-
-Commercial use of these SPECIFIC innovations outside authorized channels may
-constitute patent infringement if patents are granted.
-
-================================================================================
-ENFORCEMENT
-================================================================================
-
-Unauthorized commercial use of the specifically defined "Provably Fair Multiplayer
-Gaming Technology" constitutes:
-1. Breach of this license agreement
-2. Potential patent infringement (for the specific protected innovations)
-3. Copyright violation
-
-The licensor reserves all legal remedies including injunctive relief and damages.
-
-GOOD FAITH PROVISION:
-Inadvertent violations will be given 30-day cure period before legal action.
-
-CLARIFICATION ON SCOPE:
-Use of individual techniques (XOR commitments, Tau Language, constraint solving)
-is NOT a violation. Only unauthorized commercial use of the SPECIFIC ARCHITECTURAL
-COMBINATION defined above constitutes a violation.
-
-================================================================================
-STANDARD MIT LICENSE TERMS
-================================================================================
-
-For all non-restricted uses, the standard MIT License applies:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-================================================================================
-LICENSE MODIFICATION
-================================================================================
-
-The licensor reserves the right to change the license terms for FUTURE versions
-of this software at any time without notice.
-
-IMPORTANT CLARIFICATIONS:
-
-1. EXISTING VERSIONS remain under their original license
-   - If you obtained version 1.0 under MIT, version 1.0 stays MIT for you
-   - License changes apply only to NEW releases
-
-2. FUTURE VERSIONS may have different terms
-   - The licensor may change to AGPL, proprietary, or any other license
-   - The licensor may remove or add restrictions
-   - The licensor may change commercial licensing terms
-
-3. NO RETROACTIVE CHANGES
-   - License changes are not retroactive
-   - Previously granted rights cannot be revoked
-   - Existing deployments remain valid under original terms
-
-4. VERSION-SPECIFIC LICENSING
-   - Each release specifies its license in the LICENSE file
-   - Check the LICENSE file in the specific version you're using
-   - Git tags indicate which license applies to which version
-
-RECOMMENDATION:
-If you're building on this software, pin to a specific version/commit
-to ensure license stability.
-
-================================================================================
-SUMMARY
-================================================================================
-
-┌─────────────────────────────────────────────────────────────────────────┐
-│  USE CASE                                │  LICENSE REQUIRED?           │
-├─────────────────────────────────────────────────────────────────────────┤
-│  Learning / Research                     │  ✗ No (MIT)                  │
-│  Personal hobby project                  │  ✗ No (MIT)                  │
-│  Tau Net commercial gaming               │  ✗ No (free exception)       │
-│  Non-gaming commercial use               │  ✗ No (MIT)                  │
-│  Using XOR commitments alone             │  ✗ No (prior art)            │
-│  Using Tau Language for other purposes   │  ✗ No (IDNI license applies) │
-│  Commercial casino with this architecture│  ✓ Yes (contact us)          │
-│  Gaming-as-a-Service with this tech      │  ✓ Yes (contact us)          │
-└─────────────────────────────────────────────────────────────────────────┘
-
-Questions? taumorrow@gmail.com
-
-================================================================================
-
-Version 2.0 - August 2026 (v1.1: December 2025)
+Use of Tau Language is governed solely by the license terms that IDNI AG publishes with Tau Language
+(https://github.com/IDNI/tau-lang). Whether a given use of Tau Language is permitted is decided by those terms alone; this
+license neither grants nor waives anything there.
+
+**Other works of the author.** This license applies to the Materials and to no other work. A work of the author that carries
+its own license text stays under that text. In particular, the author's C wrapper library for the Tau command line carries
+the MIT License ("Copyright (c) 2025 l0g1x") and remains under the MIT License; this license does not change it.
+
+--------------------------------------------------------------------------------
+## 3. The Method
+--------------------------------------------------------------------------------
+
+"The Method" means a way of running the rounds of a multiplayer game with simultaneous moves on a decidable temporal logic.
+It is described in three layers. The first layer is the Method proper; the second is the two ways of executing it; the third
+is the substrate, which is not the author's.
+
+### 3.1 The method (layer one)
+
+The features of this layer depend on the logic only. They do not depend on how the engine is hosted (in a process, in a
+subprocess, behind a service, or otherwise), and they do not depend on the rules of any particular game.
+
+**F1 — The rule is a formula, and the formula is what runs.**
+The round function — how the inputs of all parties and the state after the previous round determine the outputs and the
+state after this round — is written as a formula in a decidable temporal logic, or as several formulas with a declared
+wiring (section 3.2). The round is settled by evaluating that text. No separately written program states an outcome of the
+round in the execution.
+
+**F2 — A function, with nothing left free.**
+The formula determines every output as a function of the inputs of the round and the previous state. Every state stream has
+an initial condition in the formula; inputs outside the intended range are made impossible by the type of the input or are
+given an outcome by a line of the formula; what follows when several players finish in one round, when a party does not
+open, and when the game has ended is stated as lines of the formula and is not chosen by a host program; no connection
+between parts has a default value.
+
+**F3 — Properties as queries on the same object.**
+Stated properties of the rule (for example: an outcome stays in its range; with the other contributions and the previous
+state fixed, the outcome determines a party's own contribution; two versions of a line are or are not the same function)
+are posed to the engine as queries on the formula that is executed, each with its expected verdict and, wherever one exists,
+a control query that must come out the other way.
+
+**F4 — Recomputation is re-evaluation.**
+A round is checked by evaluating the formula again on the recorded inputs of the round and the previous state, on the engine
+build named for the game, and comparing every output. The check starts from the inputs of the round, not from recorded
+intermediate values.
+
+**F5 — Bound inputs and a chain of round records.**
+Each party's input to a round (contribution and move) is fixed by a salted commitment before any input is opened; the
+operator contributes as well and opens last; what follows from a withheld opening is a rule of the game and stands in the
+formula; each round has a signed record with the openings and all outputs of the step, and every record carries the hash of
+its predecessor, so that a single step can be recomputed by a third party from two consecutive records and the game header.
+
+**F6 — A common random value from contributions of all parties, with carried state.**
+The random value of a round is computed inside the formula from contributions of all parties together with a state carried
+over from the previous round. Two instances of this feature are
+
+    seed[t] = c1[t] ^ c2[t] ^ ... ^ cn[t]            (contributions combined)
+    next[t] = mix(next[t-1] + seed[t])               (carried state, a bijective mixing step)
+    roll[t] = map(next[t])                           (a mapping to the outcome range)
+
+and
+
+    roll[t] = ((d1[t] + ... + dn[t] + dB[t] + (next[t-1] % m)) % m) + 1,   di[t] = ci[t] % m
+
+where `mix` and `map` are fixed in the formula, `m` is the number of outcomes, and `dB` is the operator's contribution.
+
+The features describe a use of such a logic. The logic, its decidability, and the engine that evaluates the formula and
+decides the queries are not the author's (section 2).
+
+### 3.2 Two executions (layer two)
+
+The Method has two executions. Both are executions of the Method; neither replaces the other. Which one fits depends on the
+size of the game and on the engine build.
+
+**X1 — One specification.**
+The whole round is one specification that carries its state: the state of the game is a set of output streams with initial
+conditions and transitions that read the previous time point.
+
+**X2 — A network of specifications.**
+The round is an acyclic network of part specifications. Each part is evaluated on its own: a part that reads the previous
+time point runs as one timeline, and a part that reads only the current time point can be evaluated by any worker. The
+outputs of parts are handed to the inputs of other parts, and the state is handed in as inputs.
+
+**W — The wiring table.**
+In the network, the connections are a declared object: a table that names, for every input of every part, its one source —
+an input of the round, a state value, a constant, or an output of another part. The table and the part formulas are hashed
+together, and the hash stands in the header of the game. A check of a round evaluates the parts from the inputs of the round
+and hands the values on by the table.
+
+Releases v1.1 (19 December 2025) and v2.0 (August 2026) of this license described the network execution in the form in
+which the author first released it: a random value with carried state as in F6; persistent engine processes in the engine's
+interactive `run always` mode, so that state is preserved between steps; decomposition of the round into several
+independent services, each with its own engine process; and a round in which all players submit for the same round and all
+moves take effect together. That form is the execution X2 with the connections held in a host program instead of a declared
+table. It remains an execution of the Method.
+
+### 3.3 The substrate (layer three)
+
+The substrate is Tau Language in a named build. It belongs to IDNI AG and is not part of the Method (section 2).
+
+### 3.4 What is not the Method
+
+The rules of a single game are not the Method. The board, the pieces, the rule by which a piece is captured, the rule by
+which a piece enters, the prize, and every other rule of a particular game can be exchanged without leaving the Method, and
+none of them is claimed by this license as such. The single techniques listed in section 9 are not the Method either.
+
+### 3.5 Scope of "the Method" for the purpose of section 8
+
+A system uses the Method if its rounds are settled as in F1, in execution X1 or in execution X2 (with a declared wiring
+table or with the connections held in a host program), and it realizes in addition at least two of the features F2, F3, F4,
+F5, F6 and W.
+
+--------------------------------------------------------------------------------
+## 4. What is and is not in the Materials, and what is not asserted
+--------------------------------------------------------------------------------
+
+So that this license describes what exists:
+
+- The Method Materials in this release consist of two small teaching examples of a random value computed from the
+  contributions of several players: `casino.tau`, which carries no state between rounds, and `temporal_state_machine.tau`,
+  which takes the previous state as an input. Neither binds inputs, neither carries its state inside the specification, and
+  neither is a complete game.
+- A complete round specification, part specifications of a network, a wiring table, queries and records are not part of
+  this release.
+- This license describes the Method by its features. It does not assert that any feature has been carried out for any
+  particular game or deployment. What has been run, what is designed and not run, and what remains trusted is stated in the
+  author's paper on the Method, with its evidence and its limits; it is not stated here.
+- This license makes no statement that any system — the author's or anyone else's — is fair, secure, or free of operator
+  influence.
+
+--------------------------------------------------------------------------------
+## 5. Free grants (no charge, attribution required)
+--------------------------------------------------------------------------------
+
+Permission is granted, free of charge, to any person obtaining a copy of the Materials, to do the following with all
+Materials — Classic, Tutorial and Method alike:
+
+1. **Research, education and verification.** Use, run, study, modify and reproduce the Materials and their results for
+   research, teaching, academic publication, peer review and independent verification, including re-running the suites and
+   checking every stated result against your own build of the engine.
+
+2. **Personal and noncommercial use.** Run and modify the Materials for personal, noncommercial purposes, and share them and
+   your modifications without charge.
+
+3. **The Tau-Net Ecosystem.** Use, adapt, integrate and deploy the Materials and the Method within the Tau-Net Ecosystem,
+   including Commercial Use in that context.
+
+4. **IDNI AG.** IDNI AG may use, adapt and integrate the Materials and the Method in Tau Language and Tau-Net development and
+   products, including as test or regression material. Contributions the author submits to IDNI AG's repositories are governed
+   by IDNI AG's own contribution terms and are not restricted by this license.
+
+**Attribution** means: keep this license text and the copyright notice with every copy or substantial portion of the
+Materials, and credit "Taumorrow" in derived works, deployments and republications. Suggested wording:
+"based on work by Taumorrow (tau-lang-demos)".
+
+--------------------------------------------------------------------------------
+## 6. Additional grant for the Classic Materials
+--------------------------------------------------------------------------------
+
+The Classic Materials may in addition be used, copied, modified, merged, published, distributed, sublicensed and sold, for any
+purpose including Commercial Use, provided the copyright notice and this license text are included in all copies or
+substantial portions.
+
+--------------------------------------------------------------------------------
+## 7. Tutorial Materials: other Commercial Use
+--------------------------------------------------------------------------------
+
+Commercial Use of the Tutorial Materials outside the grants of section 5 requires a prior written license. This includes paid
+courses or trainings built on the Tutorial Materials, commercial republication in whole or in modified form, and integration
+into commercial products outside the Tau-Net Ecosystem.
+
+--------------------------------------------------------------------------------
+## 8. Method Materials and the Method: other Commercial Use
+--------------------------------------------------------------------------------
+
+Commercial Use of the Method Materials, or of works derived from them, outside the grants of section 5 requires a prior written
+license.
+
+If you have taken the Materials under this license, you agree in addition not to make Commercial Use of the Method outside the
+grants of section 5 without a prior written license. This includes:
+
+- operating a gaming, gambling or betting service whose rounds are settled by the Method;
+- offering the Method to others as a paid service;
+- integrating the Method into a commercial product, or supplying it under another's brand.
+
+This agreement is made with those who take the Materials under this license, and with no one else (section 9).
+
+Use of any single well-known technique is not restricted by this license (section 9).
+
+A written license is issued by the author. Contact: taumorrow@gmail.com (subject: "License").
+
+The Method runs on Tau Language. A written license from the author covers the author's rights only; it neither grants nor
+replaces anything that IDNI AG's license terms require (section 2).
+
+--------------------------------------------------------------------------------
+## 9. What this license does not claim
+--------------------------------------------------------------------------------
+
+**Not a patent, and not a patent license.** This license is a copyright license and, in section 8, an agreement with those
+who take the Materials under it. It is not a patent license and grants none. It does not by itself give the author an
+exclusive right to the Method against persons who have not taken the Materials.
+
+**Patent.** The author intends to seek patent protection for the Method. As of the date of this release, no patent
+application has been filed.
+
+**Not claimed (earlier work and third-party work).** The author does not claim, and this license does not restrict:
+
+- Tau Language and everything belonging to IDNI AG (section 2);
+- combining values by XOR; commitment schemes; hash chains; digital signatures; event logs and replay; rejection sampling;
+  shift-and-XOR mixing steps; pseudo-random generators in general;
+- commit-and-reveal protocols as used for after-the-fact verification of a random value;
+- describing the rules of a game in a logic; deterministic lockstep simulation; synchronous languages; SAT/SMT solving;
+  formal verification in general;
+- the rules of any particular game (section 3.4);
+
+each taken individually. Only the Method as defined in section 3 is the subject of section 8.
+
+--------------------------------------------------------------------------------
+## 10. Earlier versions; future versions
+--------------------------------------------------------------------------------
+
+1. **Earlier releases keep their terms.** Every release of this repository before v3.0 remains under the license text it
+   shipped with (v1.1 of 19 December 2025; v2.0 of August 2026). Rights granted under those texts are not revoked by this one.
+   If you obtained a release under an earlier license, that release stays under that license for you.
+
+2. **Nothing here is retroactive.** This text applies to v3.0 and later, until a later release ships a different text. Where
+   this text places a file in a different class than an earlier text did, that applies to the file as it appears in v3.0 and
+   later; the file as it appeared in an earlier release stays under the terms of that release.
+
+3. **Future versions may have different terms.** The author may change the license for future releases. Changes are not
+   retroactive.
+
+4. **Which text applies.** Each release carries its license in the `LICENSE` file at that commit. If you build on the
+   Materials, pin a commit.
+
+--------------------------------------------------------------------------------
+## 11. General terms
+--------------------------------------------------------------------------------
+
+- **No trademark rights.** This license grants no right to the name "Taumorrow", to any name of the Method, or to any mark of
+  IDNI AG.
+
+- **No warranty.** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+  OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+
+- **Good faith.** If a use falls outside this license without intent, the author will give notice and 30 days to bring the
+  use within the license or to end it, before taking any further step.
+
+- **If a part does not hold.** If a provision of this license is found not to be enforceable, the other provisions remain
+  in effect, and no broader permission follows from that finding than this text grants.
+
+- **Contributions.** The files in this repository are the author's. Suggestions and corrections are welcome; a contribution
+  by another person is added only after the author and that person have agreed in writing on the terms under which it is
+  given.
+
+--------------------------------------------------------------------------------
+## 12. Summary (for orientation; the sections above govern)
+--------------------------------------------------------------------------------
+
+| Use                                                                 | Classic       | Tutorial               | Method Materials / Method |
+|---------------------------------------------------------------------|---------------|------------------------|---------------------------|
+| Research, teaching, publication, peer review, verification          | free          | free, attribute        | free, attribute           |
+| Personal, noncommercial use and sharing                             | free          | free, attribute        | free, attribute           |
+| Tau-Net Ecosystem, including Commercial Use there                   | free          | free, attribute        | free, attribute           |
+| IDNI AG, in Tau Language / Tau-Net development and products         | free          | free, attribute        | free, attribute           |
+| Any other Commercial Use                                            | free (sec. 6) | written license needed | written license needed    |
+| Using a single well-known technique, or the rules of a game (sec. 9)| not restricted by this license                                    |||
+| Using Tau Language itself                                           | governed by IDNI AG's license terms, not by this license          |||
+| Patent                                                              | no patent license is granted; see section 9                       |||
+
+Questions: taumorrow@gmail.com
+
+Version 3.0. The date of this release is the date of the commit that adds this text to the repository.
+Earlier versions: v2.0 (August 2026); v1.1 (19 December 2025).

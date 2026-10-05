@@ -109,7 +109,7 @@ workflow above instead.
 
 ## License
 
-See [LICENSE](LICENSE) (v3.0): the Tau-Nomic Tutorial Series is free for
+See [LICENSE](LICENSE) (v3.1): the Tau-Nomic Tutorial Series is free for
 research, education, verification and the Tau-Net ecosystem (other commercial
 use requires a written license); the provably-fair-gaming architecture carries
 its own commercial restriction; the remaining classic demos are MIT.

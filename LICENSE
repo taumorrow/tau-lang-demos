@@ -1,4 +1,4 @@
-# Taumorrow Demos License v3.0
+# Taumorrow Demos License v3.1
 ## Noncommercial - Research-Free - Tau-Net-Friendly
 
 Copyright (c) 2025-2026 Taumorrow (taumorrow@gmail.com). Earlier releases of this repository appeared under the name "l0g1x";
@@ -13,15 +13,17 @@ This license covers the files in this repository (the "Materials"). It says what
 It is written by the author of the Materials to be read by engineers. Four things are stated up front so that nobody has to
 infer them:
 
-1. Tau Language is not the author's. Tau Language, its engine, its syntax and semantics and the logic it implements are the
-   work of Ohad Asor and are developed and owned by IDNI AG. Nothing here grants any right to Tau Language (section 2).
+1. Tau Language is not the author's. Tau Language and the logics it implements are the work of Ohad Asor; Tau Language, its
+   engine, its syntax and semantics are developed and owned by IDNI AG. Nothing here grants any right to Tau Language
+   (section 2).
 2. A license governs files. This license governs the use of the Materials by those who take them under it. It is not a
    patent, it is not a patent license, and it does not claim to be either (section 9).
 3. This license describes a method. It does not assert that any deployed system has been shown to be fair, and it does not
    assert that the Materials contain a complete implementation of the method (section 4).
 4. This license covers the Materials in this repository. A paper by the author that describes the method is a separate work
    under its own license (Creative Commons BY-NC-ND 4.0); that license concerns the text of the paper, and this one concerns
-   the files here.
+   the files here. The paper describes the executions X1 and X2 of section 3.2; the execution X3 is described in this
+   license and in the earlier texts of the author named there.
 
 --------------------------------------------------------------------------------
 ## 1. Definitions
@@ -64,9 +66,9 @@ maintained; it remains under the terms it was released with, and this license sa
 ## 2. Third-party rights and other works
 --------------------------------------------------------------------------------
 
-**Tau Language.** Tau Language and its logics are the work of Ohad Asor and are developed and owned by IDNI AG
-(https://idni.org). That a specification over a rich domain of values can be decided, and executed as it stands, is his
-result; the Method lives entirely inside it.
+**Tau Language.** Tau Language and its logics are the work of Ohad Asor; Tau Language and its engine are developed and
+owned by IDNI AG (https://idni.org). That a specification over a rich domain of values can be decided, and executed as it
+stands, is his result; the Method lives entirely inside it.
 
 The author of the Materials claims no ownership of, and this license grants no right to:
 
@@ -88,7 +90,7 @@ the MIT License ("Copyright (c) 2025 l0g1x") and remains under the MIT License; 
 --------------------------------------------------------------------------------
 
 "The Method" means a way of running the rounds of a multiplayer game with simultaneous moves on a decidable temporal logic.
-It is described in three layers. The first layer is the Method proper; the second is the two ways of executing it; the third
+It is described in three layers. The first layer is the Method proper; the second is the three ways of executing it; the third
 is the substrate, which is not the author's.
 
 ### 3.1 The method (layer one)
@@ -99,8 +101,9 @@ subprocess, behind a service, or otherwise), and they do not depend on the rules
 **F1 — The rule is a formula, and the formula is what runs.**
 The round function — how the inputs of all parties and the state after the previous round determine the outputs and the
 state after this round — is written as a formula in a decidable temporal logic, or as several formulas with a declared
-wiring (section 3.2). The round is settled by evaluating that text. No separately written program states an outcome of the
-round in the execution.
+wiring (section 3.2). The round is settled by evaluating that text: in the executions X1 and X2, no separately written
+program states an outcome of the round; in the execution X3, a program runs the game, and a move or an outcome stands only
+if the evaluation of the formula admits it (section 3.2).
 
 **F2 — A function, with nothing left free.**
 The formula determines every output as a function of the inputs of the round and the previous state. Every state stream has
@@ -143,10 +146,11 @@ where `mix` and `map` are fixed in the formula, `m` is the number of outcomes, a
 The features describe a use of such a logic. The logic, its decidability, and the engine that evaluates the formula and
 decides the queries are not the author's (section 2).
 
-### 3.2 Two executions (layer two)
+### 3.2 Three executions (layer two)
 
-The Method has two executions. Both are executions of the Method; neither replaces the other. Which one fits depends on the
-size of the game and on the engine build.
+The Method has three executions. All three are executions of the Method; none replaces another. Which of X1 and X2 fits
+depends on the size of the game and on the engine build; in X3 a program runs the game and the formula, in the form of X1 or
+of X2, validates it.
 
 **X1 — One specification.**
 The whole round is one specification that carries its state: the state of the game is a set of output streams with initial
@@ -162,6 +166,18 @@ In the network, the connections are a declared object: a table that names, for e
 an input of the round, a state value, a constant, or an output of another part. The table and the part formulas are hashed
 together, and the hash stands in the header of the game. A check of a round evaluates the parts from the inputs of the round
 and hands the values on by the table.
+
+**X3 — A program runs the game, and the formula validates.**
+A program that is not the formula runs the game: it collects the inputs of the parties and carries out the phases of a
+round. The formula — one specification as in X1, or a network as in X2 — validates every move, or every round, by
+evaluation on the inputs of the round and the state recorded after the previous round. The formula is the governing rule of
+the round: a move or an outcome stands only if the evaluation of the formula admits it, and where a round is checked, its
+outcome is the result of evaluating the formula on the recorded inputs of the round and the state recorded after the
+previous round (F4).
+
+The author's first texts describe this form as well. The author's white paper of 13 December 2025 describes a
+game server that collects the commitments and runs the phases of a round while the logic validates all moves, and releases
+v1.1 and v2.0 of this license named the loop "Commit → Reveal → Validate → Execute".
 
 Releases v1.1 (19 December 2025) and v2.0 (August 2026) of this license described the network execution in the form in
 which the author first released it: a random value with carried state as in F6; persistent engine processes in the engine's
@@ -182,9 +198,10 @@ none of them is claimed by this license as such. The single techniques listed in
 
 ### 3.5 Scope of "the Method" for the purpose of section 8
 
-A system uses the Method if its rounds are settled as in F1, in execution X1 or in execution X2 (with a declared wiring
-table or with the connections held in a host program), and it realizes in addition at least two of the features F2, F3, F4,
-F5, F6 and W.
+A system uses the Method if its rounds are settled as in F1 in execution X1 or in execution X2 (with a declared wiring
+table or with the connections held in a host program), or if its rounds are run by a program that the formula validates,
+every move or every round, as in execution X3; and it realizes in addition at least two of the features F2, F3, F4, F5, F6
+and W.
 
 --------------------------------------------------------------------------------
 ## 4. What is and is not in the Materials, and what is not asserted
@@ -200,7 +217,8 @@ So that this license describes what exists:
   this release.
 - This license describes the Method by its features. It does not assert that any feature has been carried out for any
   particular game or deployment. What has been run, what is designed and not run, and what remains trusted is stated in the
-  author's paper on the Method, with its evidence and its limits; it is not stated here.
+  author's paper on the Method (DOI 10.5281/zenodo.23163643) for the executions X1 and X2 that it describes, with its
+  evidence and its limits; it is not stated here, for any of the three executions.
 - This license makes no statement that any system — the author's or anyone else's — is fair, secure, or free of operator
   influence.
 
@@ -276,8 +294,7 @@ replaces anything that IDNI AG's license terms require (section 2).
 who take the Materials under it. It is not a patent license and grants none. It does not by itself give the author an
 exclusive right to the Method against persons who have not taken the Materials.
 
-**Patent.** The author intends to seek patent protection for the Method. As of the date of this release, no patent
-application has been filed.
+**Patent.** A patent application relating to the Method has been filed.
 
 **Not claimed (earlier work and third-party work).** The author does not claim, and this license does not restrict:
 
@@ -295,12 +312,13 @@ each taken individually. Only the Method as defined in section 3 is the subject 
 ## 10. Earlier versions; future versions
 --------------------------------------------------------------------------------
 
-1. **Earlier releases keep their terms.** Every release of this repository before v3.0 remains under the license text it
-   shipped with (v1.1 of 19 December 2025; v2.0 of August 2026). Rights granted under those texts are not revoked by this one.
-   If you obtained a release under an earlier license, that release stays under that license for you.
+1. **Earlier releases keep their terms.** Every release of this repository before v3.1 remains under the license text it
+   shipped with (v1.1 of 19 December 2025; v2.0 of August 2026; v3.0 of 3 October 2026). Rights granted under those texts
+   are not revoked by this one. If you obtained a release under an earlier license, that release stays under that license
+   for you.
 
-2. **Nothing here is retroactive.** This text applies to v3.0 and later, until a later release ships a different text. Where
-   this text places a file in a different class than an earlier text did, that applies to the file as it appears in v3.0 and
+2. **Nothing here is retroactive.** This text applies to v3.1 and later, until a later release ships a different text. Where
+   this text places a file in a different class than an earlier text did, that applies to the file as it appears in v3.1 and
    later; the file as it appeared in an earlier release stays under the terms of that release.
 
 3. **Future versions may have different terms.** The author may change the license for future releases. Changes are not
@@ -348,5 +366,5 @@ each taken individually. Only the Method as defined in section 3 is the subject 
 
 Questions: taumorrow@gmail.com
 
-Version 3.0. The date of this release is the date of the commit that adds this text to the repository.
-Earlier versions: v2.0 (August 2026); v1.1 (19 December 2025).
+Version 3.1. The date of this release is the date of the commit that adds this text to the repository.
+Earlier versions: v3.0 (3 October 2026); v2.0 (August 2026); v1.1 (19 December 2025).

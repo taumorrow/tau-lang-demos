@@ -1,4 +1,4 @@
-# Taumorrow Demos License v4.1
+# Taumorrow Demos License v4.2
 ## Noncommercial - Research-Free
 
 Copyright (c) 2025-2026 Taumorrow (taumorrow@gmail.com). Earlier releases of this repository appeared under the author's
@@ -27,10 +27,10 @@ to infer them:
 5. Commercial Use of the Tutorial Materials, of the Method Materials and — for those who take the Materials — of the
    Method requires a written license from the author, in every context, except as item 3 of section 5 grants to IDNI AG
    (sections 7 and 8). Versions 3.0 and 3.1 of this license granted Commercial Use within a named ecosystem to everyone,
-   version 4.0 to nobody; this version grants it to IDNI AG alone, within the Network and Tau Language (section 5), and
-   says that a request for a written license for an application on the Network will be considered in good faith, without
-   creating any claim (section 8). The author may change this license for future releases at any time; changes are not
-   retroactive (section 10).
+   version 4.0 to nobody, version 4.1 to IDNI AG within the Network and Tau Language; this version grants it to IDNI AG
+   alone, and only within the Network (section 5), and says that a request for a written license for an application on
+   the Network will be considered in good faith, without creating any claim (section 8). The author may change this
+   license for future releases at any time; changes are not retroactive (section 10).
 
 --------------------------------------------------------------------------------
 ## 1. Definitions
@@ -261,16 +261,17 @@ Materials — Classic, Tutorial and Method alike:
 2. **Personal and noncommercial use.** Run and modify the Materials for personal, noncommercial purposes, and share them
    and your modifications without charge.
 
-3. **IDNI AG.** IDNI AG may use, adapt and integrate the Materials and the Method in Tau Language and in the Network and
-   deploy them there, including Commercial Use by IDNI AG itself within the Network and Tau Language, and may use the
-   Materials as test or regression material. Persons acting for IDNI AG, end users of an application that IDNI AG itself
-   operates, and persons who run the client software of the Network as IDNI AG publishes it, act within this grant to
-   that extent and to no further extent. Nobody else receives a right under this item; IDNI AG may not sublicense it; it
-   does not permit IDNI AG to enable Commercial Use by another person in the sense of section 8; and it does not permit
-   any person, within the Network or elsewhere, to build, offer or run an application or service of their own on the
-   Materials or the Method for Commercial Use — that requires a written license from the author (section 8).
-   Contributions the author submits to IDNI AG's repositories are governed by IDNI AG's own contribution terms and are
-   not restricted by this license.
+3. **IDNI AG.** IDNI AG may use, adapt and integrate the Materials and the Method in the Network and deploy them there,
+   including Commercial Use by IDNI AG itself within the Network, and may use the Materials as test or regression
+   material for Tau Language; that test or regression use is not Commercial Use. This item grants no Commercial Use
+   outside the Network. Persons acting for IDNI AG, end users of an application that IDNI AG itself operates within the
+   Network, and persons who run the client software of the Network as IDNI AG publishes it, as part of the Network, act
+   within this grant to that extent and to no further extent. Nobody else receives a right under this item; IDNI AG may
+   not sublicense it; it does not permit IDNI AG to enable Commercial Use by another person in the sense of section 8;
+   and it does not permit any person, within the Network or elsewhere, to build, offer or run an application or service
+   of their own on the Materials or the Method for Commercial Use — that requires a written license from the author
+   (section 8). Contributions the author submits to IDNI AG's repositories are governed by IDNI AG's own contribution
+   terms and are not restricted by this license.
 
 **Attribution** means: keep this license text and the copyright notice with every copy or substantial portion of the
 Materials, and credit "Taumorrow" in derived works, deployments and republications. Suggested wording: "based on work by
@@ -357,15 +358,15 @@ each taken individually. Only the Method as defined in section 3 is the subject 
 ## 10. Earlier versions; future versions
 --------------------------------------------------------------------------------
 
-1. **Earlier releases keep their terms.** Every release of this repository before v4.1 remains under the license text it
+1. **Earlier releases keep their terms.** Every release of this repository before v4.2 remains under the license text it
    shipped with (v1.1 of 19 December 2025; v2.0 of August 2026; v3.0 of 3 October 2026; v3.1 of 5 October 2026; v4.0 of
-   7 October 2026). Rights granted under those texts — including the ecosystem grant of v3.0 and v3.1 for the releases
-   that carried it — are not revoked by this one. If you obtained a release under an earlier license, that release stays
-   under that license for you.
+   7 October 2026; v4.1 of 11 October 2026). Rights granted under those texts — including the ecosystem grant of v3.0
+   and v3.1 for the releases that carried it — are not revoked by this one. If you obtained a release under an earlier
+   license, that release stays under that license for you.
 
-2. **Nothing here is retroactive.** This text applies to v4.1 and later, until a later release ships a different text.
+2. **Nothing here is retroactive.** This text applies to v4.2 and later, until a later release ships a different text.
    Where this text places a file in a different class than an earlier text did, that applies to the file as it appears
-   in v4.1 and later; the file as it appeared in an earlier release stays under the terms of that release.
+   in v4.2 and later; the file as it appeared in an earlier release stays under the terms of that release.
 
 3. **Future versions may have different terms, at any time.** The author may change the license for future releases at
    any time and for any reason. Changes are not retroactive: the grants and the agreement of section 8 for a release
@@ -410,7 +411,7 @@ each taken individually. Only the Method as defined in section 3 is the subject 
 |---------------------------------------------------------------------|---------------|------------------------|---------------------------|
 | Research, teaching, publication, peer review, verification          | free          | free, attribute        | free, attribute           |
 | Personal, noncommercial use and sharing                             | free          | free, attribute        | free, attribute           |
-| IDNI AG itself, in Tau Language and the Network, incl. its own Commercial Use (sec. 5, item 3) | free | free, attribute | free, attribute |
+| IDNI AG itself, within the Network, incl. its own Commercial Use there, and those acting within that grant; test use for Tau Language (sec. 5, item 3) | free | free, attribute | free, attribute |
 | Any other Commercial Use, in any context, incl. enabling others' and Training | free (sec. 6) | written license needed | written license needed |
 | Using a single well-known technique, or the rules of a game (sec. 9)| not restricted by this license                                    |||
 | Using Tau Language itself                                           | governed by IDNI AG's license terms, not by this license          |||
@@ -418,5 +419,6 @@ each taken individually. Only the Method as defined in section 3 is the subject 
 
 Questions: taumorrow@gmail.com
 
-Version 4.1. The date of this release is the date of the commit that adds this text to the repository. Earlier versions:
-v4.0 (7 October 2026); v3.1 (5 October 2026); v3.0 (3 October 2026); v2.0 (August 2026); v1.1 (19 December 2025).
+Version 4.2. The date of this release is the date of the commit that adds this text to the repository. Earlier versions:
+v4.1 (11 October 2026); v4.0 (7 October 2026); v3.1 (5 October 2026); v3.0 (3 October 2026); v2.0 (August 2026); v1.1
+(19 December 2025).

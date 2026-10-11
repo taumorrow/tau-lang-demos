@@ -109,13 +109,13 @@ workflow above instead.
 
 ## License
 
-See [LICENSE](LICENSE) (v4.1): the Tau-Nomic Tutorial Series and the method
+See [LICENSE](LICENSE) (v4.2): the Tau-Nomic Tutorial Series and the method
 materials are free for research, education, verification and personal use;
 any commercial use requires a written license from the author, except that
-IDNI AG itself may use them in Tau Language and its network (section 5). The
-classic demos may in addition be used commercially under the terms of
-section 6 of the license. Text and data mining of the tutorial and method
-materials is reserved (section 11).
+IDNI AG itself may use them within the network for which it publishes the
+client software (section 5). The classic demos may in addition be used
+commercially under the terms of section 6 of the license. Text and data
+mining of the tutorial and method materials is reserved (section 11).
 
 Tau Language itself is (c) IDNI AG under
 [its own license](https://github.com/IDNI/tau-lang/blob/main/LICENSE.md).
